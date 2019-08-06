@@ -1,0 +1,9 @@
+# dev
+.idea/
+.vscode/
+node_modules/
+*.log
+__pycache__/
+data/
+lib/
+dist/

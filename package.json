@@ -1,0 +1,24 @@
+{
+  "name": "pceditor",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/purpose233/pceditor.git"
+  },
+  "keywords": [],
+  "author": "purpose233",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/purpose233/pceditor/issues"
+  },
+  "homepage": "https://github.com/purpose233/pceditor#readme",
+  "devDependencies": {
+    "@types/node": "^12.6.9",
+    "typescript": "^3.5.3"
+  }
+}
