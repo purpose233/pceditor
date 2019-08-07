@@ -91,8 +91,8 @@ export class PCTreeNode {
     return {
       min: this.bbox.min.clone().add(new Vector3(halfScope.x * nodeVector.x, 
         halfScope.y * nodeVector.y, halfScope.z * nodeVector.z)),
-      max: this.bbox.max.clone().add(new Vector3(-halfScope.x * (nodeVector.x - 1), 
-        -halfScope.y * (nodeVector.y - 1), -halfScope.z * (nodeVector.z - 1)))
+      max: this.bbox.max.clone().add(new Vector3(halfScope.x * (nodeVector.x - 1), 
+        halfScope.y * (nodeVector.y - 1), halfScope.z * (nodeVector.z - 1)))
     };
   }
 }

@@ -15,11 +15,13 @@ export class PCDConverter extends BaseConverter {
       const rl = readline.createInterface({
         input, crlfDelay: Infinity
       });
-      rl.on('line', (data) => {
-        handler(data);
-      });
-
-      await once(rl, 'close');
+      // rl.on('line', (data) => {
+      //   handler(data);
+      // });
+      // await once(rl, 'close');
+      for await (const line of rl) {
+        handler(line);
+      }
     } catch(e) {
       console.log(e);
     }
@@ -32,7 +34,7 @@ export class PCDConverter extends BaseConverter {
     }
     await this.readLine(path, (data: string): void => {
       const words = data.split(' ');
-      if (isNaN(parseFloat(words[0]))) {
+      if (!isNaN(parseFloat(words[0]))) {
         const vector = new Vector3(parseFloat(words[0]), parseFloat(words[1]), parseFloat(words[2]));
         bbox.max.max(vector);
         bbox.min.min(vector);
@@ -54,7 +56,7 @@ export class PCDConverter extends BaseConverter {
     const tree = new PCTree(bbox);
     await this.readLine(path, (data: string) => {
       const words = data.split(' ');
-      if (isNaN(parseFloat(words[0]))) {
+      if (!isNaN(parseFloat(words[0]))) {
         const point = new PCTreePoint(new Vector3(parseFloat(words[0]), 
           parseFloat(words[1]), parseFloat(words[2])));
         tree.addPoint(point);

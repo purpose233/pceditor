@@ -1,5 +1,13 @@
+import path from 'path';
 import { PCDConverter } from './converter/pcdConverter';
+import { PCTreeScene } from './render/scene';
 
-const converter = new PCDConverter();
+(async () => {
+  const converter = new PCDConverter();
+  const tree = await converter.read(path.resolve(__dirname, '../data/test.pcd'));
+  console.log(tree);
 
-converter.read('../data/test.pcd');
+  const container = document.getElementById('container') as HTMLElement;
+  const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+  const scene = new PCTreeScene(container, canvas);
+})();
