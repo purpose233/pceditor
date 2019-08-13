@@ -56,6 +56,10 @@ export class PCTreeScene {
     this.animate();
   }
 
+  public getScene(): Scene { return this.scene; }
+
+  public getCamera(): PerspectiveCamera { return this.camera; }
+
   private onWindowResize = () => {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();

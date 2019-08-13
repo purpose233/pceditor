@@ -1,22 +1,20 @@
 import { Vector3 } from 'three';
+import { BoundingBoxType } from './types';
 
 const GridSize = 128;
 const NodeStackMax = 128;
 
-export interface BoundingBox {
-  min: Vector3,
-  max: Vector3
-}
-
 export class PCTreePoint {
-  public position: Vector3;
+  private position: Vector3;
   // color?: 
 
   constructor(position: Vector3) {
     this.position = position;
   }
 
-  public isInBBox(bbox: BoundingBox): boolean {
+  public getPosition(): Vector3 { return this.position; }
+
+  public isInBBox(bbox: BoundingBoxType): boolean {
     return this.position.x > bbox.min.x && this.position.x < bbox.max.x 
       && this.position.y > bbox.min.y && this.position.y < bbox.max.y 
       && this.position.z > bbox.min.z && this.position.z < bbox.max.z;
@@ -29,10 +27,11 @@ export class PCTreeNode {
   private grid: Map<number, PCTreePoint> = new Map();
   private pointsStacks: PCTreePoint[][] = [[],[],[],[],[],[],[],[]];
   private childNodes: (null | PCTreeNode)[] = [];
-  private bbox: BoundingBox;
+  private bbox: BoundingBoxType;
   private bboxScope: Vector3;
+  private isLoaded: boolean = true;
 
-  constructor(bbox: BoundingBox, points?: PCTreePoint[]) {
+  constructor(bbox: BoundingBoxType, points?: PCTreePoint[]) {
     this.bbox = bbox;
     this.bboxScope = this.bbox.max.clone().add(this.bbox.min.clone().negate());
     if (points) {
@@ -59,13 +58,72 @@ export class PCTreeNode {
         } else {
           this.childNodes[nodeNumber] = new PCTreeNode(
             this.calcBBoxByNode(nodeVector), this.pointsStacks[nodeNumber]);
+          this.pointsStacks[nodeNumber] = [];
         }
       }
     }
   }
 
+  public travelPoints(handler: (point: PCTreePoint, index: number) => void, 
+                                includeStack = true): void {
+    const gridIter = this.grid.values();
+    let result, index = 0;
+    while(!(result = gridIter.next()).done) {
+      handler(result.value, index++);
+    }
+    if (includeStack) {
+      for (const stack of this.pointsStacks) {
+        for (const p of stack) {
+          handler(p, index++);
+        }
+      }
+    }
+  }
+
+  public getPointCount(): number {
+    let count = this.grid.size;
+    for (const stack of this.pointsStacks) {
+      count += stack.length;
+    }
+    return count;
+  }
+
+  public getChildNodes(): PCTreeNode[] {
+    const nodes: PCTreeNode[] = [];
+    if (this.childNodes) {
+      for (const node of this.childNodes) {
+        if (node) { nodes.push(node); }
+      }
+    }
+    return nodes;
+  }
+
+  public getGrid(): Map<number, PCTreePoint> { return this.grid; }
+
+  public getStacks(): PCTreePoint[][] { return this.pointsStacks; }
+
+  public getStackCount(): number {
+    let count = 0;
+    for (const stack of this.pointsStacks) {
+      count += stack.length;
+    }
+    return count;
+  }
+
+  public getBBox(): BoundingBoxType { return this.bbox; }
+
+  public getChildrenMask(): number {
+    let mask = 0;
+    if (this.childNodes) {
+      for (let i = 0; i < this.childNodes.length; i++) {
+        mask = mask | (this.childNodes[i] ? 1 : 0) << i;
+      }
+    }
+    return mask;
+  }
+
   private findGrid(point: PCTreePoint): Vector3 {
-    const currentScope = point.position.clone()
+    const currentScope = point.getPosition().clone()
       .add(this.bbox.min.clone().negate());
     const x = Math.floor(currentScope.x * GridSize / this.bboxScope.x);
     const y = Math.floor(currentScope.y * GridSize / this.bboxScope.y);
@@ -86,7 +144,7 @@ export class PCTreeNode {
     return nodeVector.x + nodeVector.y * 2 + nodeVector.z * 4;
   }
 
-  private calcBBoxByNode(nodeVector: Vector3): BoundingBox {
+  private calcBBoxByNode(nodeVector: Vector3): BoundingBoxType {
     const halfScope = this.bboxScope.clone().divideScalar(2);
     return {
       min: this.bbox.min.clone().add(new Vector3(halfScope.x * nodeVector.x, 
@@ -98,11 +156,11 @@ export class PCTreeNode {
 }
 
 export class PCTree {
-  private bbox: BoundingBox; 
+  private bbox: BoundingBoxType; 
   private rootNode: PCTreeNode;
   private pointCount: number = 0;
 
-  constructor(bbox: BoundingBox) {
+  constructor(bbox: BoundingBoxType) {
     this.bbox = bbox;
     this.rootNode = new PCTreeNode(bbox);
   }
@@ -115,4 +173,10 @@ export class PCTree {
       // enlarge the bbox
     }
   }
+
+  public getRootNode(): PCTreeNode { return this.rootNode; }
+
+  public getBBox(): BoundingBoxType { return this.bbox; }
+
+  public getPointCount(): number { return this.pointCount; }
 }
