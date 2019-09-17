@@ -9,7 +9,7 @@ export class PCTree {
 
   constructor(bbox: BoundingBoxType) {
     this.bbox = bbox;
-    this.rootNode = new PCTreeNode(bbox);
+    this.rootNode = new PCTreeNode('0', bbox);
   }
 
   public addPoint(point: PCTreePoint): void {
