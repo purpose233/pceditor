@@ -1,4 +1,4 @@
-import { PCTree } from '../common/pcTree';
+import { PCTree } from '../tree/pcTree';
 import { BoundingBoxType } from '../common/types';
 
 export abstract class BaseConverter {

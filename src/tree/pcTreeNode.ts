@@ -1,25 +1,7 @@
 import { Vector3 } from 'three';
-import { BoundingBoxType } from './types';
-
-const GridSize = 128;
-const NodeStackMax = 128;
-
-export class PCTreePoint {
-  private position: Vector3;
-  // color?: 
-
-  constructor(position: Vector3) {
-    this.position = position;
-  }
-
-  public getPosition(): Vector3 { return this.position; }
-
-  public isInBBox(bbox: BoundingBoxType): boolean {
-    return this.position.x > bbox.min.x && this.position.x < bbox.max.x 
-      && this.position.y > bbox.min.y && this.position.y < bbox.max.y 
-      && this.position.z > bbox.min.z && this.position.z < bbox.max.z;
-  }
-}
+import { BoundingBoxType } from '../common/types';
+import { PCTreePoint } from './pcTreePoint';
+import { GridSize, NodeStackMax } from '../common/constants';
 
 export class PCTreeNode {
 
@@ -64,6 +46,7 @@ export class PCTreeNode {
     }
   }
 
+  // travel all points in grid and stacks
   public travelPoints(handler: (point: PCTreePoint, index: number) => void, 
                                 includeStack = true): void {
     const gridIter = this.grid.values();
@@ -153,30 +136,4 @@ export class PCTreeNode {
         halfScope.y * (nodeVector.y - 1), halfScope.z * (nodeVector.z - 1)))
     };
   }
-}
-
-export class PCTree {
-  private bbox: BoundingBoxType; 
-  private rootNode: PCTreeNode;
-  private pointCount: number = 0;
-
-  constructor(bbox: BoundingBoxType) {
-    this.bbox = bbox;
-    this.rootNode = new PCTreeNode(bbox);
-  }
-
-  public addPoint(point: PCTreePoint): void {
-    this.pointCount++;
-    if (point.isInBBox(this.bbox)) {
-      this.rootNode.addPoint(point);
-    } else {
-      // enlarge the bbox
-    }
-  }
-
-  public getRootNode(): PCTreeNode { return this.rootNode; }
-
-  public getBBox(): BoundingBoxType { return this.bbox; }
-
-  public getPointCount(): number { return this.pointCount; }
 }

@@ -1,5 +1,6 @@
 import fs from 'fs';
-import { PCTree, PCTreeNode } from './pcTree';
+import { PCTree } from '../tree/pcTree';
+import { PCTreeNode } from '../tree/pcTreeNode';
 import { PCTreeIndexType } from './types';
 
 export function serializeIndex(filePath: string, tree: PCTree): Promise<void> {
@@ -62,4 +63,12 @@ export function serializeNode(filePath: string, node: PCTreeNode): Promise<void>
 
 // }
 
-// export function deserializeNode(filePath: string): PCTreeNode {}
+export function deserializeNode(filePath: string): Promise<PCTreeNode> {
+  return new Promise((resolve) => {
+    const rs = fs.createReadStream(filePath);    
+    rs.on('readable', () => {});
+    rs.on('end', () => {
+      // resolve();
+    });
+  });
+}

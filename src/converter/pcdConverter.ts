@@ -3,8 +3,10 @@ import { once } from 'events';
 import readline from 'readline';
 import { Vector3 } from 'three';
 import { BaseConverter } from './baseConverter'; 
-import { PCTreePoint, PCTree } from '../common/pcTree';
+import { PCTree } from '../tree/pcTree';
+import { PCTreePoint } from '../tree/pcTreePoint';
 import { BoundingBoxType } from '../common/types';
+import { MaxConverterThreshold } from '../common/constants';
 
 export class PCDConverter extends BaseConverter {
 
@@ -39,20 +41,14 @@ export class PCDConverter extends BaseConverter {
         const vector = new Vector3(parseFloat(words[0]), parseFloat(words[2]), -parseFloat(words[1]));
         bbox.max.max(vector);
         bbox.min.min(vector);
-        // const numbers = [parseFloat(words[0]), parseFloat(words[1]), parseFloat(words[2])];
-        // if (numbers[0] < bbox.min.x) { bbox.min.x = numbers[0];
-        // } else if (numbers[0] > bbox.max.x) { bbox.max.x = numbers[0]; }
-        // if (numbers[1] < bbox.min.y) { bbox.min.y = numbers[1];
-        // } else if (numbers[1] > bbox.max.y) { bbox.max.y = numbers[1]; }
-        // if (numbers[2] < bbox.min.z) { bbox.min.z = numbers[2];
-        // } else if (numbers[2] > bbox.max.z) { bbox.max.z = numbers[2]; }
       }
     });
     return bbox;
   }
 
   public async read(path: string): Promise<PCTree> {
-    let pointCount;
+    let pointNumber: number = 0;
+    let pointCount: number = 0;
     const bbox = await this.readBoundingBox(path);
     const tree = new PCTree(bbox);
     await this.readLine(path, (data: string) => {
@@ -61,9 +57,13 @@ export class PCDConverter extends BaseConverter {
         const point = new PCTreePoint(new Vector3(parseFloat(words[0]), 
           parseFloat(words[2]), -parseFloat(words[1])));
         tree.addPoint(point);
+        pointCount++;
+        if (pointCount >= MaxConverterThreshold) {
+          
+        }
       } else {
         switch (words[0]) {
-          case 'POINTS': pointCount = parseInt(words[1]); break;
+          case 'POINTS': pointNumber = parseInt(words[1]); break;
         }
       }
     });

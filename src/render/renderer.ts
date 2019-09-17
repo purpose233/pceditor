@@ -1,6 +1,8 @@
 import { Scene, PerspectiveCamera, BufferGeometry, BufferAttribute, 
   PointsMaterial, Points, VertexColors } from 'three';
-import { PCTree, PCTreeNode, PCTreePoint } from '../common/pcTree';
+import { PCTree } from '../tree/pcTree';
+import { PCTreeNode } from '../tree/pcTreeNode';
+import { PCTreePoint } from '../tree/pcTreePoint';
 
 export class PCTreeRenderer {
 
