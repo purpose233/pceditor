@@ -1,20 +1,21 @@
 import { Vector3 } from 'three';
-import { BoundingBoxType, PCTreeNodeIndexType } from '../common/types';
+import { BoundingBoxType, NodeIndexType } from '../common/types';
 import { BasePoint } from './basePoint';
 import { GridSize, NodeStackMax } from '../common/constants';
 import { bboxToSerializedbboxType } from '../common/common';
+import { deserializeNode } from '../common/serialize';
 
 export class BaseNode {
 
-  private idx: string;
+  protected idx: string;
   // grid number: increased by x, y, z
-  private parentNode: null | BaseNode;
-  private bbox: BoundingBoxType;
-  private bboxScope: Vector3;
-  private grid: Map<number, BasePoint> = new Map();
-  private pointsStacks: BasePoint[][] = [[],[],[],[],[],[],[],[]];
-  private childNodes: (null | BaseNode)[] = [null,null,null,null,null,null,null,null];
-  private isLoaded: boolean = true;
+  protected parentNode: null | BaseNode;
+  protected bbox: BoundingBoxType;
+  protected bboxScope: Vector3;
+  protected grid: Map<number, BasePoint> = new Map();
+  protected pointsStacks: BasePoint[][] = [[],[],[],[],[],[],[],[]];
+  protected childNodes: (null | BaseNode)[] = [null,null,null,null,null,null,null,null];
+  protected isLoaded: boolean = true;
 
   constructor(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode,
               points?: BasePoint[]) {
@@ -33,6 +34,7 @@ export class BaseNode {
 
   public addPointToStack(stackIndex: number, point: BasePoint): void { this.pointsStacks[stackIndex].push(point); }
 
+  // 
   public addPoint(point: BasePoint): void {
     const grid = this.findGrid(point);
     const gridNumber = this.calcGridNumber(grid);
@@ -91,6 +93,8 @@ export class BaseNode {
     return nodes;
   }
 
+  public getParentNode(): null | BaseNode { return this.parentNode; }
+
   public setChildNode(index: number, node: BaseNode) { this.childNodes[index] = node; }
 
   public getGrid(): Map<number, BasePoint> { return this.grid; }
@@ -119,8 +123,7 @@ export class BaseNode {
 
   public getIdx(): string { return this.idx; }
 
-  public getIndex(): PCTreeNodeIndexType { 
-    // const childNodes: PCTreeNodeIndexType[] = [];
+  public getIndex(): NodeIndexType {
     return { 
       idx: this.idx, 
       bbox: bboxToSerializedbboxType(this.bbox), 
@@ -132,7 +135,8 @@ export class BaseNode {
   public checkIsLoaded(): boolean { return this.isLoaded; }
 
   public load(): void {
-    
+    // deserializeNode(, this);
+    this.isLoaded = true;
   }
 
   public unload(): void {
@@ -141,7 +145,7 @@ export class BaseNode {
     this.isLoaded = false;
   }
 
-  private findGrid(point: BasePoint): Vector3 {
+  protected findGrid(point: BasePoint): Vector3 {
     const currentScope = point.getPosition().clone()
       .add(this.bbox.min.clone().negate());
     const x = Math.floor(currentScope.x * GridSize / this.bboxScope.x);
@@ -150,20 +154,20 @@ export class BaseNode {
     return new Vector3(x, y, z);
   }
 
-  private calcGridNumber(grid: Vector3): number {
+  protected calcGridNumber(grid: Vector3): number {
     return grid.x + grid.y * GridSize + grid.z * GridSize * GridSize;
   } 
 
-  private findChildNodeVectorByGrid(grid: Vector3): Vector3 {
+  protected findChildNodeVectorByGrid(grid: Vector3): Vector3 {
     return new Vector3(Math.floor(grid.x / 64), Math.floor(grid.y / 64), 
       Math.floor(grid.z / 64));
   }
 
-  private calcNodeNumber(nodeVector: Vector3): number {
+  protected calcNodeNumber(nodeVector: Vector3): number {
     return nodeVector.x + nodeVector.y * 2 + nodeVector.z * 4;
   }
 
-  private calcBBoxByNode(nodeVector: Vector3): BoundingBoxType {
+  protected calcBBoxByNode(nodeVector: Vector3): BoundingBoxType {
     const halfScope = this.bboxScope.clone().divideScalar(2);
     return {
       min: this.bbox.min.clone().add(new Vector3(halfScope.x * nodeVector.x, 

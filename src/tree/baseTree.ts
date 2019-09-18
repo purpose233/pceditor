@@ -4,9 +4,9 @@ import { BaseNode } from './baseNode';
 
 export class BaseTree {
 
-  private bbox: BoundingBoxType; 
-  private rootNode: BaseNode;
-  private pointCount: number = 0;
+  protected bbox: BoundingBoxType; 
+  protected rootNode: BaseNode;
+  protected pointCount: number = 0;
 
   constructor(bbox: BoundingBoxType) {
     this.bbox = bbox;

@@ -6,7 +6,6 @@ import { BaseConverter } from './baseConverter';
 import { ConverterTree } from './converterTree';
 import { ConverterPoint } from './converterPoint';
 import { BoundingBoxType } from '../common/types';
-import { MaxConverterThreshold } from '../common/constants';
 
 export class PCDConverter extends BaseConverter {
 
@@ -58,15 +57,13 @@ export class PCDConverter extends BaseConverter {
           parseFloat(words[2]), -parseFloat(words[1])));
         tree.addPoint(point);
         pointCount++;
-        if (pointCount >= MaxConverterThreshold) {
-          
-        }
       } else {
         switch (words[0]) {
           case 'POINTS': pointNumber = parseInt(words[1]); break;
         }
       }
     });
+    tree.serialize();
     return tree;
   }
 }

@@ -5,19 +5,19 @@ export interface SerializedBBoxType {
   maxX: number, maxY: number, maxZ: number
 }
 
-export interface PCTreeNodeIndexType {
+export interface NodeIndexType {
   idx: string,
   bbox: SerializedBBoxType,
   mask: number, 
-  childIndexes: (PCTreeNodeIndexType | null)[]
+  childIndexes: (NodeIndexType | null)[]
 }
 
-export interface PCTreeIndexType {
+export interface TreeIndexType {
   dataDir: string,
   bbox: SerializedBBoxType,
   // pointAttrs: [],
   pointCount: number,
-  root: PCTreeNodeIndexType
+  root: NodeIndexType
 }
 
 export interface BoundingBoxType {

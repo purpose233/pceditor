@@ -2,7 +2,7 @@ import { Scene, PerspectiveCamera, BufferGeometry, BufferAttribute,
   PointsMaterial, Points, VertexColors } from 'three';
 import { RenderTree } from '../tree/renderTree';
 import { RenderNode } from '../tree/renderNode';
-import { RenderPoint } from '../tree/renderPoint';
+import { BasePoint } from '../tree/basePoint';
 
 export class PCTreeRenderer {
 
@@ -20,7 +20,7 @@ export class PCTreeRenderer {
     const pointCount = node.getPointCount();
     const positions = new Float32Array(pointCount * 3);
     const colors = new Float32Array(pointCount * 3);
-    node.travelPoints((p: RenderPoint, i: number): void => {
+    node.travelPoints((p: BasePoint, i: number): void => {
       const position = p.getPosition();
       positions[3 * i] = position.x;
       positions[3 * i + 1] = position.y;

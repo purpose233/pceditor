@@ -3,7 +3,7 @@ import { BoundingBoxType } from '../common/types';
 
 export class BasePoint {
   
-  private position: Vector3;
+  protected position: Vector3;
   // color?: 
 
   constructor(position: Vector3) {
