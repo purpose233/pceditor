@@ -1,7 +1,8 @@
 import { Vector3 } from 'three';
 import { BoundingBoxType } from '../common/types';
 
-export class PCTreePoint {
+export class BasePoint {
+  
   private position: Vector3;
   // color?: 
 

@@ -1,16 +1,17 @@
 import fs from 'fs';
-import { PCTree } from '../tree/pcTree';
-import { PCTreeNode } from '../tree/pcTreeNode';
+import { RenderTree } from '../tree/renderTree';
+import { RenderNode } from '../tree/renderNode';
 import { PCTreeIndexType, PCTreeNodeIndexType } from './types';
 import { serializedbboxToBBoxType } from './common';
-import { PCTreePoint } from '../tree/pcTreePoint';
+import { BasePoint } from '../tree/basePoint';
 import { Vector3 } from 'three';
+import { BaseNode } from '../tree/baseNode';
 
-export async function serializeTree(tree: PCTree): Promise<void> {
+export async function serializeTree(tree: RenderTree): Promise<void> {
   const indexPath = '../../output/index';
   const nodePath = '../../output/n';
 
-  async function handleNode(node: PCTreeNode): Promise<void> {
+  async function handleNode(node: RenderNode): Promise<void> {
     await serializeNode(nodePath + node.getIdx, node);
     for (const childNode of node.getChildNodes()) {
       await handleNode(childNode);
@@ -21,7 +22,7 @@ export async function serializeTree(tree: PCTree): Promise<void> {
   await handleNode(tree.getRootNode());  
 }
 
-export function serializeIndex(filePath: string, tree: PCTree): Promise<void> {
+export function serializeIndex(filePath: string, tree: RenderTree): Promise<void> {
   return new Promise((resolve) => {
     const bbox = tree.getBBox();
     const index: PCTreeIndexType = {
@@ -35,15 +36,7 @@ export function serializeIndex(filePath: string, tree: PCTree): Promise<void> {
   });
 }
 
-// function concatBufferString(buffers: Buffer[]): string {
-//   let str: string = '';
-//   for (const buffer of buffers) {
-//     str += buffer.toString();
-//   }
-//   return str;
-// }
-
-export function serializeNode(filePath: string, node: PCTreeNode): Promise<void> {
+export function serializeNode(filePath: string, node: RenderNode): Promise<void> {
   return new Promise((resolve) => {
     const grid = node.getGrid(), stacks = node.getStacks();
     const size = 4 * 6 + 1 + 4 + (12 + 4) * grid.size + 2 * 8 + 12 * node.getStackCount();
@@ -100,13 +93,13 @@ export function readFileP<T>(filePath: string, handler: (buffer: Buffer)=>T): Pr
   });
 }
 
-export function deserializeIndex(filePath: string): Promise<PCTree> {
+export function deserializeIndex(filePath: string): Promise<RenderTree> {
 
-  function handleNode(idx: string, index: PCTreeNodeIndexType): PCTreeNode {
-    const node = new PCTreeNode(idx, serializedbboxToBBoxType(index.bbox));
+  function handleNode(idx: string, index: PCTreeNodeIndexType, parentNode: BaseNode): RenderNode {
+    const node = new BaseNode(idx, serializedbboxToBBoxType(index.bbox), parentNode);
     for (let i = 0; i < 8; i++) {
       if (index.mask & (1 << i)) {
-        node.setChildNode(i, handleNode(idx + i, <PCTreeNodeIndexType>index.childIndexes[i]));
+        node.setChildNode(i, handleNode(idx + i, <PCTreeNodeIndexType>index.childIndexes[i], node));
       }
     }
     return node;
@@ -114,11 +107,11 @@ export function deserializeIndex(filePath: string): Promise<PCTree> {
 
   return readFileP(filePath, (buffer: Buffer) => {
     const treeIndex: PCTreeIndexType = JSON.parse(buffer.toString());
-    const tree = new PCTree(serializedbboxToBBoxType(treeIndex.bbox));
+    const tree = new RenderTree(serializedbboxToBBoxType(treeIndex.bbox));
     const rootNode = tree.getRootNode(), mask = treeIndex.root.mask;
     for (let i = 0; i < 8; i++) {
       if (mask & (1 << i)) {
-        const childNode = handleNode('0' + i, <PCTreeNodeIndexType>treeIndex.root.childIndexes[i]);
+        const childNode = handleNode('0' + i, <PCTreeNodeIndexType>treeIndex.root.childIndexes[i], rootNode);
         rootNode.setChildNode(i, childNode);
       }
     }
@@ -126,7 +119,7 @@ export function deserializeIndex(filePath: string): Promise<PCTree> {
   });
 }
 
-export function deserializeNode(filePath: string, node: PCTreeNode): Promise<void> {
+export function deserializeNode(filePath: string, node: RenderNode): Promise<void> {
   return readFileP(filePath, (buffer: Buffer) => {
     let offset = 0;
     const gridCount = buffer.readUInt32BE(offset); offset += 4;
@@ -135,7 +128,7 @@ export function deserializeNode(filePath: string, node: PCTreeNode): Promise<voi
       const x = buffer.readFloatBE(offset); offset += 4;
       const y = buffer.readFloatBE(offset); offset += 4;
       const z = buffer.readFloatBE(offset); offset += 4;
-      node.addPointToGrid(gridNumber, new PCTreePoint(new Vector3(x, y, z)));
+      node.addPointToGrid(gridNumber, new BasePoint(new Vector3(x, y, z)));
     }
     const stackCounts: number[] = [];
     for (let i = 0; i < 8; i++) {
@@ -146,7 +139,7 @@ export function deserializeNode(filePath: string, node: PCTreeNode): Promise<voi
         const x = buffer.readFloatBE(offset); offset += 4;
         const y = buffer.readFloatBE(offset); offset += 4;
         const z = buffer.readFloatBE(offset); offset += 4;
-        node.addPointToStack(i, new PCTreePoint(new Vector3(x, y, z)));
+        node.addPointToStack(i, new BasePoint(new Vector3(x, y, z)));
       }
     }
   });

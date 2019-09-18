@@ -1,24 +1,26 @@
 import { Vector3 } from 'three';
 import { BoundingBoxType, PCTreeNodeIndexType } from '../common/types';
-import { PCTreePoint } from './pcTreePoint';
+import { BasePoint } from './basePoint';
 import { GridSize, NodeStackMax } from '../common/constants';
 import { bboxToSerializedbboxType } from '../common/common';
 
-export class PCTreeNode {
+export class BaseNode {
 
   private idx: string;
   // grid number: increased by x, y, z
-  private grid: Map<number, PCTreePoint> = new Map();
-  private pointsStacks: PCTreePoint[][] = [[],[],[],[],[],[],[],[]];
-  private childNodes: (null | PCTreeNode)[] = [null,null,null,null,null,null,null,null];
+  private parentNode: null | BaseNode;
   private bbox: BoundingBoxType;
   private bboxScope: Vector3;
+  private grid: Map<number, BasePoint> = new Map();
+  private pointsStacks: BasePoint[][] = [[],[],[],[],[],[],[],[]];
+  private childNodes: (null | BaseNode)[] = [null,null,null,null,null,null,null,null];
   private isLoaded: boolean = true;
 
-  constructor(idx: string, bbox: BoundingBoxType, 
-              points?: PCTreePoint[],) {
+  constructor(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode,
+              points?: BasePoint[]) {
     this.idx = idx;
     this.bbox = bbox;
+    this.parentNode = parentNode;
     this.bboxScope = this.bbox.max.clone().add(this.bbox.min.clone().negate());
     if (points) {
       for (const point of points) {
@@ -27,11 +29,11 @@ export class PCTreeNode {
     }
   }
 
-  public addPointToGrid(gridNumber: number, point: PCTreePoint): void { this.grid.set(gridNumber, point); }
+  public addPointToGrid(gridNumber: number, point: BasePoint): void { this.grid.set(gridNumber, point); }
 
-  public addPointToStack(stackIndex: number, point: PCTreePoint): void { this.pointsStacks[stackIndex].push(point); }
+  public addPointToStack(stackIndex: number, point: BasePoint): void { this.pointsStacks[stackIndex].push(point); }
 
-  public addPoint(point: PCTreePoint): void {
+  public addPoint(point: BasePoint): void {
     const grid = this.findGrid(point);
     const gridNumber = this.calcGridNumber(grid);
     if (!this.grid.get(gridNumber)) {
@@ -46,8 +48,8 @@ export class PCTreeNode {
         if (this.pointsStacks[nodeNumber].length < NodeStackMax) {
           this.pointsStacks[nodeNumber].push(point);
         } else {
-          this.childNodes[nodeNumber] = new PCTreeNode(this.idx + nodeNumber,
-            this.calcBBoxByNode(nodeVector), this.pointsStacks[nodeNumber]);
+          this.childNodes[nodeNumber] = new BaseNode(this.idx + nodeNumber,
+            this.calcBBoxByNode(nodeVector), this, this.pointsStacks[nodeNumber]);
           this.pointsStacks[nodeNumber] = [];
         }
       }
@@ -55,7 +57,7 @@ export class PCTreeNode {
   }
 
   // travel all points in grid and stacks
-  public travelPoints(handler: (point: PCTreePoint, index: number) => void, 
+  public travelPoints(handler: (point: BasePoint, index: number) => void, 
                                 includeStack = true): void {
     const gridIter = this.grid.values();
     let result, index = 0;
@@ -79,8 +81,8 @@ export class PCTreeNode {
     return count;
   }
 
-  public getChildNodes(): PCTreeNode[] {
-    const nodes: PCTreeNode[] = [];
+  public getChildNodes(): BaseNode[] {
+    const nodes: BaseNode[] = [];
     if (this.childNodes) {
       for (const node of this.childNodes) {
         if (node) { nodes.push(node); }
@@ -89,11 +91,11 @@ export class PCTreeNode {
     return nodes;
   }
 
-  public setChildNode(index: number, node: PCTreeNode) { this.childNodes[index] = node; }
+  public setChildNode(index: number, node: BaseNode) { this.childNodes[index] = node; }
 
-  public getGrid(): Map<number, PCTreePoint> { return this.grid; }
+  public getGrid(): Map<number, BasePoint> { return this.grid; }
 
-  public getStacks(): PCTreePoint[][] { return this.pointsStacks; }
+  public getStacks(): BasePoint[][] { return this.pointsStacks; }
 
   public getStackCount(): number {
     let count = 0;
@@ -127,6 +129,8 @@ export class PCTreeNode {
     }; 
   }
 
+  public checkIsLoaded(): boolean { return this.isLoaded; }
+
   public load(): void {
     
   }
@@ -137,7 +141,7 @@ export class PCTreeNode {
     this.isLoaded = false;
   }
 
-  private findGrid(point: PCTreePoint): Vector3 {
+  private findGrid(point: BasePoint): Vector3 {
     const currentScope = point.getPosition().clone()
       .add(this.bbox.min.clone().negate());
     const x = Math.floor(currentScope.x * GridSize / this.bboxScope.x);

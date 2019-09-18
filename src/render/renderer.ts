@@ -1,14 +1,14 @@
 import { Scene, PerspectiveCamera, BufferGeometry, BufferAttribute, 
   PointsMaterial, Points, VertexColors } from 'three';
-import { PCTree } from '../tree/pcTree';
-import { PCTreeNode } from '../tree/pcTreeNode';
-import { PCTreePoint } from '../tree/pcTreePoint';
+import { RenderTree } from '../tree/renderTree';
+import { RenderNode } from '../tree/renderNode';
+import { RenderPoint } from '../tree/renderPoint';
 
 export class PCTreeRenderer {
 
-  private tree: PCTree;
+  private tree: RenderTree;
 
-  constructor(tree: PCTree) {
+  constructor(tree: RenderTree) {
     this.tree = tree;
   }
 
@@ -16,11 +16,11 @@ export class PCTreeRenderer {
     this.renderNodes(this.tree.getRootNode(), scene, camera);
   }
 
-  public renderNode(node: PCTreeNode, scene: Scene, camera: PerspectiveCamera): void {
+  public renderNode(node: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
     const pointCount = node.getPointCount();
     const positions = new Float32Array(pointCount * 3);
     const colors = new Float32Array(pointCount * 3);
-    node.travelPoints((p: PCTreePoint, i: number): void => {
+    node.travelPoints((p: RenderPoint, i: number): void => {
       const position = p.getPosition();
       positions[3 * i] = position.x;
       positions[3 * i + 1] = position.y;
@@ -38,7 +38,7 @@ export class PCTreeRenderer {
     scene.add(mesh);
   }
 
-  private renderNodes(node: PCTreeNode, scene: Scene, camera: PerspectiveCamera): void {
+  private renderNodes(node: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
     this.renderNode(node, scene, camera);
     const childNodes = node.getChildNodes();
     for (const child of childNodes) {

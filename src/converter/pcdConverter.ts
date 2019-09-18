@@ -3,8 +3,8 @@ import { once } from 'events';
 import readline from 'readline';
 import { Vector3 } from 'three';
 import { BaseConverter } from './baseConverter'; 
-import { PCTree } from '../tree/pcTree';
-import { PCTreePoint } from '../tree/pcTreePoint';
+import { ConverterTree } from './converterTree';
+import { ConverterPoint } from './converterPoint';
 import { BoundingBoxType } from '../common/types';
 import { MaxConverterThreshold } from '../common/constants';
 
@@ -46,15 +46,15 @@ export class PCDConverter extends BaseConverter {
     return bbox;
   }
 
-  public async read(path: string): Promise<PCTree> {
+  public async read(path: string): Promise<ConverterTree> {
     let pointNumber: number = 0;
     let pointCount: number = 0;
     const bbox = await this.readBoundingBox(path);
-    const tree = new PCTree(bbox);
+    const tree = new ConverterTree(bbox);
     await this.readLine(path, (data: string) => {
       const words = data.split(' ');
       if (!isNaN(parseFloat(words[0]))) {
-        const point = new PCTreePoint(new Vector3(parseFloat(words[0]), 
+        const point = new ConverterPoint(new Vector3(parseFloat(words[0]), 
           parseFloat(words[2]), -parseFloat(words[1])));
         tree.addPoint(point);
         pointCount++;

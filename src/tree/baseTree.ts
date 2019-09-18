@@ -1,18 +1,19 @@
 import { BoundingBoxType } from '../common/types';
-import { PCTreePoint } from './pcTreePoint';
-import { PCTreeNode } from './pcTreeNode';
+import { BasePoint } from './basePoint';
+import { BaseNode } from './baseNode';
 
-export class PCTree {
+export class BaseTree {
+
   private bbox: BoundingBoxType; 
-  private rootNode: PCTreeNode;
+  private rootNode: BaseNode;
   private pointCount: number = 0;
 
   constructor(bbox: BoundingBoxType) {
     this.bbox = bbox;
-    this.rootNode = new PCTreeNode('0', bbox);
+    this.rootNode = new BaseNode('0', bbox, null);
   }
 
-  public addPoint(point: PCTreePoint): void {
+  public addPoint(point: BasePoint): void {
     this.pointCount++;
     if (point.isInBBox(this.bbox)) {
       this.rootNode.addPoint(point);
@@ -21,7 +22,7 @@ export class PCTree {
     }
   }
 
-  public getRootNode(): PCTreeNode { return this.rootNode; }
+  public getRootNode(): BaseNode { return this.rootNode; }
 
   public getBBox(): BoundingBoxType { return this.bbox; }
 
