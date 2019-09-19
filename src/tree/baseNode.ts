@@ -1,11 +1,12 @@
 import { Vector3 } from 'three';
 import { BoundingBoxType, NodeIndexType } from '../common/types';
 import { BasePoint } from './basePoint';
+import { BaseTree } from './baseTree';
 import { GridSize, NodeStackMax } from '../common/constants';
 import { bboxToSerializedbboxType } from '../common/common';
 import { deserializeNode } from '../common/serialize';
 
-export class BaseNode {
+export abstract class BaseNode {
 
   protected idx: string;
   // grid number: increased by x, y, z
@@ -30,11 +31,12 @@ export class BaseNode {
     }
   }
 
+  protected abstract createNode(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode, points?: BasePoint[]): BaseNode;
+
   public addPointToGrid(gridNumber: number, point: BasePoint): void { this.grid.set(gridNumber, point); }
 
   public addPointToStack(stackIndex: number, point: BasePoint): void { this.pointsStacks[stackIndex].push(point); }
 
-  // 
   public addPoint(point: BasePoint): void {
     const grid = this.findGrid(point);
     const gridNumber = this.calcGridNumber(grid);
@@ -50,7 +52,7 @@ export class BaseNode {
         if (this.pointsStacks[nodeNumber].length < NodeStackMax) {
           this.pointsStacks[nodeNumber].push(point);
         } else {
-          this.childNodes[nodeNumber] = new BaseNode(this.idx + nodeNumber,
+          this.childNodes[nodeNumber] = this.createNode(this.idx + nodeNumber,
             this.calcBBoxByNode(nodeVector), this, this.pointsStacks[nodeNumber]);
           this.pointsStacks[nodeNumber] = [];
         }
@@ -135,7 +137,8 @@ export class BaseNode {
   public checkIsLoaded(): boolean { return this.isLoaded; }
 
   public load(): void {
-    // deserializeNode(, this);
+    // fix the hardcoding
+    deserializeNode('../../output/n' + this.idx, this);
     this.isLoaded = true;
   }
 

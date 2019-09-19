@@ -1,9 +1,14 @@
 import { BaseTree } from '../tree/baseTree';
 import { ConverterNode } from './converterNode';
+import { BoundingBoxType } from '../common/types';
 
 export class ConverterTree extends BaseTree {
 
   private loadedCount: number = 0;
+
+  protected createRootNode(bbox: BoundingBoxType): ConverterNode {
+    return new ConverterNode('0', bbox, null, this);
+  }
 
   public getLoadedCount(): number { return this.loadedCount; }
 

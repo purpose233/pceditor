@@ -7,8 +7,15 @@ import { BasePoint } from '../tree/basePoint';
 import { Vector3 } from 'three';
 import { BaseNode } from '../tree/baseNode';
 import { BaseTree } from '../tree/baseTree';
+import { ConverterNode } from '../converter/converterNode';
+import { RenderNode } from '../tree/renderNode';
+import { ConverterTree } from '../converter/converterTree';
+import { RenderTree } from '../tree/renderTree';
+import { ConverterPoint } from '../converter/converterPoint';
+import { RenderPoint } from '../tree/renderPoint';
 
 export async function serializeTree(tree: BaseTree): Promise<void> {
+  // TODO: fix the hardcoding
   const indexPath = '../../output/index';
   const nodePath = '../../output/n';
 
@@ -94,13 +101,14 @@ export function readFileP<T>(filePath: string, handler: (buffer: Buffer)=>T): Pr
   });
 }
 
-export function deserializeIndex(filePath: string): Promise<BaseTree> {
+export function deserializeIndex(filePath: string, isConvertering: boolean = false): Promise<BaseTree> {
 
-  function handleNode(idx: string, index: NodeIndexType, parentNode: BaseNode): BaseNode {
-    const node = new BaseNode(idx, serializedbboxToBBoxType(index.bbox), parentNode);
+  function handleNode(idx: string, index: NodeIndexType, parentNode: BaseNode, tree: BaseTree): BaseNode {
+    const node = isConvertering ? new ConverterNode(idx, serializedbboxToBBoxType(index.bbox), parentNode, tree as ConverterTree) 
+                                : new RenderNode(idx, serializedbboxToBBoxType(index.bbox), parentNode);
     for (let i = 0; i < 8; i++) {
       if (index.mask & (1 << i)) {
-        node.setChildNode(i, handleNode(idx + i, index.childIndexes[i] as NodeIndexType, node));
+        node.setChildNode(i, handleNode(idx + i, index.childIndexes[i] as NodeIndexType, node, tree));
       }
     }
     return node;
@@ -108,11 +116,13 @@ export function deserializeIndex(filePath: string): Promise<BaseTree> {
 
   return readFileP(filePath, (buffer: Buffer) => {
     const treeIndex: TreeIndexType = JSON.parse(buffer.toString());
-    const tree = new BaseTree(serializedbboxToBBoxType(treeIndex.bbox));
+    // const tree = new BaseTree(serializedbboxToBBoxType(treeIndex.bbox));
+    const tree = isConvertering ? new ConverterTree(serializedbboxToBBoxType(treeIndex.bbox)) 
+                                : new RenderTree(serializedbboxToBBoxType(treeIndex.bbox));
     const rootNode = tree.getRootNode(), mask = treeIndex.root.mask;
     for (let i = 0; i < 8; i++) {
       if (mask & (1 << i)) {
-        const childNode = handleNode('0' + i, treeIndex.root.childIndexes[i] as NodeIndexType, rootNode);
+        const childNode = handleNode('0' + i, treeIndex.root.childIndexes[i] as NodeIndexType, rootNode, tree);
         rootNode.setChildNode(i, childNode);
       }
     }
@@ -120,7 +130,7 @@ export function deserializeIndex(filePath: string): Promise<BaseTree> {
   });
 }
 
-export function deserializeNode(filePath: string, node: BaseNode): Promise<void> {
+export function deserializeNode(filePath: string, node: BaseNode, isConvertering: boolean = false): Promise<void> {
   return readFileP(filePath, (buffer: Buffer) => {
     let offset = 0;
     const gridCount = buffer.readUInt32BE(offset); offset += 4;
@@ -129,7 +139,8 @@ export function deserializeNode(filePath: string, node: BaseNode): Promise<void>
       const x = buffer.readFloatBE(offset); offset += 4;
       const y = buffer.readFloatBE(offset); offset += 4;
       const z = buffer.readFloatBE(offset); offset += 4;
-      node.addPointToGrid(gridNumber, new BasePoint(new Vector3(x, y, z)));
+      node.addPointToGrid(gridNumber, isConvertering ? new ConverterPoint(new Vector3(x, y, z)) 
+                                                     : new RenderPoint(new Vector3(x, y, z)));
     }
     const stackCounts: number[] = [];
     for (let i = 0; i < 8; i++) {
@@ -140,7 +151,8 @@ export function deserializeNode(filePath: string, node: BaseNode): Promise<void>
         const x = buffer.readFloatBE(offset); offset += 4;
         const y = buffer.readFloatBE(offset); offset += 4;
         const z = buffer.readFloatBE(offset); offset += 4;
-        node.addPointToStack(i, new BasePoint(new Vector3(x, y, z)));
+        node.addPointToStack(i, isConvertering ? new ConverterPoint(new Vector3(x, y, z)) 
+                                               : new RenderPoint(new Vector3(x, y, z)));
       }
     }
   });

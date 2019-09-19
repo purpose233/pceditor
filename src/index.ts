@@ -10,6 +10,6 @@ import { PCTreeRenderer } from './render/renderer';
   const converter = new PCDConverter();
   const tree = await converter.read(path.resolve(__dirname, '../data/test.pcd'));
   console.log(tree);
-  const renderer = new PCTreeRenderer(tree);
-  renderer.renderTree(scene.getScene(), scene.getCamera());
+  // const renderer = new PCTreeRenderer(tree);
+  // renderer.renderTree(scene.getScene(), scene.getCamera());
 })();

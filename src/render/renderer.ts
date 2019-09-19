@@ -13,7 +13,7 @@ export class PCTreeRenderer {
   }
 
   public renderTree(scene: Scene, camera: PerspectiveCamera): void {
-    this.renderNodes(this.tree.getRootNode(), scene, camera);
+    this.renderNodes(this.tree.getRootNode() as RenderNode, scene, camera);
   }
 
   public renderNode(node: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
@@ -41,7 +41,7 @@ export class PCTreeRenderer {
   private renderNodes(node: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
     this.renderNode(node, scene, camera);
     const childNodes = node.getChildNodes();
-    for (const child of childNodes) {
+    for (const child of childNodes as RenderNode[]) {
       this.renderNodes(child, scene, camera);
     }
   }

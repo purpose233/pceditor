@@ -2,7 +2,7 @@ import { BoundingBoxType } from '../common/types';
 import { BasePoint } from './basePoint';
 import { BaseNode } from './baseNode';
 
-export class BaseTree {
+export abstract class BaseTree {
 
   protected bbox: BoundingBoxType; 
   protected rootNode: BaseNode;
@@ -10,8 +10,10 @@ export class BaseTree {
 
   constructor(bbox: BoundingBoxType) {
     this.bbox = bbox;
-    this.rootNode = new BaseNode('0', bbox, null);
+    this.rootNode = this.createRootNode(bbox);
   }
+
+  protected abstract createRootNode(bbox: BoundingBoxType): BaseNode;
 
   public addPoint(point: BasePoint): void {
     this.pointCount++;
