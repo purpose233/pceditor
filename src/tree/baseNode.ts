@@ -16,26 +16,28 @@ export abstract class BaseNode {
   protected grid: Map<number, BasePoint> = new Map();
   protected pointsStacks: BasePoint[][] = [[],[],[],[],[],[],[],[]];
   protected childNodes: (null | BaseNode)[] = [null,null,null,null,null,null,null,null];
-  protected isLoaded: boolean = true;
+  protected isLoaded: boolean;
 
   constructor(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode,
-              points?: BasePoint[]) {
+              isNew: boolean = true) {
     this.idx = idx;
     this.bbox = bbox;
     this.parentNode = parentNode;
     this.bboxScope = this.bbox.max.clone().add(this.bbox.min.clone().negate());
-    if (points) {
-      for (const point of points) {
-        this.addPoint(point);
-      }
-    }
+    this.isLoaded = isNew;
   }
 
-  protected abstract createNode(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode, points?: BasePoint[]): BaseNode;
+  protected abstract createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode): BaseNode;
 
   public addPointToGrid(gridNumber: number, point: BasePoint): void { this.grid.set(gridNumber, point); }
 
   public addPointToStack(stackIndex: number, point: BasePoint): void { this.pointsStacks[stackIndex].push(point); }
+
+  public addPoints(points: BasePoint[]): void {
+    for (const point of points) {
+      this.addPoint(point);
+    }
+  }
 
   public addPoint(point: BasePoint): void {
     const grid = this.findGrid(point);
@@ -52,8 +54,10 @@ export abstract class BaseNode {
         if (this.pointsStacks[nodeNumber].length < NodeStackMax) {
           this.pointsStacks[nodeNumber].push(point);
         } else {
-          this.childNodes[nodeNumber] = this.createNode(this.idx + nodeNumber,
-            this.calcBBoxByNode(nodeVector), this, this.pointsStacks[nodeNumber]);
+          const childNode = this.createNewNode(this.idx + nodeNumber,
+            this.calcBBoxByNode(nodeVector), this);
+          childNode.addPoints(this.pointsStacks[nodeNumber]);
+          this.childNodes[nodeNumber] = childNode;
           this.pointsStacks[nodeNumber] = [];
         }
       }
@@ -136,13 +140,13 @@ export abstract class BaseNode {
 
   public checkIsLoaded(): boolean { return this.isLoaded; }
 
-  public load(): void {
-    // fix the hardcoding
-    deserializeNode('../../output/n' + this.idx, this);
+  public async load(): Promise<void> {
+    // TODO: fix the hardcoding
+    await deserializeNode('../../output/n' + this.idx, this);
     this.isLoaded = true;
   }
 
-  public unload(): void {
+  public async unload(): Promise<void> {
     this.grid.clear();
     this.pointsStacks = [[],[],[],[],[],[],[],[]];
     this.isLoaded = false;

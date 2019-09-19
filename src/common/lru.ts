@@ -1,31 +1,39 @@
 import { RenderNode } from '../tree/renderNode';
-
-interface TimeNode {
-  node: RenderNode,
-  time: number
-}
+import { MaxRenderNodes } from './constants';
 
 export class LRU {
 
-  private nodeStack: TimeNode[] = [];
-  private loadedNodeNumber: number = 0;
+  private loadedNodeStack: RenderNode[] = [];
 
   public updateNodeTime(node: RenderNode): void {
-    const timeNode = this.sliceNode(node);
-    if (timeNode) { 
-      timeNode.time = new Date().getTime();
-      this.nodeStack.push(timeNode);
+    this.sliceNode(node);
+    this.loadedNodeStack.push(node);
+  }
+
+  public loadNodes(nodes: RenderNode[]): void {
+    // TODO: handle when nodes number greater than MaxRenderNodes
+    for (const node of nodes) {
+      this.loadNode(node);
     }
   }
 
-  public loadNode(node: RenderNode): void {
-    
+  public async loadNode(node: RenderNode): Promise<void> { 
+    await node.load();
+    this.updateNodeTime(node);
+    this.unloadOverflowedNodes();
   }
 
-  private sliceNode(node: RenderNode): TimeNode | null {
-    for (let i = 0; i < this.nodeStack.length; i++) {
-      if (this.nodeStack[i].node === node) {
-        return this.nodeStack.splice(i, 1)[0];
+  private async unloadOverflowedNodes(): Promise<void> {
+    while (this.loadedNodeStack.length > MaxRenderNodes) {
+      const node = this.loadedNodeStack.shift() as RenderNode;
+      await node.unload();
+    }
+  }
+
+  private sliceNode(node: RenderNode): RenderNode | null {
+    for (let i = 0; i < this.loadedNodeStack.length; i++) {
+      if (this.loadedNodeStack[i] === node) {
+        return this.loadedNodeStack.splice(i, 1)[0];
       }
     }
     return null;

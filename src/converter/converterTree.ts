@@ -15,31 +15,32 @@ export class ConverterTree extends BaseTree {
   public changeLoadedCount(diff: number) { this.loadedCount += diff; }
 
   // when refNode is not passed, function will serialize the total tree.
-  public serialize(refNode?: ConverterNode): void {
+  public async serialize(refNode?: ConverterNode): Promise<void> {
     if (refNode) {
-      this.unloadChildren(refNode);
+      await this.unloadChildren(refNode);
       // TODO: this strategy will cause problems when the ancestor nodes 
       //  contains more points than threshold. This could be resolved by 
       //  changing the thredhold dynamicly.
       let currentNode: ConverterNode | null = refNode;
       while (currentNode && currentNode.getParentNode()) {
         const parent = currentNode.getParentNode() as ConverterNode;
-        this.unloadChildren(parent, false, [currentNode]);
+        await this.unloadChildren(parent, false, [currentNode]);
         currentNode = parent;
       }
     } else {
-      this.unloadChildren(this.getRootNode() as ConverterNode, true);
+      await this.unloadChildren(this.getRootNode() as ConverterNode, true);
     }
   }
 
-  private unloadChildren(parent: ConverterNode, unloadParent: boolean = false, excludeChildren: ConverterNode[] = []): void {
+  private async unloadChildren(parent: ConverterNode, unloadParent: boolean = false, 
+                               excludeChildren: ConverterNode[] = []): Promise<void> {
     for (const child of (parent.getChildNodes() as ConverterNode[])) {
       if (!excludeChildren.includes(child)) {
-        this.unloadChildren(child, true, excludeChildren);
+        await this.unloadChildren(child, true, excludeChildren);
       }
     }
     if (unloadParent) {
-      parent.unload();
+      await parent.unload();
     }
   }
 }

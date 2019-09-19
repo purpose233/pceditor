@@ -7,3 +7,5 @@ export const NodeStackMax = 128;
 //  point cloud. So, it could be set smaller than a fulfilled node.
 // And it could be convconvenient to reduce the de&serializing operations.
 export const MaxConverterThreshold = 1000000;
+
+export const MaxRenderNodes = 20;

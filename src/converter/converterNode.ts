@@ -12,18 +12,17 @@ export class ConverterNode extends BaseNode {
 
   constructor(idx: string, bbox: BoundingBoxType, 
               parentNode: null | BaseNode, refTree: ConverterTree,
-              points?: ConverterPoint[]) {
-    super(idx, bbox, parentNode, points);
+              isNew: boolean = true) {
+    super(idx, bbox, parentNode, isNew);
     this.refTree = refTree;
   }
 
-  protected createNode(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode, 
-                       points?: BasePoint[]): BaseNode {
-    return new ConverterNode(idx, bbox, parentNode, this.refTree, points);
+  protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode): BaseNode {
+    return new ConverterNode(idx, bbox, parentNode, this.refTree);
   };
 
-  public addPoint(point: ConverterPoint): void {
-    if (!this.isLoaded) { this.load(); }
+  public async addPoint(point: ConverterPoint): Promise<void> {
+    if (!this.isLoaded) { await this.load(); }
 
     let isInCurrentNode: boolean = false;
     const grid = this.findGrid(point);
@@ -43,8 +42,10 @@ export class ConverterNode extends BaseNode {
           this.pointsStacks[nodeNumber].push(point);
           isInCurrentNode = true;
         } else {
-          this.childNodes[nodeNumber] = this.createNode(this.idx + nodeNumber,
-            this.calcBBoxByNode(nodeVector), this, this.pointsStacks[nodeNumber]);
+          const childNode = this.createNewNode(this.idx + nodeNumber,
+            this.calcBBoxByNode(nodeVector), this);
+          childNode.addPoints(this.pointsStacks[nodeNumber]);
+          this.childNodes[nodeNumber] = childNode;
           this.pointsStacks[nodeNumber] = [];
         }
       }
@@ -58,15 +59,15 @@ export class ConverterNode extends BaseNode {
     }
   }
 
-  public load(): void {
+  public async load(): Promise<void> {
     // TODO: fix the hardcoding
-    deserializeNode('../../output/n' + this.idx, this, true);
+    await deserializeNode('../../output/n' + this.idx, this, true);
     this.isLoaded = true;
     this.refTree.changeLoadedCount(this.getPointCount());
   }
 
-  public unload(): void {
-    super.unload();
+  public async unload(): Promise<void> {
+    await super.unload();
     this.refTree.changeLoadedCount(-this.getPointCount());
   }
 }

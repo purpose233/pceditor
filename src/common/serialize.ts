@@ -104,8 +104,8 @@ export function readFileP<T>(filePath: string, handler: (buffer: Buffer)=>T): Pr
 export function deserializeIndex(filePath: string, isConvertering: boolean = false): Promise<BaseTree> {
 
   function handleNode(idx: string, index: NodeIndexType, parentNode: BaseNode, tree: BaseTree): BaseNode {
-    const node = isConvertering ? new ConverterNode(idx, serializedbboxToBBoxType(index.bbox), parentNode, tree as ConverterTree) 
-                                : new RenderNode(idx, serializedbboxToBBoxType(index.bbox), parentNode);
+    const node = isConvertering ? new ConverterNode(idx, serializedbboxToBBoxType(index.bbox), parentNode, tree as ConverterTree, false) 
+                                : new RenderNode(idx, serializedbboxToBBoxType(index.bbox), parentNode, false);
     for (let i = 0; i < 8; i++) {
       if (index.mask & (1 << i)) {
         node.setChildNode(i, handleNode(idx + i, index.childIndexes[i] as NodeIndexType, node, tree));
