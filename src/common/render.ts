@@ -1,6 +1,6 @@
 import { BoundingBoxType } from './types';
 import { Vector3, PerspectiveCamera, Points, BufferGeometry, BufferAttribute, PointsMaterial, VertexColors } from 'three';
-import { RenderNode } from '../tree/renderNode';
+import { RenderNode } from '../render/renderNode';
 import { BasePoint } from '../tree/basePoint';
 
 export function createNodeMesh(node: RenderNode): Points {

@@ -6,11 +6,11 @@ import { Vector3 } from 'three';
 import { BaseNode } from '../tree/baseNode';
 import { BaseTree } from '../tree/baseTree';
 import { ConverterNode } from '../converter/converterNode';
-import { RenderNode } from '../tree/renderNode';
+import { RenderNode } from '../render/renderNode';
 import { ConverterTree } from '../converter/converterTree';
-import { RenderTree } from '../tree/renderTree';
+import { RenderTree } from '../render/renderTree';
 import { ConverterPoint } from '../converter/converterPoint';
-import { RenderPoint } from '../tree/renderPoint';
+import { RenderPoint } from '../render/renderPoint';
 import { ExportDataPath, ExportIndexPath } from './constants';
 
 // TODO: use stream to improve the usage of rom

@@ -1,6 +1,6 @@
 import { Scene, PerspectiveCamera, Points } from 'three';
-import { RenderTree } from '../tree/renderTree';
-import { RenderNode } from '../tree/renderNode';
+import { RenderTree } from './renderTree';
+import { RenderNode } from './renderNode';
 import { LRU } from '../common/lru';
 import { createNodeMesh } from '../common/render';
 
@@ -34,7 +34,7 @@ export class PCRenderer {
   public renderNode(node: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
     node.render(scene);
   }
-  
+ 
   private renderNodesTree(root: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
     this.renderNode(root, scene, camera);
     const childNodes = root.getChildNodes();

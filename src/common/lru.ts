@@ -1,4 +1,4 @@
-import { RenderNode } from '../tree/renderNode';
+import { RenderNode } from '../render/renderNode';
 import { MaxRenderNodes } from './constants';
 
 export class LRU {

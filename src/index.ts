@@ -3,7 +3,7 @@ import { PCScene } from './render/scene';
 import { PCRenderer } from './render/renderer';
 import { ConverterTree } from './converter/converterTree';
 import { deserializeIndex } from './common/serialize';
-import { RenderTree } from './tree/renderTree';
+import { RenderTree } from './render/renderTree';
 import { ExportIndexPath } from './common/constants';
 
 (async () => {
@@ -17,5 +17,5 @@ import { ExportIndexPath } from './common/constants';
   console.log(renderTree);
   const renderer = new PCRenderer(renderTree);
   const scene = new PCScene(container, canvas, renderer);
-  await renderer.renderTotalTree(scene.getScene(), scene.getCamera());
+  // await renderer.renderTotalTree(scene.getScene(), scene.getCamera());
 })();

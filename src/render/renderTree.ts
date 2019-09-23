@@ -1,6 +1,6 @@
-import { BaseTree } from './baseTree';
+import { BaseTree } from '../tree/baseTree';
 import { BoundingBoxType } from '../common/types';
-import { BaseNode } from './baseNode';
+import { BaseNode } from '../tree/baseNode';
 import { RenderNode } from './renderNode';
 
 export class RenderTree extends BaseTree {

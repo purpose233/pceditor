@@ -63,19 +63,19 @@ export class PCScene {
 
   public getCamera(): PerspectiveCamera { return this.camera; }
 
-  private onWindowResize = () => {
+  private onWindowResize = async () => {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     // this.controls.handleResize();
-    this.render();
+    await this.render();
   }
 
-  private animate = () => {
-    requestAnimationFrame(this.animate);
-    this.render();
+  private animate = async () => {
     this.controls.update();
     this.stats.update();
+    await this.render();
+    requestAnimationFrame(this.animate);
   }
 
   // private onMouseDown = () => {}
@@ -84,10 +84,9 @@ export class PCScene {
 
   // private onMouseMove = () => {}
 
-  private render = () => {
+  private render = async () => {
+    await this.pcRenderer.renderTree(this.scene, this.camera);
     this.camera.updateMatrixWorld();
     this.renderer.render(this.scene, this.camera);
-    // await this.renderer.renderTotalTree(this.scene, this.getCamera);
-    // this.pcRenderer.renderTree(this.scene, this.camera);
   }
 }

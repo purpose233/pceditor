@@ -1,6 +1,6 @@
-import { BaseNode } from './baseNode';
+import { BaseNode } from '../tree/baseNode';
 import { BoundingBoxType } from '../common/types';
-import { BasePoint } from './basePoint';
+import { BasePoint } from '../tree/basePoint';
 import { Points, Scene } from 'three';
 import { createNodeMesh } from '../common/render';
 import { deserializeNode } from '../common/serialize';
@@ -10,7 +10,6 @@ export class RenderNode extends BaseNode {
 
   private mesh: Points | null = null;
   private isRendering: boolean = false;
-  // private lastVisitTime: number = 0;
   // private isDirty: boolean = false;
 
   protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode): BaseNode {
@@ -22,6 +21,7 @@ export class RenderNode extends BaseNode {
   // public setMesh(mesh: Points | null) { this.mesh = mesh; }
 
   public async load(): Promise<void> {
+    if (this.isLoaded) { return; }
     await deserializeNode(ExportDataPath + this.idx, this);
     this.isLoaded = true;
     this.mesh = createNodeMesh(this);
@@ -33,6 +33,7 @@ export class RenderNode extends BaseNode {
   }
 
   public render(scene: Scene): void {
+    if (this.isRendering) { return; }
     if (!this.isLoaded || !this.mesh) { 
       console.log('Node has not loaded!')
       return; 
@@ -42,6 +43,7 @@ export class RenderNode extends BaseNode {
   }
 
   public unrender(scene: Scene): void {
+    if (!this.isRendering) { return; }
     if (!this.isLoaded || !this.mesh) { 
       console.log('Node has not loaded!')
       return; 
@@ -50,7 +52,5 @@ export class RenderNode extends BaseNode {
     this.isRendering = false;
   }
 
-  // public getLastVisitTime(): number { return this.lastVisitTime; }
-
-  // public setLastVisitTime(time: number): void { this.lastVisitTime = time; }
+  public checkIsRendering(): boolean { return this.isRendering; }
 }
