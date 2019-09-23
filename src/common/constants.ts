@@ -8,4 +8,9 @@ export const NodeStackMax = 128;
 // And it could be convconvenient to reduce the de&serializing operations.
 export const MaxConverterThreshold = 1000000;
 
-export const MaxRenderNodes = 20;
+export const MaxRenderNodes = 100;
+
+// TODO: fix the hardcoding
+export const ExportFolderPath = '/home/purpose/Projects/web/output/';
+export const ExportIndexPath = ExportFolderPath + 'index';
+export const ExportDataPath = ExportFolderPath + 'n';

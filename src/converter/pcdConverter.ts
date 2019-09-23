@@ -6,6 +6,7 @@ import { BaseConverter } from './baseConverter';
 import { ConverterTree } from './converterTree';
 import { ConverterPoint } from './converterPoint';
 import { BoundingBoxType } from '../common/types';
+import { serializeTree } from '../common/serialize';
 
 export class PCDConverter extends BaseConverter {
 
@@ -63,7 +64,7 @@ export class PCDConverter extends BaseConverter {
         }
       }
     });
-    tree.serialize();
+    await serializeTree(tree);
     return tree;
   }
 }

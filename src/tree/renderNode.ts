@@ -3,6 +3,8 @@ import { BoundingBoxType } from '../common/types';
 import { BasePoint } from './basePoint';
 import { Points, Scene } from 'three';
 import { createNodeMesh } from '../common/render';
+import { deserializeNode } from '../common/serialize';
+import { ExportDataPath } from '../common/constants';
 
 export class RenderNode extends BaseNode {
 
@@ -20,7 +22,8 @@ export class RenderNode extends BaseNode {
   // public setMesh(mesh: Points | null) { this.mesh = mesh; }
 
   public async load(): Promise<void> {
-    await super.load();
+    await deserializeNode(ExportDataPath + this.idx, this);
+    this.isLoaded = true;
     this.mesh = createNodeMesh(this);
   }
 

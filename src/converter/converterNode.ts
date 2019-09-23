@@ -2,8 +2,7 @@ import { BaseNode } from '../tree/baseNode';
 import { BoundingBoxType } from '../common/types';
 import { ConverterPoint } from './converterPoint';
 import { ConverterTree } from './converterTree';
-import { NodeStackMax, MaxConverterThreshold } from '../common/constants';
-import { BasePoint } from '../tree/basePoint';
+import { NodeStackMax, MaxConverterThreshold, ExportDataPath } from '../common/constants';
 import { deserializeNode } from '../common/serialize';
 
 export class ConverterNode extends BaseNode {
@@ -54,14 +53,13 @@ export class ConverterNode extends BaseNode {
     if (isInCurrentNode) {
       this.refTree.changeLoadedCount(1);
       if (this.refTree.getLoadedCount() >= MaxConverterThreshold) {
-        this.refTree.serialize(this);
+        this.refTree.unloadNodeTree(this);
       }
     }
   }
 
   public async load(): Promise<void> {
-    // TODO: fix the hardcoding
-    await deserializeNode('../../output/n' + this.idx, this, true);
+    await deserializeNode(ExportDataPath + this.idx, this, true);
     this.isLoaded = true;
     this.refTree.changeLoadedCount(this.getPointCount());
   }

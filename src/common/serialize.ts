@@ -1,6 +1,4 @@
 import fs from 'fs';
-// import { RenderTree } from '../tree/renderTree';
-// import { RenderNode } from '../tree/renderNode';
 import { TreeIndexType, NodeIndexType } from './types';
 import { serializedbboxToBBoxType } from './common';
 import { BasePoint } from '../tree/basePoint';
@@ -13,20 +11,19 @@ import { ConverterTree } from '../converter/converterTree';
 import { RenderTree } from '../tree/renderTree';
 import { ConverterPoint } from '../converter/converterPoint';
 import { RenderPoint } from '../tree/renderPoint';
+import { ExportDataPath, ExportIndexPath } from './constants';
+
+// TODO: use stream to improve the usage of rom
 
 export async function serializeTree(tree: BaseTree): Promise<void> {
-  // TODO: fix the hardcoding
-  const indexPath = '../../output/index';
-  const nodePath = '../../output/n';
-
   async function handleNode(node: BaseNode): Promise<void> {
-    await serializeNode(nodePath + node.getIdx, node);
+    await serializeNode(ExportDataPath + node.getIdx(), node);
     for (const childNode of node.getChildNodes()) {
       await handleNode(childNode);
     }
   }
 
-  await serializeIndex(indexPath, tree);
+  await serializeIndex(ExportIndexPath, tree);
   await handleNode(tree.getRootNode());  
 }
 
@@ -89,15 +86,18 @@ export function serializeNode(filePath: string, node: BaseNode): Promise<void> {
 
 export function readFileP<T>(filePath: string, handler: (buffer: Buffer)=>T): Promise<T> {
   return new Promise((resolve) => {
-    const rs = fs.createReadStream(filePath);
-    const chunks: Buffer[] = [];
-    rs.on('data', function(chunk: Buffer) {
-      chunks.push(chunk);
-    });
-    rs.on('readable', () => {});
-    rs.on('end', () => {
-      resolve(handler(Buffer.concat(chunks)));
-    });
+    fs.readFile(filePath, (err: any, data: Buffer) => {
+      resolve(handler(data));
+    })
+    // const rs = fs.createReadStream(filePath);
+    // const chunks: Buffer[] = [];
+    // rs.on('data', function(chunk: Buffer) {
+    //   chunks.push(chunk);
+    // });
+    // rs.on('readable', () => {});
+    // rs.on('end', () => {
+    //   resolve(handler(Buffer.concat(chunks)));
+    // });
   });
 }
 
@@ -130,8 +130,10 @@ export function deserializeIndex(filePath: string, isConvertering: boolean = fal
   });
 }
 
+// TODO: return flag or throw error if node file don't exist or is not valid.
 export function deserializeNode(filePath: string, node: BaseNode, isConvertering: boolean = false): Promise<void> {
   return readFileP(filePath, (buffer: Buffer) => {
+    console.log(filePath);
     let offset = 0;
     const gridCount = buffer.readUInt32BE(offset); offset += 4;
     for (let i = 0; i < gridCount; i++) {

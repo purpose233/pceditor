@@ -3,21 +3,24 @@ import { Scene, PerspectiveCamera,
 // import { TrackballControls } from '../../lib/TrackballControls';
 import { OrbitControls } from '../../lib/OrbitControls';
 import Stats from 'stats.js';
+import { PCRenderer } from './renderer';
 
-export class PCTreeScene {
+export class PCScene {
 
   private scene: Scene;
   private camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
   private stats: Stats;
   private controls: OrbitControls;
+  private pcRenderer: PCRenderer;
 
-  constructor(container: HTMLElement, canvas: HTMLCanvasElement) {
+  constructor(container: HTMLElement, canvas: HTMLCanvasElement, renderer: PCRenderer) {
     this.scene = new Scene();
     this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
     this.camera.position.set(10, 10, 10);
     this.camera.lookAt(this.scene.position);
     this.camera.updateMatrix();
+    this.pcRenderer = renderer;
 
     const context = canvas.getContext('webgl2') as WebGLRenderingContext;
     this.renderer = new WebGLRenderer({canvas: canvas, context: context});
@@ -84,5 +87,7 @@ export class PCTreeScene {
   private render = () => {
     this.camera.updateMatrixWorld();
     this.renderer.render(this.scene, this.camera);
+    // await this.renderer.renderTotalTree(this.scene, this.getCamera);
+    // this.pcRenderer.renderTree(this.scene, this.camera);
   }
 }

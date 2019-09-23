@@ -10,10 +10,10 @@ export class LRU {
     this.loadedNodeStack.push(node);
   }
 
-  public loadNodes(nodes: RenderNode[]): void {
+  public async loadNodes(nodes: RenderNode[]): Promise<void> {
     // TODO: handle when nodes number greater than MaxRenderNodes
     for (const node of nodes) {
-      this.loadNode(node);
+      await this.loadNode(node);
     }
   }
 

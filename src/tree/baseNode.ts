@@ -1,10 +1,8 @@
 import { Vector3 } from 'three';
 import { BoundingBoxType, NodeIndexType } from '../common/types';
 import { BasePoint } from './basePoint';
-import { BaseTree } from './baseTree';
 import { GridSize, NodeStackMax } from '../common/constants';
 import { bboxToSerializedbboxType } from '../common/common';
-import { deserializeNode } from '../common/serialize';
 
 export abstract class BaseNode {
 
@@ -140,11 +138,13 @@ export abstract class BaseNode {
 
   public checkIsLoaded(): boolean { return this.isLoaded; }
 
-  public async load(): Promise<void> {
-    // TODO: fix the hardcoding
-    await deserializeNode('../../output/n' + this.idx, this);
-    this.isLoaded = true;
-  }
+  public abstract async load(): Promise<void>; 
+
+  // public async load(): Promise<void> {
+  //   // TODO: fix the hardcoding
+  //   await deserializeNode('../../output/n' + this.idx, this);
+  //   this.isLoaded = true;
+  // }
 
   public async unload(): Promise<void> {
     this.grid.clear();

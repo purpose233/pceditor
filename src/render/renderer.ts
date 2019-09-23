@@ -4,7 +4,7 @@ import { RenderNode } from '../tree/renderNode';
 import { LRU } from '../common/lru';
 import { createNodeMesh } from '../common/render';
 
-export class PCTreeRenderer {
+export class PCRenderer {
 
   private tree: RenderTree;
   private lru: LRU = new LRU();
@@ -15,6 +15,7 @@ export class PCTreeRenderer {
 
   public async renderTotalTree(scene: Scene, camera: PerspectiveCamera): Promise<void> {
     // TODO: load all nodes
+    await this.lru.loadNodes(this.tree.getAllNodes() as RenderNode[]);
     this.renderNodesTree(this.tree.getRootNode() as RenderNode, scene, camera);
   }
 
