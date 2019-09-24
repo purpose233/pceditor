@@ -5,10 +5,11 @@ import { MNOPoint } from './mnoPoint';
 import { GridSize, NodeStackMax } from '../common/constants';
 import { bboxToSerializedbboxType } from '../common/common';
 
+// TODO: set some functions static
 export abstract class MNONode extends OctreeNode {
 
   protected bbox: BoundingBoxType;
-  protected bboxScope: Vector3;
+  private bboxScope: Vector3;
   // grid number: increased by x, y, z
   protected grid: Map<number, MNOPoint> = new Map();
   protected pointsStacks: MNOPoint[][] = [[],[],[],[],[],[],[],[]];

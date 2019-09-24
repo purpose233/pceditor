@@ -2,7 +2,6 @@ import { Scene, PerspectiveCamera, Points } from 'three';
 import { RenderTree } from './renderTree';
 import { RenderNode } from './renderNode';
 import { LRU } from '../common/lru';
-import { createNodeMesh } from '../common/render';
 
 export class PCRenderer {
 

@@ -104,8 +104,9 @@ export function readFileP<T>(filePath: string, handler: (buffer: Buffer)=>T): Pr
 export function deserializeIndex(filePath: string, isConvertering: boolean = false): Promise<MNOTree> {
 
   function handleNode(idx: string, index: NodeIndexType, parentNode: MNONode, tree: MNOTree): MNONode {
-    const node = isConvertering ? new ConverterNode(idx, serializedbboxToBBoxType(index.bbox), parentNode, tree as ConverterTree, false) 
-                                : new RenderNode(idx, serializedbboxToBBoxType(index.bbox), parentNode, false);
+    const node = isConvertering ? new ConverterNode(idx, serializedbboxToBBoxType(index.bbox), parentNode as ConverterNode, 
+                                                    tree as ConverterTree, false) 
+                                : new RenderNode(idx, serializedbboxToBBoxType(index.bbox), parentNode as RenderNode, false);
     for (let i = 0; i < 8; i++) {
       if (index.mask & (1 << i)) {
         node.setChildNode(i, handleNode(idx + i, index.childIndexes[i] as NodeIndexType, node, tree));

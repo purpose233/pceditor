@@ -1,10 +1,10 @@
 import { MNONode } from '../tree/mnoNode';
 import { BoundingBoxType } from '../common/types';
-import { MNOPoint } from '../tree/mnoPoint';
-import { Points, Scene } from 'three';
-import { createNodeMesh } from '../common/render';
+import { Points, Scene, BufferGeometry, BufferAttribute, PointsMaterial, VertexColors } from 'three';
 import { deserializeNode } from '../common/serialize';
-import { ExportDataPath } from '../common/constants';
+import { ExportDataPath, DefaultPointSize, SelectedPointColor } from '../common/constants';
+import { RenderPoint } from './renderPoint';
+import { MNOPoint } from '../tree/mnoPoint';
 
 export class RenderNode extends MNONode {
 
@@ -12,7 +12,12 @@ export class RenderNode extends MNONode {
   private isRendering: boolean = false;
   // private isDirty: boolean = false;
 
-  protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | MNONode): MNONode {
+  constructor(idx: string, bbox: BoundingBoxType, parentNode: null | RenderNode,
+              isNew: boolean = true) {
+    super(idx, bbox, parentNode, isNew);
+  }
+
+  protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | RenderNode): MNONode {
     return new RenderNode(idx, bbox, parentNode);
   };
 
@@ -24,7 +29,7 @@ export class RenderNode extends MNONode {
     if (this.isLoaded) { return; }
     await deserializeNode(ExportDataPath + this.idx, this);
     this.isLoaded = true;
-    this.mesh = createNodeMesh(this);
+    this.mesh = this.createMesh();
   }
 
   public async unload(): Promise<void> {
@@ -53,4 +58,32 @@ export class RenderNode extends MNONode {
   }
 
   public checkIsRendering(): boolean { return this.isRendering; }
+
+  private createMesh(): Points {
+    const pointCount = this.getPointCount();
+    const positions = new Float32Array(pointCount * 3);
+    const colors = new Float32Array(pointCount * 3);
+    this.travelPoints((p: MNOPoint, i: number): void => {
+      const position = p.getPosition();
+      const color = p.getColor();
+      positions[3 * i] = position.x;
+      positions[3 * i + 1] = position.y;
+      positions[3 * i + 2] = position.z;
+      if ((p as RenderPoint).checkIsSelected()) {
+        colors[3 * i] = SelectedPointColor.r;
+        colors[3 * i + 1] = SelectedPointColor.g;
+        colors[3 * i + 2] = SelectedPointColor.b;
+      } else {
+        colors[3 * i] = color.r;
+        colors[3 * i + 1] = color.g;
+        colors[3 * i + 2] = color.b;
+      }
+    });
+    const geometry = new BufferGeometry();
+    geometry.addAttribute('position', new BufferAttribute(positions, 3));
+    geometry.addAttribute('color', new BufferAttribute(colors, 3));
+    geometry.computeBoundingBox();
+    const material = new PointsMaterial({size: DefaultPointSize, vertexColors: VertexColors});
+    return new Points(geometry, material);
+  }
 }

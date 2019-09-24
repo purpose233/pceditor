@@ -11,7 +11,7 @@ export class ConverterNode extends MNONode {
   private refTree: ConverterTree | null;
 
   constructor(idx: string, bbox: BoundingBoxType, 
-              parentNode: null | MNONode, refTree: ConverterTree | null,
+              parentNode: null | ConverterNode, refTree: ConverterTree | null,
               isNew: boolean = true) {
     super(idx, bbox, parentNode, isNew);
     this.refTree = refTree;
@@ -19,7 +19,7 @@ export class ConverterNode extends MNONode {
 
   public setRefTree(refTree: ConverterTree): void { this.refTree = refTree; }
 
-  protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | MNONode): MNONode {
+  protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | ConverterNode): MNONode {
     return new ConverterNode(idx, bbox, parentNode, this.refTree);
   };
 
