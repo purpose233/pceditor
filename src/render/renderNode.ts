@@ -1,18 +1,18 @@
-import { BaseNode } from '../tree/baseNode';
+import { MNONode } from '../tree/mnoNode';
 import { BoundingBoxType } from '../common/types';
-import { BasePoint } from '../tree/basePoint';
+import { MNOPoint } from '../tree/mnoPoint';
 import { Points, Scene } from 'three';
 import { createNodeMesh } from '../common/render';
 import { deserializeNode } from '../common/serialize';
 import { ExportDataPath } from '../common/constants';
 
-export class RenderNode extends BaseNode {
+export class RenderNode extends MNONode {
 
   private mesh: Points | null = null;
   private isRendering: boolean = false;
   // private isDirty: boolean = false;
 
-  protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode): BaseNode {
+  protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | MNONode): MNONode {
     return new RenderNode(idx, bbox, parentNode);
   };
 

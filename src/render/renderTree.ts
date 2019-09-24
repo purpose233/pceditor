@@ -1,11 +1,15 @@
-import { BaseTree } from '../tree/baseTree';
+import { MNOTree } from '../tree/mnoTree';
 import { BoundingBoxType } from '../common/types';
-import { BaseNode } from '../tree/baseNode';
+import { MNONode } from '../tree/mnoNode';
 import { RenderNode } from './renderNode';
 
-export class RenderTree extends BaseTree {
+export class RenderTree extends MNOTree {
 
-  protected createRootNode(bbox: BoundingBoxType): BaseNode {
+  constructor(bbox: BoundingBoxType) {
+    super(RenderTree.createRootNode(bbox), bbox);
+  }
+
+  protected static createRootNode(bbox: BoundingBoxType): MNONode {
     return new RenderNode('0', bbox, null, false);
   }
 }

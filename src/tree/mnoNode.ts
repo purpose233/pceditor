@@ -1,43 +1,40 @@
+import { OctreeNode } from './octreeNode';
 import { Vector3 } from 'three';
 import { BoundingBoxType, NodeIndexType } from '../common/types';
-import { BasePoint } from './basePoint';
+import { MNOPoint } from './mnoPoint';
 import { GridSize, NodeStackMax } from '../common/constants';
 import { bboxToSerializedbboxType } from '../common/common';
 
-export abstract class BaseNode {
+export abstract class MNONode extends OctreeNode {
 
-  protected idx: string;
-  // grid number: increased by x, y, z
-  protected parentNode: null | BaseNode;
   protected bbox: BoundingBoxType;
   protected bboxScope: Vector3;
-  protected grid: Map<number, BasePoint> = new Map();
-  protected pointsStacks: BasePoint[][] = [[],[],[],[],[],[],[],[]];
-  protected childNodes: (null | BaseNode)[] = [null,null,null,null,null,null,null,null];
+  // grid number: increased by x, y, z
+  protected grid: Map<number, MNOPoint> = new Map();
+  protected pointsStacks: MNOPoint[][] = [[],[],[],[],[],[],[],[]];
   protected isLoaded: boolean;
 
-  constructor(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode,
+  constructor(idx: string, bbox: BoundingBoxType, parentNode: null | MNONode,
               isNew: boolean = true) {
-    this.idx = idx;
+    super(idx, parentNode);
     this.bbox = bbox;
-    this.parentNode = parentNode;
     this.bboxScope = this.bbox.max.clone().add(this.bbox.min.clone().negate());
     this.isLoaded = isNew;
   }
 
-  protected abstract createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode): BaseNode;
+  protected abstract createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | MNONode): MNONode;
 
-  public addPointToGrid(gridNumber: number, point: BasePoint): void { this.grid.set(gridNumber, point); }
+  public addPointToGrid(gridNumber: number, point: MNOPoint): void { this.grid.set(gridNumber, point); }
 
-  public addPointToStack(stackIndex: number, point: BasePoint): void { this.pointsStacks[stackIndex].push(point); }
+  public addPointToStack(stackIndex: number, point: MNOPoint): void { this.pointsStacks[stackIndex].push(point); }
 
-  public addPoints(points: BasePoint[]): void {
+  public addPoints(points: MNOPoint[]): void {
     for (const point of points) {
       this.addPoint(point);
     }
   }
 
-  public addPoint(point: BasePoint): void {
+  public addPoint(point: MNOPoint): void {
     const grid = this.findGrid(point);
     const gridNumber = this.calcGridNumber(grid);
     if (!this.grid.get(gridNumber)) {
@@ -47,7 +44,7 @@ export abstract class BaseNode {
       const nodeNumber = this.calcNodeNumber(nodeVector);
       const node = this.childNodes[nodeNumber];
       if (node) {
-        node.addPoint(point);
+        (node as MNONode).addPoint(point);
       } else {
         if (this.pointsStacks[nodeNumber].length < NodeStackMax) {
           this.pointsStacks[nodeNumber].push(point);
@@ -63,7 +60,7 @@ export abstract class BaseNode {
   }
 
   // travel all points in grid and stacks
-  public travelPoints(handler: (point: BasePoint, index: number) => void, 
+  public travelPoints(handler: (point: MNOPoint, index: number) => void, 
                                 includeStack = true): void {
     const gridIter = this.grid.values();
     let result, index = 0;
@@ -87,23 +84,9 @@ export abstract class BaseNode {
     return count;
   }
 
-  public getChildNodes(): BaseNode[] {
-    const nodes: BaseNode[] = [];
-    if (this.childNodes) {
-      for (const node of this.childNodes) {
-        if (node) { nodes.push(node); }
-      }
-    }
-    return nodes;
-  }
+  public getGrid(): Map<number, MNOPoint> { return this.grid; }
 
-  public getParentNode(): null | BaseNode { return this.parentNode; }
-
-  public setChildNode(index: number, node: BaseNode) { this.childNodes[index] = node; }
-
-  public getGrid(): Map<number, BasePoint> { return this.grid; }
-
-  public getStacks(): BasePoint[][] { return this.pointsStacks; }
+  public getStacks(): MNOPoint[][] { return this.pointsStacks; }
 
   public getStackCount(): number {
     let count = 0;
@@ -115,24 +98,12 @@ export abstract class BaseNode {
 
   public getBBox(): BoundingBoxType { return this.bbox; }
 
-  public getChildrenMask(): number {
-    let mask = 0;
-    if (this.childNodes) {
-      for (let i = 0; i < this.childNodes.length; i++) {
-        mask = mask | (this.childNodes[i] ? 1 : 0) << i;
-      }
-    }
-    return mask;
-  }
-
-  public getIdx(): string { return this.idx; }
-
   public getIndex(): NodeIndexType {
     return { 
       idx: this.idx, 
       bbox: bboxToSerializedbboxType(this.bbox), 
       mask: this.getChildrenMask(),
-      childIndexes: this.childNodes.map((node) => (node ? node.getIndex() : null))
+      childIndexes: this.childNodes.map((node) => (node ? (node as MNONode).getIndex() : null))
     }; 
   }
 
@@ -152,7 +123,7 @@ export abstract class BaseNode {
     this.isLoaded = false;
   }
 
-  protected findGrid(point: BasePoint): Vector3 {
+  protected findGrid(point: MNOPoint): Vector3 {
     const currentScope = point.getPosition().clone()
       .add(this.bbox.min.clone().negate());
     const x = Math.floor(currentScope.x * GridSize / this.bboxScope.x);

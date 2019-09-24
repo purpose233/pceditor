@@ -1,13 +1,13 @@
 import { BoundingBoxType } from './types';
 import { Vector3, PerspectiveCamera, Points, BufferGeometry, BufferAttribute, PointsMaterial, VertexColors } from 'three';
 import { RenderNode } from '../render/renderNode';
-import { BasePoint } from '../tree/basePoint';
+import { MNOPoint } from '../tree/mnoPoint';
 
 export function createNodeMesh(node: RenderNode): Points {
   const pointCount = node.getPointCount();
   const positions = new Float32Array(pointCount * 3);
   const colors = new Float32Array(pointCount * 3);
-  node.travelPoints((p: BasePoint, i: number): void => {
+  node.travelPoints((p: MNOPoint, i: number): void => {
     const position = p.getPosition();
     positions[3 * i] = position.x;
     positions[3 * i + 1] = position.y;

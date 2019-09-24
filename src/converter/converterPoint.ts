@@ -1,5 +1,5 @@
-import { BasePoint } from '../tree/basePoint';
+import { MNOPoint } from '../tree/mnoPoint';
 
-export class ConverterPoint extends BasePoint {
+export class ConverterPoint extends MNOPoint {
 
 }

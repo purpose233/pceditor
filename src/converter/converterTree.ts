@@ -1,13 +1,18 @@
-import { BaseTree } from '../tree/baseTree';
+import { MNOTree } from '../tree/mnoTree';
 import { ConverterNode } from './converterNode';
 import { BoundingBoxType } from '../common/types';
 
-export class ConverterTree extends BaseTree {
+export class ConverterTree extends MNOTree {
+
+  constructor(bbox: BoundingBoxType) {
+    super(ConverterTree.createRootNode(bbox), bbox);
+    (this.rootNode as ConverterNode).setRefTree(this);
+  }
 
   private loadedCount: number = 0;
 
-  protected createRootNode(bbox: BoundingBoxType): ConverterNode {
-    return new ConverterNode('0', bbox, null, this, false);
+  protected static createRootNode(bbox: BoundingBoxType): ConverterNode {
+    return new ConverterNode('0', bbox, null, null, false);
   }
 
   public getLoadedCount(): number { return this.loadedCount; }

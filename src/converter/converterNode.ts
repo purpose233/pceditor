@@ -1,22 +1,25 @@
-import { BaseNode } from '../tree/baseNode';
+import { MNONode } from '../tree/mnoNode';
 import { BoundingBoxType } from '../common/types';
 import { ConverterPoint } from './converterPoint';
 import { ConverterTree } from './converterTree';
 import { NodeStackMax, MaxConverterThreshold, ExportDataPath } from '../common/constants';
 import { deserializeNode } from '../common/serialize';
 
-export class ConverterNode extends BaseNode {
+export class ConverterNode extends MNONode {
   
-  private refTree: ConverterTree;
+  // TODO: the refTree cannot be null, but it will be a little bit hard to instantiate
+  private refTree: ConverterTree | null;
 
   constructor(idx: string, bbox: BoundingBoxType, 
-              parentNode: null | BaseNode, refTree: ConverterTree,
+              parentNode: null | MNONode, refTree: ConverterTree | null,
               isNew: boolean = true) {
     super(idx, bbox, parentNode, isNew);
     this.refTree = refTree;
   }
 
-  protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | BaseNode): BaseNode {
+  public setRefTree(refTree: ConverterTree): void { this.refTree = refTree; }
+
+  protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | MNONode): MNONode {
     return new ConverterNode(idx, bbox, parentNode, this.refTree);
   };
 
@@ -35,7 +38,7 @@ export class ConverterNode extends BaseNode {
       const nodeNumber = this.calcNodeNumber(nodeVector);
       const node = this.childNodes[nodeNumber];
       if (node) {
-        node.addPoint(point);
+        (node as MNONode).addPoint(point);
       } else {
         if (this.pointsStacks[nodeNumber].length < NodeStackMax) {
           this.pointsStacks[nodeNumber].push(point);
@@ -51,9 +54,9 @@ export class ConverterNode extends BaseNode {
     }
 
     if (isInCurrentNode) {
-      this.refTree.changeLoadedCount(1);
-      if (this.refTree.getLoadedCount() >= MaxConverterThreshold) {
-        this.refTree.unloadNodeTree(this);
+      (this.refTree as ConverterTree).changeLoadedCount(1);
+      if ((this.refTree as ConverterTree).getLoadedCount() >= MaxConverterThreshold) {
+        (this.refTree as ConverterTree).unloadNodeTree(this);
       }
     }
   }
@@ -61,11 +64,11 @@ export class ConverterNode extends BaseNode {
   public async load(): Promise<void> {
     await deserializeNode(ExportDataPath + this.idx, this, true);
     this.isLoaded = true;
-    this.refTree.changeLoadedCount(this.getPointCount());
+    (this.refTree as ConverterTree).changeLoadedCount(this.getPointCount());
   }
 
   public async unload(): Promise<void> {
     await super.unload();
-    this.refTree.changeLoadedCount(-this.getPointCount());
+    (this.refTree as ConverterTree).changeLoadedCount(-this.getPointCount());
   }
 }

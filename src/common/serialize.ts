@@ -1,10 +1,10 @@
 import fs from 'fs';
 import { TreeIndexType, NodeIndexType } from './types';
 import { serializedbboxToBBoxType } from './common';
-import { BasePoint } from '../tree/basePoint';
+import { MNOPoint } from '../tree/mnoPoint';
 import { Vector3 } from 'three';
-import { BaseNode } from '../tree/baseNode';
-import { BaseTree } from '../tree/baseTree';
+import { MNONode } from '../tree/mnoNode';
+import { MNOTree } from '../tree/mnoTree';
 import { ConverterNode } from '../converter/converterNode';
 import { RenderNode } from '../render/renderNode';
 import { ConverterTree } from '../converter/converterTree';
@@ -15,19 +15,19 @@ import { ExportDataPath, ExportIndexPath } from './constants';
 
 // TODO: use stream to improve the usage of rom
 
-export async function serializeTree(tree: BaseTree): Promise<void> {
-  async function handleNode(node: BaseNode): Promise<void> {
+export async function serializeTree(tree: MNOTree): Promise<void> {
+  async function handleNode(node: MNONode): Promise<void> {
     await serializeNode(ExportDataPath + node.getIdx(), node);
-    for (const childNode of node.getChildNodes()) {
+    for (const childNode of node.getChildNodes() as MNONode[]) {
       await handleNode(childNode);
     }
   }
 
   await serializeIndex(ExportIndexPath, tree);
-  await handleNode(tree.getRootNode());  
+  await handleNode(tree.getRootNode() as MNONode);  
 }
 
-export function serializeIndex(filePath: string, tree: BaseTree): Promise<void> {
+export function serializeIndex(filePath: string, tree: MNOTree): Promise<void> {
   return new Promise((resolve) => {
     const bbox = tree.getBBox();
     const index: TreeIndexType = {
@@ -35,13 +35,13 @@ export function serializeIndex(filePath: string, tree: BaseTree): Promise<void> 
       bbox: { minX: bbox.min.x, minY: bbox.min.y, minZ: bbox.min.z,
               maxX: bbox.max.x, maxY: bbox.max.y, maxZ: bbox.max.z, },
       pointCount: tree.getPointCount(),
-      root: tree.getRootNode().getIndex()
+      root: (tree.getRootNode() as MNONode).getIndex()
     };
     fs.writeFile(filePath, JSON.stringify(index), () => { resolve(); });
   });
 }
 
-export function serializeNode(filePath: string, node: BaseNode): Promise<void> {
+export function serializeNode(filePath: string, node: MNONode): Promise<void> {
   return new Promise((resolve) => {
     const grid = node.getGrid(), stacks = node.getStacks();
     const size = 4 * 6 + 1 + 4 + (12 + 4) * grid.size + 2 * 8 + 12 * node.getStackCount();
@@ -101,9 +101,9 @@ export function readFileP<T>(filePath: string, handler: (buffer: Buffer)=>T): Pr
   });
 }
 
-export function deserializeIndex(filePath: string, isConvertering: boolean = false): Promise<BaseTree> {
+export function deserializeIndex(filePath: string, isConvertering: boolean = false): Promise<MNOTree> {
 
-  function handleNode(idx: string, index: NodeIndexType, parentNode: BaseNode, tree: BaseTree): BaseNode {
+  function handleNode(idx: string, index: NodeIndexType, parentNode: MNONode, tree: MNOTree): MNONode {
     const node = isConvertering ? new ConverterNode(idx, serializedbboxToBBoxType(index.bbox), parentNode, tree as ConverterTree, false) 
                                 : new RenderNode(idx, serializedbboxToBBoxType(index.bbox), parentNode, false);
     for (let i = 0; i < 8; i++) {
@@ -122,7 +122,8 @@ export function deserializeIndex(filePath: string, isConvertering: boolean = fal
     const rootNode = tree.getRootNode(), mask = treeIndex.root.mask;
     for (let i = 0; i < 8; i++) {
       if (mask & (1 << i)) {
-        const childNode = handleNode('0' + i, treeIndex.root.childIndexes[i] as NodeIndexType, rootNode, tree);
+        const childNode = handleNode('0' + i, treeIndex.root.childIndexes[i] as NodeIndexType, 
+                                     rootNode as MNONode, tree);
         rootNode.setChildNode(i, childNode);
       }
     }
@@ -131,7 +132,7 @@ export function deserializeIndex(filePath: string, isConvertering: boolean = fal
 }
 
 // TODO: return flag or throw error if node file don't exist or is not valid.
-export function deserializeNode(filePath: string, node: BaseNode, isConvertering: boolean = false): Promise<void> {
+export function deserializeNode(filePath: string, node: MNONode, isConvertering: boolean = false): Promise<void> {
   return readFileP(filePath, (buffer: Buffer) => {
     console.log(filePath);
     let offset = 0;

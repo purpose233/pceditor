@@ -1,7 +1,7 @@
 import { Vector3 } from 'three';
 import { BoundingBoxType } from '../common/types';
 
-export abstract class BasePoint {
+export abstract class MNOPoint {
   
   protected position: Vector3;
   // color?: 
