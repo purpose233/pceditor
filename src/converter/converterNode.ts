@@ -40,15 +40,15 @@ export class ConverterNode extends MNONode {
       if (node) {
         (node as MNONode).addPoint(point);
       } else {
-        if (this.pointsStacks[nodeNumber].length < NodeStackMax) {
-          this.pointsStacks[nodeNumber].push(point);
+        if (this.pointStacks[nodeNumber].length < NodeStackMax) {
+          this.pointStacks[nodeNumber].push(point);
           isInCurrentNode = true;
         } else {
           const childNode = this.createNewNode(this.idx + nodeNumber,
             this.calcBBoxByNode(nodeVector), this);
-          childNode.addPoints(this.pointsStacks[nodeNumber]);
+          childNode.addPoints(this.pointStacks[nodeNumber]);
           this.childNodes[nodeNumber] = childNode;
-          this.pointsStacks[nodeNumber] = [];
+          this.pointStacks[nodeNumber] = [];
         }
       }
     }

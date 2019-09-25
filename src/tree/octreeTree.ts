@@ -21,4 +21,15 @@ export abstract class OctreeTree {
     }
     return getSubNodes(this.rootNode);
   }
+
+  public travelNodes(handler: (node: OctreeNode) => void) {
+    this.handleNodeRecursively(this.rootNode, handler);
+  }
+
+  private handleNodeRecursively(node: OctreeNode, handler: (node: OctreeNode) => void): void {
+    handler(node);
+    for (const childNode of node.getChildNodes() as OctreeNode[]) {
+      this.handleNodeRecursively(node, handler);
+    }
+  }
 }

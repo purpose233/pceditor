@@ -21,10 +21,6 @@ export class RenderNode extends MNONode {
     return new RenderNode(idx, bbox, parentNode);
   };
 
-  // public getMesh(): Points | null { return this.mesh; }
-
-  // public setMesh(mesh: Points | null) { this.mesh = mesh; }
-
   public async load(): Promise<void> {
     if (this.isLoaded) { return; }
     await deserializeNode(ExportDataPath + this.idx, this);

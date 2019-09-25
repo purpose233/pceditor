@@ -23,6 +23,7 @@ export class SphereSelector extends BaseSelector {
     this.unselectedMesh = SphereSelector.createMesh(center, radius, false);
   }
 
+  // TODO: whether rerendering should to be called by selector itself?
   public relocate(scene: Scene, position: Vector3): void {
     // The mesh is referring the center vector, it's not necessary to rerenderer.
     this.center.set(position.x, position.y, position.z);
@@ -32,7 +33,7 @@ export class SphereSelector extends BaseSelector {
   public resize(scene: Scene, radius: number): void {
     this.radius = radius;
     this.updateSelectTree();
-    this.render(scene, true, true);
+    // this.render(scene, true, true);
   }
 
   public checkNodeInSelector(node: RenderNode): boolean {
@@ -49,9 +50,9 @@ export class SphereSelector extends BaseSelector {
     return this.center.distanceTo(point.getPosition()) <= this.radius;
   }
 
-  public updateSelectTree(): void {
+  // public updateSelectTree(): void {
     
-  }
+  // }
 
   public select(scene: Scene): void {
     scene.remove(this.unselectedMesh);

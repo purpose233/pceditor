@@ -19,9 +19,23 @@ export class OctreeNode {
     return nodes;
   }
 
+  public getChildNodesWithNumber(): [number, OctreeNode][] {
+    const nodes: [number, OctreeNode][] = [];
+    if (this.childNodes) {
+      for (let i = 0; i < 8; i++) {
+        if (this.childNodes[i]) { 
+          nodes.push([i, this.childNodes[i] as OctreeNode]); 
+        }
+      }
+    }
+    return nodes;
+  }
+
   public getParentNode(): null | OctreeNode { return this.parentNode; }
 
   public setChildNode(index: number, node: OctreeNode) { this.childNodes[index] = node; }
+
+  public removeChildNode(index: number): void { this.childNodes[index] = null; }
 
   public getChildrenMask(): number {
     let mask = 0;

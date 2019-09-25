@@ -12,7 +12,7 @@ export abstract class MNONode extends OctreeNode {
   private bboxScope: Vector3;
   // grid number: increased by x, y, z
   protected grid: Map<number, MNOPoint> = new Map();
-  protected pointsStacks: MNOPoint[][] = [[],[],[],[],[],[],[],[]];
+  protected pointStacks: MNOPoint[][] = [[],[],[],[],[],[],[],[]];
   protected isLoaded: boolean;
 
   constructor(idx: string, bbox: BoundingBoxType, parentNode: null | MNONode,
@@ -27,7 +27,7 @@ export abstract class MNONode extends OctreeNode {
 
   public addPointToGrid(gridNumber: number, point: MNOPoint): void { this.grid.set(gridNumber, point); }
 
-  public addPointToStack(stackIndex: number, point: MNOPoint): void { this.pointsStacks[stackIndex].push(point); }
+  public addPointToStack(stackIndex: number, point: MNOPoint): void { this.pointStacks[stackIndex].push(point); }
 
   public addPoints(points: MNOPoint[]): void {
     for (const point of points) {
@@ -47,29 +47,34 @@ export abstract class MNONode extends OctreeNode {
       if (node) {
         (node as MNONode).addPoint(point);
       } else {
-        if (this.pointsStacks[nodeNumber].length < NodeStackMax) {
-          this.pointsStacks[nodeNumber].push(point);
+        if (this.pointStacks[nodeNumber].length < NodeStackMax) {
+          this.pointStacks[nodeNumber].push(point);
         } else {
           const childNode = this.createNewNode(this.idx + nodeNumber,
             this.calcBBoxByNode(nodeVector), this);
-          childNode.addPoints(this.pointsStacks[nodeNumber]);
+          childNode.addPoints(this.pointStacks[nodeNumber]);
           this.childNodes[nodeNumber] = childNode;
-          this.pointsStacks[nodeNumber] = [];
+          this.pointStacks[nodeNumber] = [];
         }
       }
     }
   }
 
+  public getGridEntryIter(): IterableIterator<[number, MNOPoint]> {
+    return this.grid.entries();
+  }
+
+  // TODO: enable travel functions to use async handler
   // travel all points in grid and stacks
   public travelPoints(handler: (point: MNOPoint, index: number) => void, 
                                 includeStack = true): void {
     const gridIter = this.grid.values();
     let result, index = 0;
-    while(!(result = gridIter.next()).done) {
+    while (!(result = gridIter.next()).done) {
       handler(result.value, index++);
     }
     if (includeStack) {
-      for (const stack of this.pointsStacks) {
+      for (const stack of this.pointStacks) {
         for (const p of stack) {
           handler(p, index++);
         }
@@ -77,9 +82,26 @@ export abstract class MNONode extends OctreeNode {
     }
   }
 
+  public travelGrid(handler: (point: MNOPoint, index: number, gridNumber: number) => void): void {
+    const gridIter = this.grid.entries();
+    let result, index = 0;
+    while (!(result = gridIter.next()).done) {
+      handler(result.value[1], index++, result.value[0]);
+    }
+  }
+  
+  public travelStacks(handler: (point: MNOPoint, index: number, stackNumber: number) => void): void {
+    let index = 0;
+    for (let i = 0; i < 8; i++) {
+      for (const p of this.pointStacks[i]) {
+        handler(p, index++, i);
+      }
+    }
+  }
+
   public getPointCount(): number {
     let count = this.grid.size;
-    for (const stack of this.pointsStacks) {
+    for (const stack of this.pointStacks) {
       count += stack.length;
     }
     return count;
@@ -87,11 +109,13 @@ export abstract class MNONode extends OctreeNode {
 
   public getGrid(): Map<number, MNOPoint> { return this.grid; }
 
-  public getStacks(): MNOPoint[][] { return this.pointsStacks; }
+  public getGridPoint(gridNumber: number): MNOPoint | undefined { return this.grid.get(gridNumber); }
+
+  public getStacks(): MNOPoint[][] { return this.pointStacks; }
 
   public getStackCount(): number {
     let count = 0;
-    for (const stack of this.pointsStacks) {
+    for (const stack of this.pointStacks) {
       count += stack.length;
     }
     return count;
@@ -120,7 +144,7 @@ export abstract class MNONode extends OctreeNode {
 
   public async unload(): Promise<void> {
     this.grid.clear();
-    this.pointsStacks = [[],[],[],[],[],[],[],[]];
+    this.pointStacks = [[],[],[],[],[],[],[],[]];
     this.isLoaded = false;
   }
 
