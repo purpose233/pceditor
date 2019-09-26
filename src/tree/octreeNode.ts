@@ -9,6 +9,8 @@ export class OctreeNode {
     this.parentNode = parentNode;
   }
 
+  public getChildNode(index: number): OctreeNode | null { return this.childNodes[index]; }
+
   public getChildNodes(): OctreeNode[] {
     const nodes: OctreeNode[] = [];
     if (this.childNodes) {
@@ -31,9 +33,11 @@ export class OctreeNode {
     return nodes;
   }
 
-  public getParentNode(): null | OctreeNode { return this.parentNode; }
-
   public setChildNode(index: number, node: OctreeNode) { this.childNodes[index] = node; }
+
+  public checkChildNodeExist(index: number): boolean { return !!this.childNodes[index]; }
+
+  public getParentNode(): null | OctreeNode { return this.parentNode; }
 
   public removeChildNode(index: number): void { this.childNodes[index] = null; }
 

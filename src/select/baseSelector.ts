@@ -35,12 +35,12 @@ export abstract class BaseSelector {
     if (!this.checkNodeInSelector(refNode)) {
       selectNode.clear();
     } else {
-      this.selectTreeRecursively(refNode, selectNode);
+      this.selectTreeRecursively(selectNode, refNode);
     }
     this.selectTree.removeUnreachedNodes();
   };
 
-  private selectTreeRecursively(refNode: RenderNode, selectNode: SelectNode): void {
+  private selectTreeRecursively(selectNode: SelectNode, refNode: RenderNode): void {
     let isDirty = false;
     
     // check points in grid
@@ -136,10 +136,16 @@ export abstract class BaseSelector {
     }
 
     isDirty ? selectNode.setDirty() : selectNode.setClean();
+    selectNode.setReached();
 
     // check points in child nodes
     for (const entry of refNode.getChildNodesWithNumber()) {
-      
+      const childNumber = entry[0], childRefNode = entry[1] as RenderNode;
+      if (!selectNode.checkChildNodeExist(childNumber)) {
+        selectNode.setChildNode(childNumber, 
+          new SelectNode(selectNode.getIdx() + childNumber, selectNode, refNode));
+      }
+      this.selectTreeRecursively(selectNode, childRefNode);
     }
   }
 }

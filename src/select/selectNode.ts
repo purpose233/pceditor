@@ -63,11 +63,13 @@ export class SelectNode extends OctreeNode {
   }
 
   public selectStackPoint(point: RenderPoint, stackNumber: number): void {
-
+    point.select();
+    this.pointStacks[stackNumber].push(point);
   }
 
   public unselectStackPoint(point: RenderPoint, stackNumber: number): void {
-
+    point.unselect();
+    this.pointStacks[stackNumber].splice(this.pointStacks[stackNumber].indexOf(point));
   }
 
   public getPointCount(): number {
