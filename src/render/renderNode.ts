@@ -53,6 +53,13 @@ export class RenderNode extends MNONode {
     this.isRendering = false;
   }
 
+  public updateRender(scene: Scene): void {
+    if (!this.isLoaded) { return; }
+    if (this.isRendering) { scene.remove(this.mesh as Points); }
+    this.mesh = this.createMesh();
+    if (this.isRendering) { scene.add(this.mesh as Points); }
+  }
+
   public checkIsRendering(): boolean { return this.isRendering; }
 
   private createMesh(): Points {

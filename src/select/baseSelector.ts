@@ -8,9 +8,10 @@ import { MNOPoint } from '../tree/mnoPoint';
 
 export abstract class BaseSelector {
   
-  private refTree: RenderTree;
-  private selectTree: SelectTree;
-  private isUpdated: boolean = false;
+  protected refTree: RenderTree;
+  protected selectTree: SelectTree;
+  protected isRendering: boolean = false;
+  protected isUpdated: boolean = false;
 
   constructor(refTree: RenderTree) {
     this.refTree = refTree;   
@@ -25,9 +26,15 @@ export abstract class BaseSelector {
   
   public abstract checkPointInSelector(point: RenderPoint): boolean;
 
-  // public abstract render(isFocused: boolean, isUpdating: boolean): void; 
+  public render(scene: Scene, isFocused: boolean): void {
+    this.isRendering = true;
+  } 
 
-  public updateSelectTree(): void {
+  // public abstract pick();
+
+  public checkIsRendering(): boolean { return this.isRendering; }
+
+  public updateSelectTree(scene: Scene): void {
     this.selectTree.dirtyTree();
     this.selectTree.unreachTree();
     const refNode = this.refTree.getRootNode() as RenderNode;
@@ -37,6 +44,8 @@ export abstract class BaseSelector {
     } else {
       this.selectTreeRecursively(selectNode, refNode);
     }
+    // Update rendering before remove unreached nodes.
+    this.selectTree.updateTreeRender(scene);
     this.selectTree.removeUnreachedNodes();
   };
 
@@ -141,11 +150,15 @@ export abstract class BaseSelector {
     // check points in child nodes
     for (const entry of refNode.getChildNodesWithNumber()) {
       const childNumber = entry[0], childRefNode = entry[1] as RenderNode;
-      if (!selectNode.checkChildNodeExist(childNumber)) {
-        selectNode.setChildNode(childNumber, 
-          new SelectNode(selectNode.getIdx() + childNumber, selectNode, refNode));
+      if (this.checkNodeInSelector(childRefNode)) {
+        if (!selectNode.checkChildNodeExist(childNumber)) {
+          selectNode.setChildNode(childNumber, 
+            new SelectNode(selectNode.getIdx() + childNumber, selectNode, refNode));
+        }
+        this.selectTreeRecursively(selectNode.getChildNode(childNumber) as SelectNode, childRefNode);
+      } else if (selectNode.checkChildNodeExist(childNumber)) {
+        (selectNode.getChildNode(childNumber) as SelectNode).clear();
       }
-      this.selectTreeRecursively(selectNode, childRefNode);
     }
   }
 }

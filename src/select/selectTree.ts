@@ -3,6 +3,7 @@ import { SelectNode } from './selectNode';
 import { RenderTree } from '../render/renderTree';
 import { RenderNode } from '../render/renderNode';
 import { OctreeNode } from '../tree/octreeNode';
+import { Scene } from 'three';
 
 export class SelectTree extends OctreeTree {
 
@@ -40,6 +41,10 @@ export class SelectTree extends OctreeTree {
 
   public removeUnreachedNodes(): void {
     this.removeChildren(this.rootNode as SelectNode);
+  }
+
+  public updateTreeRender(scene: Scene): void {
+    (this.rootNode as SelectNode).updateRender(scene);
   }
 
   private removeChildren(node: SelectNode): void {

@@ -33,7 +33,7 @@ export class OctreeNode {
     return nodes;
   }
 
-  public setChildNode(index: number, node: OctreeNode) { this.childNodes[index] = node; }
+  public setChildNode(index: number, node: OctreeNode): void { this.childNodes[index] = node; }
 
   public checkChildNodeExist(index: number): boolean { return !!this.childNodes[index]; }
 

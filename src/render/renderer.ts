@@ -1,11 +1,15 @@
-import { Scene, PerspectiveCamera, Points } from 'three';
+import { Scene, PerspectiveCamera, Vector3 } from 'three';
 import { RenderTree } from './renderTree';
 import { RenderNode } from './renderNode';
 import { LRU } from '../common/lru';
+import { BaseSelector } from '../select/baseSelector';
+import { SphereSelector } from '../select/sphereSelector';
+import { DefaultSphereSelectorRadius } from '../common/constants';
 
 export class PCRenderer {
 
   private tree: RenderTree;
+  private selector: BaseSelector | null = null;
   private lru: LRU = new LRU();
 
   constructor(tree: RenderTree) {
@@ -23,6 +27,12 @@ export class PCRenderer {
     await this.lru.loadNodes(nodes);
     for (const node of nodes) {
       this.renderNode(node, scene, camera);
+    }
+
+    if (this.selector === null) {
+      this.selector = new SphereSelector(this.tree, scene, new Vector3(0,0,0), DefaultSphereSelectorRadius);
+      this.selector.render(scene, false);
+      console.log(this.selector);
     }
   }
   

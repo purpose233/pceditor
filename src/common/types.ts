@@ -20,6 +20,7 @@ export interface TreeIndexType {
   root: NodeIndexType
 }
 
+// TODO: set BoundingBox to class
 export interface BoundingBoxType {
   min: Vector3,
   max: Vector3

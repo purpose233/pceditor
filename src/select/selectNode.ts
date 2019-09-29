@@ -1,10 +1,11 @@
 import { OctreeNode } from '../tree/octreeNode';
 import { RenderNode } from '../render/renderNode';
 import { RenderPoint } from '../render/renderPoint';
+import { Scene } from 'three';
 
 export class SelectNode extends OctreeNode {
   
-  private refMNONode: RenderNode;
+  private refNode: RenderNode;
   private isDirty: boolean = false;
   private isReached: boolean = false;
 
@@ -12,12 +13,13 @@ export class SelectNode extends OctreeNode {
   // store points in eight stacks of render node
   private pointStacks: RenderPoint[][] = [[],[],[],[],[],[],[],[]];
 
-  constructor(idx: string, parentNode: SelectNode | null, refMNONode: RenderNode) {
+  constructor(idx: string, parentNode: SelectNode | null, refNode: RenderNode) {
     super(idx, parentNode);
-    this.refMNONode = refMNONode;
+    this.refNode = refNode;
   }
 
   public clear(): void {
+    this.isReached = false;
     this.isDirty = this.isDirty || this.getPointCount() > 0;
     const gridIter = this.grid.values();
     let result;
@@ -31,13 +33,17 @@ export class SelectNode extends OctreeNode {
     }
     this.grid.clear();
     this.pointStacks = [[],[],[],[],[],[],[],[]];
+    // If the parent node is not reached, the children won't be reached neither.
+    for (const child of this.getChildNodes() as SelectNode[]) {
+      child.clear();
+    }
   }
 
   public checkIsDirty(): boolean { return this.isDirty; }
 
-  public setClean(): void { this.isDirty = true; }
+  public setClean(): void { this.isDirty = false; }
 
-  public setDirty(): void { this.isDirty = false; }
+  public setDirty(): void { this.isDirty = true; }
 
   public checkIsReached(): boolean { return this.isReached; }
 
@@ -78,5 +84,16 @@ export class SelectNode extends OctreeNode {
       count += stack.length;
     }
     return count;
+  }
+
+  public updateRender(scene: Scene): void {
+    if (this.isDirty) {
+      this.refNode.updateRender(scene);
+      this.isDirty = false;
+    }
+    // Even if parent node is clean, it doesn't mean children are clean.
+    for (const child of this.getChildNodes() as SelectNode[]) {
+      child.updateRender(scene);
+    }
   }
 }
