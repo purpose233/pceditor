@@ -84,7 +84,14 @@ export class PCScene {
 
   // private onMouseMove = () => {}
 
+  private flag = true;
+
   private render = async () => {
+    // Used for debugging
+    // if (this.flag) {
+    //   await this.pcRenderer.renderTree(this.scene, this.camera);
+    // }
+    // this.flag = false;
     await this.pcRenderer.renderTree(this.scene, this.camera);
     this.camera.updateMatrixWorld();
     this.renderer.render(this.scene, this.camera);

@@ -1,14 +1,17 @@
 import { MNONode } from '../tree/mnoNode';
 import { BoundingBoxType } from '../common/types';
-import { Points, Scene, BufferGeometry, BufferAttribute, PointsMaterial, VertexColors } from 'three';
+import { Points, Scene, BufferGeometry, BufferAttribute, 
+  PointsMaterial, VertexColors, Line, 
+  Mesh, MeshBasicMaterial, Color, BoxHelper, BoxGeometry, Box3, Box3Helper, Vector3 } from 'three';
 import { deserializeNode } from '../common/serialize';
-import { ExportDataPath, DefaultPointSize, SelectedPointColor } from '../common/constants';
+import { ExportDataPath, DefaultPointSize, SelectedPointColor, BBoxColor } from '../common/constants';
 import { RenderPoint } from './renderPoint';
 import { MNOPoint } from '../tree/mnoPoint';
 
 export class RenderNode extends MNONode {
 
   private mesh: Points | null = null;
+  private bboxMesh: Line | null = null;
   private isRendering: boolean = false;
   // private isDirty: boolean = false;
 
@@ -62,6 +65,20 @@ export class RenderNode extends MNONode {
 
   public checkIsRendering(): boolean { return this.isRendering; }
 
+  // TODO: unrender bbox in unrender function
+  public renderBBox(scene: Scene): void {
+    if (!this.bboxMesh) {
+      this.bboxMesh = this.createBBoxMesh();
+    }
+    scene.add(this.bboxMesh);
+  }
+
+  public unrenderBBox(scene: Scene): void {
+    if (this.bboxMesh) {
+      scene.remove(this.bboxMesh);
+    }
+  }
+
   private createMesh(): Points {
     const pointCount = this.getPointCount();
     const positions = new Float32Array(pointCount * 3);
@@ -88,5 +105,14 @@ export class RenderNode extends MNONode {
     geometry.computeBoundingBox();
     const material = new PointsMaterial({size: DefaultPointSize, vertexColors: VertexColors});
     return new Points(geometry, material);
+  }
+
+  private createBBoxMesh(): Box3Helper {
+    const bbox = this.bbox;
+    const box = new Box3();
+    box.setFromCenterAndSize(
+      new Vector3((bbox.max.x + bbox.min.x) / 2, (bbox.max.y + bbox.min.y) / 2, (bbox.max.z + bbox.min.z) / 2), 
+      new Vector3(bbox.max.x - bbox.min.x, bbox.max.y - bbox.min.y, bbox.max.z - bbox.min.z));
+    return new Box3Helper(box, new Color(BBoxColor));
   }
 }

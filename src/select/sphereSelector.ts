@@ -148,6 +148,7 @@ export class SphereSelector extends BaseSelector {
     }
   }
 
+  // TODO: use transparent sphere instead
   private static createMesh(center: Vector3, radius: number, isSelected: boolean): Line {
     const material = new LineBasicMaterial({color: isSelected ? SelectedSelectorColor : UnselectedSelectorColor});
     const geometry = new CircleGeometry(radius, DefaultSphereSelectorSegments);

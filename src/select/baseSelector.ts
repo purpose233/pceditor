@@ -153,7 +153,7 @@ export abstract class BaseSelector {
       if (this.checkNodeInSelector(childRefNode)) {
         if (!selectNode.checkChildNodeExist(childNumber)) {
           selectNode.setChildNode(childNumber, 
-            new SelectNode(selectNode.getIdx() + childNumber, selectNode, refNode));
+            new SelectNode(selectNode.getIdx() + childNumber, selectNode, childRefNode));
         }
         this.selectTreeRecursively(selectNode.getChildNode(childNumber) as SelectNode, childRefNode);
       } else if (selectNode.checkChildNodeExist(childNumber)) {
