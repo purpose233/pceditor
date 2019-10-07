@@ -5,7 +5,6 @@ import { DefaultSphereSelectorRadius, UnselectedSelectorColor, DefaultSphereSele
 import { RenderTree } from '../render/renderTree';
 import { RenderPoint } from '../render/renderPoint';
 import { RenderNode } from '../render/renderNode';
-import { getVerticesOfBBox } from '../common/render';
 
 export class SphereSelector extends BaseSelector {
 
@@ -22,6 +21,12 @@ export class SphereSelector extends BaseSelector {
     this.selectedMesh = SphereSelector.createMesh(center, radius, true);
     this.unselectedMesh = SphereSelector.createMesh(center, radius, false);
     this.updateSelectTree(scene);
+
+    // TODO: add transparent shape for selector
+    // var geometry = new THREE.SphereBufferGeometry(DefaultSphereSelectorRadius, 32, 32);
+    // var material = new THREE.MeshBasicMaterial({color: 0xffffff, opacity: 0.2, transparent: true});
+    // var sphere = new THREE.Mesh(geometry, material);
+    // scene.add(sphere);
   }
 
   // TODO: whether rerendering should to be called by selector itself?
@@ -42,8 +47,8 @@ export class SphereSelector extends BaseSelector {
     // TODO: maybe add '=' for all comparison
     const bbox = node.getBBox();
     const { x, y, z } = this.center;
-    const { x: minX, y: minY, z: minZ } = bbox.min;
-    const { x: maxX, y: maxY, z: maxZ } = bbox.max;
+    const { x: minX, y: minY, z: minZ } = bbox.getMin();
+    const { x: maxX, y: maxY, z: maxZ } = bbox.getMax();
 
     // check 6 faces of bbox
     if (x > minX && x < maxX && y < minY && y > maxY 
@@ -60,7 +65,7 @@ export class SphereSelector extends BaseSelector {
     }
 
     // check 8 vertices of bbox
-    const vertices = getVerticesOfBBox(bbox);
+    const vertices = bbox.getVertices();
     for (const vertex of vertices) {
       if (this.center.distanceTo(vertex) <= this.radius) {
         return true;
@@ -155,8 +160,10 @@ export class SphereSelector extends BaseSelector {
     // Remove center vertex
     geometry.vertices.shift();
     let line = new LineLoop(geometry, material);
-    const parent = new Line();
-    parent.add(line);
+    // If creating a empty line, "Render count or primcount is 0" warining will occur.
+    // const parent = new Line();
+    // parent.add(line);
+    const parent = line;
     line = new LineLoop(geometry, material);
     line.rotateY(Math.PI / 2);
     parent.add(line);

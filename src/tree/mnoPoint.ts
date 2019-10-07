@@ -1,6 +1,6 @@
 import { Vector3, Color } from 'three';
-import { BoundingBoxType } from '../common/types';
 import { DefaultPointColor } from '../common/constants';
+import { BoundingBox } from '../common/bbox';
 
 export abstract class MNOPoint {
   
@@ -17,9 +17,10 @@ export abstract class MNOPoint {
     return this.color ? this.color : DefaultPointColor;
   }
 
-  public isInBBox(bbox: BoundingBoxType): boolean {
-    return this.position.x > bbox.min.x && this.position.x < bbox.max.x 
-      && this.position.y > bbox.min.y && this.position.y < bbox.max.y 
-      && this.position.z > bbox.min.z && this.position.z < bbox.max.z;
+  public isInBBox(bbox: BoundingBox): boolean {
+  const min = bbox.getMin(), max = bbox.getMax();
+  return this.position.x > min.x && this.position.x < max.x 
+      && this.position.y > min.y && this.position.y < max.y 
+      && this.position.z > min.z && this.position.z < max.z;
   }
 }

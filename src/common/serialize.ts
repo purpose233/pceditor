@@ -1,7 +1,6 @@
 import fs from 'fs';
 import { TreeIndexType, NodeIndexType } from './types';
 import { serializedbboxToBBoxType } from './common';
-import { MNOPoint } from '../tree/mnoPoint';
 import { Vector3 } from 'three';
 import { MNONode } from '../tree/mnoNode';
 import { MNOTree } from '../tree/mnoTree';
@@ -30,10 +29,11 @@ export async function serializeTree(tree: MNOTree): Promise<void> {
 export function serializeIndex(filePath: string, tree: MNOTree): Promise<void> {
   return new Promise((resolve) => {
     const bbox = tree.getBBox();
+    const min = bbox.getMin(), max = bbox.getMax();
     const index: TreeIndexType = {
       dataDir: './data',
-      bbox: { minX: bbox.min.x, minY: bbox.min.y, minZ: bbox.min.z,
-              maxX: bbox.max.x, maxY: bbox.max.y, maxZ: bbox.max.z, },
+      bbox: { minX: min.x, minY: min.y, minZ: min.z,
+              maxX: max.x, maxY: max.y, maxZ: max.z, },
       pointCount: tree.getPointCount(),
       root: (tree.getRootNode() as MNONode).getIndex()
     };

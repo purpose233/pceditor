@@ -1,17 +1,17 @@
 import { MNOTree } from '../tree/mnoTree';
 import { ConverterNode } from './converterNode';
-import { BoundingBoxType } from '../common/types';
+import { BoundingBox } from '../common/bbox';
 
 export class ConverterTree extends MNOTree {
 
-  constructor(bbox: BoundingBoxType) {
+  constructor(bbox: BoundingBox) {
     super(ConverterTree.createRootNode(bbox), bbox);
     (this.rootNode as ConverterNode).setRefTree(this);
   }
 
   private loadedCount: number = 0;
 
-  protected static createRootNode(bbox: BoundingBoxType): ConverterNode {
+  protected static createRootNode(bbox: BoundingBox): ConverterNode {
     return new ConverterNode('0', bbox, null, null, false);
   }
 

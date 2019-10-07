@@ -1,5 +1,4 @@
 import { MNONode } from '../tree/mnoNode';
-import { BoundingBoxType } from '../common/types';
 import { Points, Scene, BufferGeometry, BufferAttribute, 
   PointsMaterial, VertexColors, Line, 
   Mesh, MeshBasicMaterial, Color, BoxHelper, BoxGeometry, Box3, Box3Helper, Vector3 } from 'three';
@@ -7,20 +6,22 @@ import { deserializeNode } from '../common/serialize';
 import { ExportDataPath, DefaultPointSize, SelectedPointColor, BBoxColor } from '../common/constants';
 import { RenderPoint } from './renderPoint';
 import { MNOPoint } from '../tree/mnoPoint';
+import { BoundingBox } from '../common/bbox';
 
 export class RenderNode extends MNONode {
 
   private mesh: Points | null = null;
   private bboxMesh: Line | null = null;
   private isRendering: boolean = false;
+  private isBBoxRendering: boolean = false;
   // private isDirty: boolean = false;
 
-  constructor(idx: string, bbox: BoundingBoxType, parentNode: null | RenderNode,
+  constructor(idx: string, bbox: BoundingBox, parentNode: null | RenderNode,
               isNew: boolean = true) {
     super(idx, bbox, parentNode, isNew);
   }
 
-  protected createNewNode(idx: string, bbox: BoundingBoxType, parentNode: null | RenderNode): MNONode {
+  protected createNewNode(idx: string, bbox: BoundingBox, parentNode: null | RenderNode): MNONode {
     return new RenderNode(idx, bbox, parentNode);
   };
 
@@ -43,6 +44,7 @@ export class RenderNode extends MNONode {
       return; 
     }
     scene.add(this.mesh as Points);
+    if (this.isBBoxRendering) { this.renderBBox(scene); }
     this.isRendering = true;
   }
 
@@ -53,6 +55,7 @@ export class RenderNode extends MNONode {
       return; 
     }
     scene.remove(this.mesh as Points);
+    if (this.isBBoxRendering && this.bboxMesh) { scene.remove(this.bboxMesh); }
     this.isRendering = false;
   }
 
@@ -65,18 +68,19 @@ export class RenderNode extends MNONode {
 
   public checkIsRendering(): boolean { return this.isRendering; }
 
-  // TODO: unrender bbox in unrender function
   public renderBBox(scene: Scene): void {
     if (!this.bboxMesh) {
       this.bboxMesh = this.createBBoxMesh();
     }
     scene.add(this.bboxMesh);
+    this.isBBoxRendering = true;
   }
 
   public unrenderBBox(scene: Scene): void {
     if (this.bboxMesh) {
       scene.remove(this.bboxMesh);
     }
+    this.isBBoxRendering = false;
   }
 
   private createMesh(): Points {
@@ -108,11 +112,11 @@ export class RenderNode extends MNONode {
   }
 
   private createBBoxMesh(): Box3Helper {
-    const bbox = this.bbox;
     const box = new Box3();
+    const min = this.bbox.getMin(), max = this.bbox.getMax();
     box.setFromCenterAndSize(
-      new Vector3((bbox.max.x + bbox.min.x) / 2, (bbox.max.y + bbox.min.y) / 2, (bbox.max.z + bbox.min.z) / 2), 
-      new Vector3(bbox.max.x - bbox.min.x, bbox.max.y - bbox.min.y, bbox.max.z - bbox.min.z));
+      new Vector3((max.x + min.x) / 2, (max.y + min.y) / 2, (max.z + min.z) / 2), 
+      new Vector3(max.x - min.x, max.y - min.y, max.z - min.z));
     return new Box3Helper(box, new Color(BBoxColor));
   }
 }

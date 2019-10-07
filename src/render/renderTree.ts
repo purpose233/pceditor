@@ -1,16 +1,16 @@
 import { MNOTree } from '../tree/mnoTree';
-import { BoundingBoxType } from '../common/types';
 import { MNONode } from '../tree/mnoNode';
 import { RenderNode } from './renderNode';
 import { Scene } from 'three';
+import { BoundingBox } from '../common/bbox';
 
 export class RenderTree extends MNOTree {
 
-  constructor(bbox: BoundingBoxType) {
+  constructor(bbox: BoundingBox) {
     super(RenderTree.createRootNode(bbox), bbox);
   }
 
-  protected static createRootNode(bbox: BoundingBoxType): MNONode {
+  protected static createRootNode(bbox: BoundingBox): MNONode {
     return new RenderNode('0', bbox, null, false);
   }
 

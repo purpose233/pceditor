@@ -5,6 +5,7 @@ import { LRU } from '../common/lru';
 import { BaseSelector } from '../select/baseSelector';
 import { SphereSelector } from '../select/sphereSelector';
 import { DefaultSphereSelectorRadius } from '../common/constants';
+import { BoundingBox } from '../common/bbox';
 
 export class PCRenderer {
 
@@ -54,7 +55,14 @@ export class PCRenderer {
     }
   }
 
-  private checkLoD(node: RenderNode, camera: PerspectiveCamera): boolean { return true; }
+  private checkLoD(node: RenderNode, camera: PerspectiveCamera): boolean { 
+    // TODO: need to be improved
+    // const bbox = node.getBBox();
+    // if (!bbox.checkInFrustum(camera)) { return false; }
+    // const distance = bbox.calcDistanceToPosition(camera.position);
+    // // if (distance <= 3 * Math.max()
+    return true;
+  }
 
   // get nodes which need to be rendered by calculation LoD
   private calcRenderNodes(root: RenderNode, camera: PerspectiveCamera): RenderNode[] {

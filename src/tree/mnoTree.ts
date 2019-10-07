@@ -1,14 +1,14 @@
 import { OctreeTree } from './octreeTree';
-import { BoundingBoxType } from '../common/types';
 import { MNOPoint } from './mnoPoint';
 import { MNONode } from './mnoNode';
+import { BoundingBox } from '../common/bbox';
 
 export abstract class MNOTree extends OctreeTree {
 
-  protected bbox: BoundingBoxType; 
+  protected bbox: BoundingBox; 
   protected pointCount: number = 0;
 
-  constructor(root: MNONode, bbox: BoundingBoxType) {
+  constructor(root: MNONode, bbox: BoundingBox) {
     super(root);
     this.bbox = bbox;
   }
@@ -22,7 +22,7 @@ export abstract class MNOTree extends OctreeTree {
     }
   }
 
-  public getBBox(): BoundingBoxType { return this.bbox; }
+  public getBBox(): BoundingBox { return this.bbox; }
 
   public getPointCount(): number { return this.pointCount; }
 }
