@@ -1,4 +1,4 @@
-import { Vector3, PerspectiveCamera } from 'three';
+import { Vector3, PerspectiveCamera, Matrix4, Vector2 } from 'three';
 
 export class BoundingBox {
 
@@ -37,21 +37,155 @@ export class BoundingBox {
     return vertices; 
   }
 
+  // outdated way, could not check node containing frustum
+  // public checkInFrustum(camera: PerspectiveCamera): boolean {
+  //   let flag: boolean = false;
+  //   const vertices = this.getVertices();
+  //   const view = camera.position.clone();
+  //   const lookAt = new Vector3();
+  //   camera.getWorldDirection(lookAt);
+  //   // the up vector which projects on the camera plane
+  //   const up = camera.up.clone().projectOnPlane(lookAt).normalize();
+
+  //   for (const vertex of vertices) {
+  //     // vertex projects on the look at vector 
+  //     const projectVertex = vertex.clone().projectOnVector(lookAt);
+  //     // the distance between projected vertex and camera
+  //     const distance = projectVertex.clone().add(view.clone().negate()).dot(lookAt);
+  //     if (distance < camera.near && distance > camera.far) {
+  //       continue;
+  //     }
+  //     // calculate field of view on look at plane
+  //     const planeHalfHeight = Math.abs(distance) * Math.tan(camera.fov / 2);
+  //     const planeHalfWidth = planeHalfHeight * camera.aspect;
+  //     // the vector of projected vertex to vertex
+  //     const v = vertex.clone().add(projectVertex.clone().negate());
+  //     // height is the projecting length from v to up
+  //     const height = Math.abs(v.clone().dot(up));
+  //     const width = Math.sqrt(v.length() ** 2 - height ** 2);
+  //     if (width < planeHalfWidth && height < planeHalfHeight) {
+  //       flag = true; 
+  //       break;
+  //     }
+  //   }
+  //   return flag;
+  // }
+
   public checkInFrustum(camera: PerspectiveCamera): boolean {
     let flag: boolean = false;
-    const vertices = this.getVertices();
-    for (const vertex of vertices) {
-      vertex.applyMatrix4(camera.matrixWorldInverse);
-      if (vertex.z < camera.near && vertex.z > camera.far) {
-        continue;
-      }
-      const planeHalfHeight = Math.abs(vertex.z) * Math.tan(camera.fov / 2);
-      const planeHalfWidth = planeHalfHeight * camera.aspect;
-      if (Math.abs(vertex.x) < planeHalfWidth && Math.abs(vertex.y) < planeHalfHeight) {
-        flag = true; 
-        break;
-      }
+    // TODO: reuse the m matrix by passing it as parameter
+    const mt = new Matrix4();
+    mt.set(1,0,0,-camera.position.x,
+          0,1,0,-camera.position.y,
+          0,0,1,-camera.position.z,
+          0,0,0,1);
+    const mz = new Matrix4();
+    const { x: rx, y: ry, z: rz } = camera.rotation;
+    mz.set(Math.cos(-rz),-Math.sin(-rz),0,0,
+           Math.sin(-rz),Math.cos(-rz),0,0,
+           0,0,1,0,
+           0,0,0,1);
+    const mx = new Matrix4();
+    mx.set(1,0,0,0,
+           0,Math.cos(-rx),-Math.sin(-rx),0,
+           0,Math.sin(-rx),Math.cos(-rx),0,
+           0,0,0,1);
+    const my = new Matrix4();
+    my.set(Math.cos(-ry),0,Math.sin(-ry),0,
+           0,1,0,0,
+           -Math.sin(-ry),0,Math.cos(-ry),0,
+           0,0,0,1);
+    const m = mx.multiply(my).multiply(mz).multiply(mt);
+    const pVertices: Vector3[] = [];
+    for (const vertex of this.getVertices()) {
+      // transform to camera coordinate
+      vertex.applyMatrix4(m);
+      // project to -1/1 plane
+      vertex.multiplyScalar(vertex.z);
+      pVertices.push(vertex);
+    }
+    
+    const planeHalfHeight = 1 * Math.tan(camera.fov / 2);
+    const planeHalfWidth = planeHalfHeight * camera.aspect;
+    const faces = [
+      [pVertices[0],pVertices[1],pVertices[3],pVertices[2]],
+      [pVertices[0],pVertices[1],pVertices[5],pVertices[4]],
+      [pVertices[4],pVertices[5],pVertices[7],pVertices[6]],
+      [pVertices[2],pVertices[3],pVertices[7],pVertices[6]],
+      [pVertices[1],pVertices[3],pVertices[7],pVertices[5]],
+      [pVertices[0],pVertices[2],pVertices[6],pVertices[4]]
+    ]
+    // Cuz the vertices will be project to plane 1 or plane -1,
+    //  the current algorithm might add some wrong results. 
+    for (const face of faces) {
+      if (this.checkFaceInWindow(face, planeHalfWidth, planeHalfHeight)) { return true; }
     }
     return flag;
+  }
+
+  private checkFaceInWindow(face: Vector3[], hWidth: number, hHeight: number): boolean {
+    // at least one face vertex should lie on -1 plane
+    let flag: boolean = false;
+    for (const vertex of face) {
+      flag = vertex.z < 0 ? true : flag;
+    }
+    if (!flag) { return false; }
+
+    // check face vertices in window
+    for (const vertex of face) {
+      if (Math.abs(vertex.x) <= hWidth && Math.abs(vertex.y) <= hHeight) {
+        return true;
+      }
+    }
+
+    // check window vertices in face
+    const windowVertice = [
+      new Vector2(hWidth, hHeight),
+      new Vector2(hWidth, -hHeight),
+      new Vector2(-hWidth, -hHeight),
+      new Vector2(-hWidth, hHeight)
+    ];
+    for (const wVertex of windowVertice) {
+      const dot0 = new Vector2(face[0].x-wVertex.x,face[0].y-wVertex.y)
+        .dot(new Vector2(face[1].x-face[0].x,face[1].y-face[0].y));
+      const dot1 = new Vector2(face[1].x-wVertex.x,face[1].y-wVertex.y)
+        .dot(new Vector2(face[2].x-face[1].x,face[2].y-face[1].y));
+      const dot2 = new Vector2(face[2].x-wVertex.x,face[2].y-wVertex.y)
+        .dot(new Vector2(face[3].x-face[2].x,face[3].y-face[2].y));
+      const dot3 = new Vector2(face[3].x-wVertex.x,face[3].y-wVertex.y)
+        .dot(new Vector2(face[0].x-face[3].x,face[0].y-face[3].y));
+      if (dot0 >= 0 && dot1 >= 0 && dot2 >= 0 && dot3 >= 0) {
+        return true;
+      }
+      if (dot0 <= 0 && dot1 <= 0 && dot2 <= 0 && dot3 <= 0) {
+        return true;
+      }
+    }
+
+    // check face edges cross window
+    const lines = [
+      [face[0], face[1]],
+      [face[1], face[2]],
+      [face[2], face[3]],
+      [face[3], face[0]]
+    ];
+    for (const line of lines) {
+      if (line[0].x === line[1].x) {
+        if (Math.abs(line[0].x) === hWidth) { return true; } else { continue; }
+      }
+      if (line[0].y === line[1].y) {
+        if (Math.abs(line[0].y) === hHeight) { return true; } else { continue; }
+      }
+      const x1 = (hHeight-line[0].y)/(line[1].y-line[0].y)*(line[1].x-line[0].x)+line[0].x;
+      if (Math.abs(x1) <= hWidth) { return true; }
+      const x2 = (-hHeight-line[0].y)/(line[1].y-line[0].y)*(line[1].x-line[0].x)+line[0].x;
+      if (Math.abs(x2) <= hWidth) { return true; }
+      const y1 = (hWidth-line[0].x)/(line[1].x-line[0].x)*(line[1].y-line[0].y)+line[0].y;
+      if (Math.abs(y1) <= hHeight) { return true; }
+      const y2 = (-hWidth-line[0].x)/(line[1].x-line[0].x)*(line[1].y-line[0].y)+line[0].y;
+      if (Math.abs(y2) <= hHeight) { return true; }
+    }
+
+    return false;
   }
 }

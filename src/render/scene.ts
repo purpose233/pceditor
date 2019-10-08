@@ -17,7 +17,8 @@ export class PCScene {
   constructor(container: HTMLElement, canvas: HTMLCanvasElement, renderer: PCRenderer) {
     this.scene = new Scene();
     this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-    this.camera.position.set(10, 10, 10);
+    // this.camera.position.set(0, 0, 5);
+    this.camera.position.set(0, 10, 5);
     this.camera.lookAt(this.scene.position);
     this.camera.updateMatrix();
     this.pcRenderer = renderer;
@@ -46,15 +47,15 @@ export class PCScene {
     this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
     this.controls.dampingFactor = 0.05;
     this.controls.screenSpacePanning = false;
-    this.controls.minDistance = 10;
+    this.controls.minDistance = 5;
     this.controls.maxDistance = 500;
     this.controls.maxPolarAngle = Math.PI / 2;
     this.controls.keyPanSpeed = 20;
 
     window.addEventListener('resize', this.onWindowResize, false);
 
-    const gridHelper = new GridHelper(10, 10, new Color(0xffffff));
-    this.scene.add(gridHelper);
+    // const gridHelper = new GridHelper(10, 10, new Color(0xffffff));
+    // this.scene.add(gridHelper);
 
     this.animate();
   }
