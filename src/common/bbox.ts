@@ -75,9 +75,9 @@ export class BoundingBox {
     let flag: boolean = false;
     // TODO: reuse the m matrix by passing it as parameter
     const mt = new Matrix4();
-    mt.set(1,0,0,-camera.position.x,
-          0,1,0,-camera.position.y,
-          0,0,1,-camera.position.z,
+    mt.set(1,0,0,camera.position.x,
+          0,1,0,camera.position.y,
+          0,0,1,camera.position.z,
           0,0,0,1);
     const mz = new Matrix4();
     const { x: rx, y: ry, z: rz } = camera.rotation;
@@ -95,13 +95,13 @@ export class BoundingBox {
            0,1,0,0,
            -Math.sin(-ry),0,Math.cos(-ry),0,
            0,0,0,1);
-    const m = mx.multiply(my).multiply(mz).multiply(mt);
+    const m = mz.multiply(my).multiply(mx).multiply(mt);
     const pVertices: Vector3[] = [];
     for (const vertex of this.getVertices()) {
       // transform to camera coordinate
       vertex.applyMatrix4(m);
       // project to -1/1 plane
-      vertex.multiplyScalar(vertex.z);
+      vertex.divideScalar(vertex.z);
       pVertices.push(vertex);
     }
     
@@ -125,11 +125,11 @@ export class BoundingBox {
 
   private checkFaceInWindow(face: Vector3[], hWidth: number, hHeight: number): boolean {
     // at least one face vertex should lie on -1 plane
-    let flag: boolean = false;
-    for (const vertex of face) {
-      flag = vertex.z < 0 ? true : flag;
-    }
-    if (!flag) { return false; }
+    // let flag: boolean = false;
+    // for (const vertex of face) {
+    //   flag = vertex.z < 0 ? true : flag;
+    // }
+    // if (!flag) { return false; }
 
     // check face vertices in window
     for (const vertex of face) {
@@ -177,13 +177,13 @@ export class BoundingBox {
         if (Math.abs(line[0].y) === hHeight) { return true; } else { continue; }
       }
       const x1 = (hHeight-line[0].y)/(line[1].y-line[0].y)*(line[1].x-line[0].x)+line[0].x;
-      if (Math.abs(x1) <= hWidth) { return true; }
+      if (Math.abs(x1) <= hWidth && x1 >= Math.min(line[0].x, line[1].x) && x1 <= Math.max(line[0].x, line[1].x)) { return true; }
       const x2 = (-hHeight-line[0].y)/(line[1].y-line[0].y)*(line[1].x-line[0].x)+line[0].x;
-      if (Math.abs(x2) <= hWidth) { return true; }
+      if (Math.abs(x2) <= hWidth && x2 >= Math.min(line[0].x, line[1].x) && x2 <= Math.max(line[0].x, line[1].x)) { return true; }
       const y1 = (hWidth-line[0].x)/(line[1].x-line[0].x)*(line[1].y-line[0].y)+line[0].y;
-      if (Math.abs(y1) <= hHeight) { return true; }
+      if (Math.abs(y1) <= hHeight && y1 >= Math.min(line[0].y, line[1].y) && y1 <= Math.max(line[0].y, line[1].y)) { return true; }
       const y2 = (-hWidth-line[0].x)/(line[1].x-line[0].x)*(line[1].y-line[0].y)+line[0].y;
-      if (Math.abs(y2) <= hHeight) { return true; }
+      if (Math.abs(y2) <= hHeight && y2 >= Math.min(line[0].y, line[1].y) && y2 <= Math.max(line[0].y, line[1].y)) { return true; }
     }
 
     return false;

@@ -85,8 +85,7 @@ export class PCScene {
 
   // private onMouseMove = () => {}
 
-  private flag = true;
-
+  // private flag = true;
   private render = async () => {
     // Used for debugging
     // if (this.flag) {

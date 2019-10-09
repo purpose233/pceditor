@@ -6,7 +6,7 @@ import { BaseSelector } from '../select/baseSelector';
 import { SphereSelector } from '../select/sphereSelector';
 import { DefaultSphereSelectorRadius } from '../common/constants';
 
-import * as THREE from 'three'
+import * as THREE from 'three';
 
 export class PCRenderer {
 
@@ -44,57 +44,85 @@ export class PCRenderer {
     node.unrender(scene);
   }
 
-  private flag = true;
-
+  // private flag = true;
+  // private points: any[] = [];
+  // private windows: any[] = [];
   public renderNode(node: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
-    if (this.flag) {
-      const mt = new THREE.Matrix4();
-      mt.set(1,0,0,-camera.position.x,
-            0,1,0,-camera.position.y,
-            0,0,1,-camera.position.z,
-            0,0,0,1);
-      const mz = new THREE.Matrix4();
-      const { x: rx, y: ry, z: rz } = camera.rotation;
-      mz.set(Math.cos(-rz),-Math.sin(-rz),0,0,
-             Math.sin(-rz),Math.cos(-rz),0,0,
-             0,0,1,0,
-             0,0,0,1);
-      const mx = new THREE.Matrix4();
-      mx.set(1,0,0,0,
-             0,Math.cos(-rx),-Math.sin(-rx),0,
-             0,Math.sin(-rx),Math.cos(-rx),0,
-             0,0,0,1);
-      const my = new THREE.Matrix4();
-      my.set(Math.cos(-ry),0,Math.sin(-ry),0,
-             0,1,0,0,
-             -Math.sin(-ry),0,Math.cos(-ry),0,
-             0,0,0,1);
-      const m = mx.multiply(my).multiply(mz).multiply(mt);
-
-      const vertices = node.getBBox().getVertices();
-      for (const vertex of vertices) {
-        var geometryLine = new THREE.Geometry();
-        geometryLine.vertices.push(new THREE.Vector3(vertex.x, vertex.y, vertex.z));
-        vertex.applyMatrix4(m);
-        // vertex.applyMatrix4(mz);
-        // vertex.applyMatrix4(my);
-        // vertex.applyMatrix4(mx);
-        vertex.divideScalar(Math.abs(vertex.z));
-        // vertex.applyMatrix4(camera.matrixWorld);
-        geometryLine.vertices.push(new THREE.Vector3(vertex.x, vertex.y, vertex.z));
-        var materialLine = new THREE.LineBasicMaterial( { color: 0x0000ff } );
-        var line = new THREE.Line( geometryLine, materialLine );
-        scene.add(line);
-
-        var geometry = new THREE.SphereBufferGeometry(0.2, 32, 32);
-        var material = new THREE.MeshBasicMaterial({color: 0xffff00});
-        var sphere = new THREE.Mesh(geometry, material);
-        sphere.position.set(vertex.x, vertex.y, vertex.z);
-        // console.log(vertex);
-        scene.add(sphere);
-      }
-      this.flag = false;
-    }
+    // Used for debugging
+    // if (node.getIdx() === '0') {
+    //   const mt = new THREE.Matrix4();
+    //   mt.set(1,0,0,camera.position.x,
+    //         0,1,0,camera.position.y,
+    //         0,0,1,camera.position.z,
+    //         0,0,0,1);
+    //   const mz = new THREE.Matrix4();
+    //   const { x: rx, y: ry, z: rz } = camera.rotation;
+    //   mz.set(Math.cos(-rz),-Math.sin(-rz),0,0,
+    //           Math.sin(-rz),Math.cos(-rz),0,0,
+    //           0,0,1,0,
+    //           0,0,0,1);
+    //   const mx = new THREE.Matrix4();
+    //   mx.set(1,0,0,0,
+    //           0,Math.cos(-rx),-Math.sin(-rx),0,
+    //           0,Math.sin(-rx),Math.cos(-rx),0,
+    //           0,0,0,1);
+    //   const my = new THREE.Matrix4();
+    //   my.set(Math.cos(-ry),0,Math.sin(-ry),0,
+    //           0,1,0,0,
+    //           -Math.sin(-ry),0,Math.cos(-ry),0,
+    //           0,0,0,1);
+    //   const m = mz.multiply(my).multiply(mx);
+    //   const vertices = node.getBBox().getVertices();
+    //   if (this.flag) {
+    //     const planeHalfHeight = 1 * Math.tan(camera.fov / 2) * 5;
+    //     const planeHalfWidth = planeHalfHeight * camera.aspect;
+    //     var geometry = new THREE.SphereBufferGeometry(0.1, 3, 3);
+    //     var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+    //     var sphere = new THREE.Mesh(geometry, material);
+    //     sphere.position.set(planeHalfWidth, planeHalfHeight, -5);
+    //     this.windows.push(sphere);
+    //     scene.add(sphere);
+    //     sphere = new THREE.Mesh(geometry, material);
+    //     sphere.position.set(planeHalfWidth, -planeHalfHeight, -5);
+    //     this.windows.push(sphere);
+    //     scene.add(sphere);
+    //     sphere = new THREE.Mesh(geometry, material);
+    //     sphere.position.set(-planeHalfWidth, planeHalfHeight, -5);
+    //     this.windows.push(sphere);
+    //     scene.add(sphere);
+    //     sphere = new THREE.Mesh(geometry, material);
+    //     sphere.position.set(-planeHalfWidth, -planeHalfHeight, -5);
+    //     this.windows.push(sphere);
+    //     scene.add(sphere);
+  
+    //     for (const vertex of vertices) {
+    //       // var geometryLine = new THREE.Geometry();
+    //       // geometryLine.vertices.push(new THREE.Vector3(vertex.x, vertex.y, vertex.z));
+    //       vertex.applyMatrix4(m);
+    //       vertex.divideScalar(Math.abs(vertex.z));
+    //       // geometryLine.vertices.push(new THREE.Vector3(vertex.x, vertex.y, vertex.z));
+    //       // var materialLine = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+    //       // var line = new THREE.Line( geometryLine, materialLine );
+    //       // scene.add(line);
+  
+    //       var geometry = new THREE.SphereBufferGeometry(0.1, 32, 32);
+    //       var material = new THREE.MeshBasicMaterial({color: 0xffff00});
+    //       var sphere = new THREE.Mesh(geometry, material);
+    //       sphere.position.set(vertex.x, vertex.y, vertex.z);
+    //       scene.add(sphere);
+    //       this.points.push(sphere);
+    //     }
+    //     this.flag = false;
+    //   } else {
+    //     let i = 0;
+    //     for (const vertex of vertices) {
+    //       vertex.applyMatrix4(m);
+    //       // vertex.divideScalar(Math.abs(vertex.z) / 5);
+    //       this.points[i].position.set(vertex.x, vertex.y, vertex.z);
+    //       i++;
+    //     }
+    //   }
+    // }
 
     node.render(scene);
     node.renderBBox(scene);
@@ -111,9 +139,12 @@ export class PCRenderer {
   private checkLoD(node: RenderNode, camera: PerspectiveCamera): boolean { 
     // TODO: need to be improved
     const bbox = node.getBBox();
-    if (!bbox.checkInFrustum(camera)) { 
-      console.log(node.getIdx());
-      return false; }
+    if (node.getIdx() === '0') {
+      console.log('0' + bbox.checkInFrustum(camera));
+    }
+    // if (!bbox.checkInFrustum(camera)) { 
+    //   console.log(node.getIdx());
+    //   return false; }
     // const distance = bbox.calcDistanceToPosition(camera.position);
     // // if (distance <= 3 * Math.max()
     return true;
