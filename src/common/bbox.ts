@@ -1,24 +1,37 @@
 import { Vector3, PerspectiveCamera, Matrix4, Vector2 } from 'three';
+import { calcWorldToCameraMatrix } from './common';
 
 export class BoundingBox {
 
   private max: Vector3;
   private min: Vector3;
+  private size: Vector3;
 
   constructor(max: Vector3, min: Vector3) {
     this.max = max;
     this.min = min;
+    this.size = min.clone().negate().add(max);
   }
 
   public getMax(): Vector3 { return this.max; }
 
-  public setMax(max: Vector3): void { this.max = max; }
+  public setMax(max: Vector3): void { 
+    this.max = max; 
+    this.size = this.min.clone().negate().add(this.max);
+  }
 
   public getMin(): Vector3 { return this.min; }
 
-  public setMin(min: Vector3): void { this.min = min; }
+  public setMin(min: Vector3): void { 
+    this.min = min; 
+    this.size = this.min.clone().negate().add(this.max);
+  }
 
-  public getSize(): Vector3 { return this.min.clone().negate().add(this.max); }
+  public getSize(): Vector3 { return this.size; }
+
+  public getSizeMaxScalar(): number { return Math.max(this.size.x, this.size.y, this.size.z); }
+  
+  public getSizeMinScalar(): number { return Math.min(this.size.x, this.size.y, this.size.z); }
 
   public calcDistanceToPosition(position: Vector3): number {
     return this.max.clone().add(this.min).divideScalar(2).distanceTo(position);
@@ -71,31 +84,9 @@ export class BoundingBox {
   //   return flag;
   // }
 
-  public checkInFrustum(camera: PerspectiveCamera): boolean {
+  public checkInFrustum(camera: PerspectiveCamera, worldToCameraMatrix?: Matrix4): boolean {
     let flag: boolean = false;
-    // TODO: reuse the m matrix by passing it as parameter
-    const mt = new Matrix4();
-    mt.set(1,0,0,camera.position.x,
-          0,1,0,camera.position.y,
-          0,0,1,camera.position.z,
-          0,0,0,1);
-    const mz = new Matrix4();
-    const { x: rx, y: ry, z: rz } = camera.rotation;
-    mz.set(Math.cos(-rz),-Math.sin(-rz),0,0,
-           Math.sin(-rz),Math.cos(-rz),0,0,
-           0,0,1,0,
-           0,0,0,1);
-    const mx = new Matrix4();
-    mx.set(1,0,0,0,
-           0,Math.cos(-rx),-Math.sin(-rx),0,
-           0,Math.sin(-rx),Math.cos(-rx),0,
-           0,0,0,1);
-    const my = new Matrix4();
-    my.set(Math.cos(-ry),0,Math.sin(-ry),0,
-           0,1,0,0,
-           -Math.sin(-ry),0,Math.cos(-ry),0,
-           0,0,0,1);
-    const m = mz.multiply(my).multiply(mx).multiply(mt);
+    const m = worldToCameraMatrix ? worldToCameraMatrix : calcWorldToCameraMatrix(camera);
     const pVertices: Vector3[] = [];
     for (const vertex of this.getVertices()) {
       // transform to camera coordinate

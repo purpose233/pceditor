@@ -135,7 +135,6 @@ export function deserializeIndex(filePath: string, isConvertering: boolean = fal
 // TODO: return flag or throw error if node file don't exist or is not valid.
 export function deserializeNode(filePath: string, node: MNONode, isConvertering: boolean = false): Promise<void> {
   return readFileP(filePath, (buffer: Buffer) => {
-    console.log(filePath);
     let offset = 0;
     const gridCount = buffer.readUInt32BE(offset); offset += 4;
     for (let i = 0; i < gridCount; i++) {

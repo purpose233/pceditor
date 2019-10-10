@@ -1,18 +1,23 @@
-import { Scene, PerspectiveCamera, Vector3 } from 'three';
+import { Scene, PerspectiveCamera, Vector3, Matrix4 } from 'three';
 import { RenderTree } from './renderTree';
 import { RenderNode } from './renderNode';
 import { LRU } from '../common/lru';
 import { BaseSelector } from '../select/baseSelector';
 import { SphereSelector } from '../select/sphereSelector';
 import { DefaultSphereSelectorRadius } from '../common/constants';
+import { calcWorldToCameraMatrix } from '../common/common';
 
-import * as THREE from 'three';
+// import * as THREE from 'three';
+
+// TODO: unrender node when it is not required
 
 export class PCRenderer {
 
   private tree: RenderTree;
   private selector: BaseSelector | null = null;
   private lru: LRU = new LRU();
+  private renderingNodes: Set<RenderNode> = new Set();
+  private currentWtoCMatrix: Matrix4 = new Matrix4();
 
   constructor(tree: RenderTree) {
     this.tree = tree;
@@ -20,34 +25,47 @@ export class PCRenderer {
 
   public async renderTotalTree(scene: Scene, camera: PerspectiveCamera): Promise<void> {
     // TODO: load all nodes
-    await this.lru.loadNodes(this.tree.getAllNodes() as RenderNode[]);
+    await this.lru.requireNodes(this.tree.getAllNodes() as RenderNode[]);
     this.renderNodesTree(this.tree.getRootNode() as RenderNode, scene, camera);
   }
 
   public async renderTree(scene: Scene, camera: PerspectiveCamera): Promise<void> {
+    this.currentWtoCMatrix = calcWorldToCameraMatrix(camera);
     const nodes = this.calcRenderNodes(this.tree.getRootNode() as RenderNode, camera);
-    await this.lru.loadNodes(nodes);
-    for (const node of nodes) {
-      this.renderNode(node, scene, camera);
+    console.log('count: ' + nodes.length);
+
+    // Hide unrequired nodes which are loaded but needn't to show.
+    const iter = this.renderingNodes.values();
+    let result;
+    while (!(result = iter.next()).done) {
+      const node: RenderNode = result.value;
+      if (!nodes.includes(node)) { this.hideNode(node, scene, camera); }
     }
 
-    if (this.selector === null) {
-      this.selector = new SphereSelector(this.tree, scene, new Vector3(0,0,0), DefaultSphereSelectorRadius);
-      this.selector.render(scene, false);
-      console.log(scene);
-      console.log(this.selector);
-      console.log(this.tree);
+    // Load & render required nodes.
+    await this.lru.requireNodes(nodes);
+    for (const node of nodes) {
+      this.showNode(node, scene, camera);
     }
+
+    // if (this.selector === null) {
+    //   this.selector = new SphereSelector(this.tree, scene, new Vector3(0,0,0), DefaultSphereSelectorRadius);
+    //   this.selector.render(scene, false);
+    //   console.log(scene);
+    //   console.log(this.selector);
+    //   console.log(this.tree);
+    // }
   }
   
   public hideNode(node: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
     node.unrender(scene);
+    this.renderingNodes.delete(node);
   }
 
   // private flag = true;
   // private points: any[] = [];
   // private windows: any[] = [];
-  public renderNode(node: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
+  public showNode(node: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
     // Used for debugging
     // if (node.getIdx() === '0') {
     //   const mt = new THREE.Matrix4();
@@ -125,11 +143,12 @@ export class PCRenderer {
     // }
 
     node.render(scene);
-    node.renderBBox(scene);
+    // node.renderBBox(scene);
+    this.renderingNodes.add(node);
   }
  
   private renderNodesTree(root: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
-    this.renderNode(root, scene, camera);
+    this.showNode(root, scene, camera);
     const childNodes = root.getChildNodes();
     for (const child of childNodes as RenderNode[]) {
       this.renderNodesTree(child, scene, camera);
@@ -138,15 +157,12 @@ export class PCRenderer {
 
   private checkLoD(node: RenderNode, camera: PerspectiveCamera): boolean { 
     // TODO: need to be improved
+    // always show root node
+    if (node.getIdx() === '0') { return true; }
     const bbox = node.getBBox();
-    if (node.getIdx() === '0') {
-      console.log('0' + bbox.checkInFrustum(camera));
-    }
-    // if (!bbox.checkInFrustum(camera)) { 
-    //   console.log(node.getIdx());
-    //   return false; }
-    // const distance = bbox.calcDistanceToPosition(camera.position);
-    // // if (distance <= 3 * Math.max()
+    if (!bbox.checkInFrustum(camera, this.currentWtoCMatrix)) { return false; }
+    const distance = bbox.calcDistanceToPosition(camera.position);
+    if (distance >= 3 * bbox.getSizeMaxScalar()) { return false; }
     return true;
   }
 
@@ -155,10 +171,9 @@ export class PCRenderer {
     const nodes: RenderNode[] = [];
     if (this.checkLoD(root, camera)) {
       nodes.push(root);
-    }
-    // TODO: whether stop searching in node children when parent node is dropped?
-    for (const node of root.getChildNodes() as RenderNode[]) {
-      nodes.push(...this.calcRenderNodes(node, camera));
+      for (const node of root.getChildNodes() as RenderNode[]) {
+        nodes.push(...this.calcRenderNodes(node, camera));
+      }
     }
     return nodes;
   }

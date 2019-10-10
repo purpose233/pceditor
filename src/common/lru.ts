@@ -6,36 +6,47 @@ export class LRU {
   private loadedNodeStack: RenderNode[] = [];
 
   public updateNodeTime(node: RenderNode): void {
-    this.sliceNode(node);
-    this.loadedNodeStack.push(node);
-  }
-
-  public async loadNodes(nodes: RenderNode[]): Promise<void> {
-    // TODO: handle when nodes number greater than MaxRenderNodes
-    for (const node of nodes) {
-      await this.loadNode(node);
+    const index = this.loadedNodeStack.indexOf(node);
+    if (index >= 0) {
+      this.loadedNodeStack.splice(index, 1);
+      this.loadedNodeStack.push(node);
     }
   }
 
-  public async loadNode(node: RenderNode): Promise<void> { 
-    await node.load();
-    this.updateNodeTime(node);
-    this.unloadOverflowedNodes();
+  // requireNodes means one operation, which will always loads all nodes in parameter,
+  //  even when node number is greater than MaxRenderNodes.
+  public async requireNodes(nodes: RenderNode[]): Promise<void> {
+    for (let i = 0; i < this.loadedNodeStack.length; i++) {
+      if (nodes.includes(this.loadedNodeStack[i])) {
+        this.loadedNodeStack.splice(i, 1);
+        i--;
+      }
+    }
+    await this.unloadOverflowedNodes(nodes.length < MaxRenderNodes ? MaxRenderNodes - nodes.length : 0);
+    for (const node of nodes) {
+      await node.load();
+      this.loadedNodeStack.push(node);
+    }
   }
 
-  private async unloadOverflowedNodes(): Promise<void> {
-    while (this.loadedNodeStack.length > MaxRenderNodes) {
+  // loadNodes will unload nodes when stack overflows.
+  // public async loadNodes(nodes: RenderNode[]): Promise<void> {
+  //   // TODO: check the repeated nodes
+  //   for (const node of nodes) {
+  //     await this.loadNode(node);
+  //   }
+  // }
+
+  // private async loadNode(node: RenderNode): Promise<void> { 
+  //   await node.load();
+  //   this.updateNodeTime(node);
+  // }
+
+  private async unloadOverflowedNodes(max?: number): Promise<void> {
+    const threshold = max !== undefined ? max : MaxRenderNodes;
+    while (this.loadedNodeStack.length > threshold) {
       const node = this.loadedNodeStack.shift() as RenderNode;
       await node.unload();
     }
-  }
-
-  private sliceNode(node: RenderNode): RenderNode | null {
-    for (let i = 0; i < this.loadedNodeStack.length; i++) {
-      if (this.loadedNodeStack[i] === node) {
-        return this.loadedNodeStack.splice(i, 1)[0];
-      }
-    }
-    return null;
   }
 }

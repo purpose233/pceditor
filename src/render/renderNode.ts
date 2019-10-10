@@ -12,9 +12,12 @@ export class RenderNode extends MNONode {
 
   private mesh: Points | null = null;
   private bboxMesh: Line | null = null;
+  // TODO: maybe remove isRendering flag
   private isRendering: boolean = false;
   private isBBoxRendering: boolean = false;
   // private isDirty: boolean = false;
+  private isModified = false;
+  private needModifying = false;
 
   constructor(idx: string, bbox: BoundingBox, parentNode: null | RenderNode,
               isNew: boolean = true) {
@@ -27,6 +30,7 @@ export class RenderNode extends MNONode {
 
   public async load(): Promise<void> {
     if (this.isLoaded) { return; }
+    console.log('load node: ' + this.idx);
     await deserializeNode(ExportDataPath + this.idx, this);
     this.isLoaded = true;
     this.mesh = this.createMesh();
@@ -34,13 +38,15 @@ export class RenderNode extends MNONode {
 
   public async unload(): Promise<void> {
     await super.unload();
+    if (this.isRendering) { console.log('unload rendering node'); }
+    console.log('unload node: ' + this.idx);
     this.mesh = null;
   }
 
   public render(scene: Scene): void {
     if (this.isRendering) { return; }
     if (!this.isLoaded || !this.mesh) { 
-      console.log('Node has not loaded!')
+      console.log('Rendered node has not loaded!')
       return; 
     }
     scene.add(this.mesh as Points);
@@ -51,7 +57,7 @@ export class RenderNode extends MNONode {
   public unrender(scene: Scene): void {
     if (!this.isRendering) { return; }
     if (!this.isLoaded || !this.mesh) { 
-      console.log('Node has not loaded!')
+      console.log('Unrendered node has not loaded!')
       return; 
     }
     scene.remove(this.mesh as Points);
@@ -81,6 +87,32 @@ export class RenderNode extends MNONode {
       scene.remove(this.bboxMesh);
     }
     this.isBBoxRendering = false;
+  }
+
+  // TODO: temporarily stash the deletion until the node is loaded, 
+  //  or loading the node to handle deletion.
+
+  public deleteGridPoint(gridNumber: number): RenderPoint | null {
+    const point = this.grid.get(gridNumber);
+    if (point) {
+      this.grid.delete(gridNumber);
+      this.isModified = true;
+    }
+    return point ? point as RenderPoint : null;
+  }
+
+  public deleteStackPoint(point: RenderPoint, stackNumber: number): void {
+    const stack = this.pointStacks[stackNumber];
+    if (stack.includes(point)) {
+      stack.splice(stack.indexOf(point), 1);
+      this.isModified = true;
+    }
+  }
+
+  public deleteStackPoints(points: RenderPoint[], stackNumber: number): void {
+    for (const point of points) {
+      this.deleteStackPoint(point, stackNumber);
+    }
   }
 
   private createMesh(): Points {

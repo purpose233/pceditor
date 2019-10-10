@@ -49,6 +49,10 @@ export abstract class BaseSelector {
     this.selectTree.removeUnreachedNodes();
   };
 
+  public deletePoints(scene: Scene): void {
+    
+  }
+
   private selectTreeRecursively(selectNode: SelectNode, refNode: RenderNode): void {
     let isDirty = false;
     

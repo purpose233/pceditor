@@ -47,6 +47,12 @@ export class SelectTree extends OctreeTree {
     (this.rootNode as SelectNode).updateRender(scene);
   }
 
+  public deleteTree(scene: Scene): void {
+    this.deleteNodeRecursively(this.rootNode as SelectNode);
+    // TODO: fill the hole of deletion
+    // TODO: update the rendering
+  }
+
   private removeChildren(node: SelectNode): void {
     for (const childWithNumber of node.getChildNodesWithNumber() as [number, SelectNode][]) {
       if (childWithNumber[1].checkIsReached()) {
@@ -54,6 +60,13 @@ export class SelectTree extends OctreeTree {
       } else {
         node.removeChildNode(childWithNumber[0]);
       }
+    }
+  }
+
+  private deleteNodeRecursively(node: SelectNode): void {
+    node.deleteNode();
+    for (const childNode of node.getChildNodes()) {
+      this.deleteNodeRecursively(childNode as SelectNode);
     }
   }
 }
