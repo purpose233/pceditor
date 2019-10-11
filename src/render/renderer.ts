@@ -9,8 +9,6 @@ import { calcWorldToCameraMatrix } from '../common/common';
 
 // import * as THREE from 'three';
 
-// TODO: unrender node when it is not required
-
 export class PCRenderer {
 
   private tree: RenderTree;
@@ -32,7 +30,7 @@ export class PCRenderer {
   public async renderTree(scene: Scene, camera: PerspectiveCamera): Promise<void> {
     this.currentWtoCMatrix = calcWorldToCameraMatrix(camera);
     const nodes = this.calcRenderNodes(this.tree.getRootNode() as RenderNode, camera);
-    console.log('count: ' + nodes.length);
+    // console.log('count: ' + nodes.length);
 
     // Hide unrequired nodes which are loaded but needn't to show.
     const iter = this.renderingNodes.values();
@@ -48,13 +46,25 @@ export class PCRenderer {
       this.showNode(node, scene, camera);
     }
 
-    // if (this.selector === null) {
-    //   this.selector = new SphereSelector(this.tree, scene, new Vector3(0,0,0), DefaultSphereSelectorRadius);
-    //   this.selector.render(scene, false);
-    //   console.log(scene);
-    //   console.log(this.selector);
-    //   console.log(this.tree);
-    // }
+    if (this.selector === null) {
+      this.selector = new SphereSelector(this.tree, scene, new Vector3(0,0,0), DefaultSphereSelectorRadius);
+      this.selector.render(scene, false);
+      console.log(scene);
+      console.log(this.selector);
+      console.log(this.tree);
+    } else {
+      this.selector.completeSelectTree(scene);
+      // for (const node of nodes) {
+      //   if (node.checkRecentLoaded()) {
+      //     this.selector.rebuildConnection(node);
+      //   }
+      // }
+    }
+
+    // clear recentLoaded flag after updating is done
+    for (const node of nodes) {
+      node.setNotRecentLoaded();
+    }
   }
   
   public hideNode(node: RenderNode, scene: Scene, camera: PerspectiveCamera): void {

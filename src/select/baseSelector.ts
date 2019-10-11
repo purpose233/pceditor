@@ -26,6 +26,7 @@ export abstract class BaseSelector {
   
   public abstract checkPointInSelector(point: RenderPoint): boolean;
 
+  // render need to be extended by child class
   public render(scene: Scene, isFocused: boolean): void {
     this.isRendering = true;
   } 
@@ -33,7 +34,27 @@ export abstract class BaseSelector {
   // public abstract pick();
 
   public checkIsRendering(): boolean { return this.isRendering; }
+  
+  public deletePoints(scene: Scene): void {
+    
+  }
 
+  public rebuildConnection(selectNode: SelectNode, refNode: RenderNode): void {
+    // const selectNode = this.selectTree.getNodeByIdx(refNode.getIdx()) as SelectNode | null;
+    // if (!selectNode) { return; }
+    const iter = selectNode.getGridEntryIter();
+    let result;
+    while (!(result = iter.next()).done) {
+      const gNumber: number = result.value[0];
+      selectNode.selectGridPoint(refNode.getGridPoint(gNumber) as RenderPoint, gNumber);
+    }
+
+    this.diffStacks(selectNode, refNode);
+    selectNode.setDirty();
+  }
+
+  // The function updateSelectTree will update each node of select tree and should be 
+  //  called after selector is changed.
   public updateSelectTree(scene: Scene): void {
     this.selectTree.dirtyTree();
     this.selectTree.unreachTree();
@@ -42,21 +63,27 @@ export abstract class BaseSelector {
     if (!this.checkNodeInSelector(refNode)) {
       selectNode.clear();
     } else {
-      this.selectTreeRecursively(selectNode, refNode);
+      this.updateTreeRecursively(selectNode, refNode);
     }
-    // Update rendering before remove unreached nodes.
+    // Update rendering before removing unreached nodes so that the unreached node 
+    //  which contains points before updating could be cleared.
     this.selectTree.updateTreeRender(scene);
     this.selectTree.removeUnreachedNodes();
   };
 
-  public deletePoints(scene: Scene): void {
-    
+  // The function completeSelectTree won't change the node that already has selecting result, 
+  //  but will check the previous unloaded node.
+  // It should be called after lru operation is excuted.
+  public completeSelectTree(scene: Scene): void {
+    const refNode = this.refTree.getRootNode() as RenderNode;
+    const selectNode = this.selectTree.getRootNode() as SelectNode;
+    this.completeTreeRecursively(selectNode, refNode);
+    this.selectTree.updateTreeRender(scene);
   }
 
-  private selectTreeRecursively(selectNode: SelectNode, refNode: RenderNode): void {
+  private diffGrid(selectNode: SelectNode, refNode: RenderNode): void {
     let isDirty = false;
     
-    // check points in grid
     const addNumbers: number[] = [];
     const removeNumbers: number[] = [];
     const refIter = refNode.getGridEntryIter();
@@ -124,8 +151,13 @@ export abstract class BaseSelector {
         selectNode.selectGridPoint(refNode.getGridPoint(gridNumber) as RenderPoint, gridNumber);
       }
     }
+    
+    if (isDirty) { selectNode.setDirty(); }
+  }
 
-    // check points in stacks
+  private diffStacks(selectNode: SelectNode, refNode: RenderNode): void {
+    let isDirty = false;
+
     // TODO: there are much to do to improve the comparing performance
     const refStackPoints: RenderPoint[][] = [[],[],[],[],[],[],[],[]];
     const selectStacks = selectNode.getStacks();
@@ -148,7 +180,21 @@ export abstract class BaseSelector {
       }
     }
 
-    isDirty ? selectNode.setDirty() : selectNode.setClean();
+    if (isDirty) { selectNode.setDirty(); }
+  }
+
+  private diff(selectNode: SelectNode, refNode: RenderNode): void {
+    this.diffGrid(selectNode, refNode);
+    this.diffStacks(selectNode, refNode);
+  }
+
+  private updateTreeRecursively(selectNode: SelectNode, refNode: RenderNode): void {
+    if (refNode.checkIsLoaded()) {
+      this.diff(selectNode, refNode);
+      selectNode.setNotNeedDiff();
+    } else {
+      selectNode.setNeedDiff();
+    }
     selectNode.setReached();
 
     // check points in child nodes
@@ -159,10 +205,24 @@ export abstract class BaseSelector {
           selectNode.setChildNode(childNumber, 
             new SelectNode(selectNode.getIdx() + childNumber, selectNode, childRefNode));
         }
-        this.selectTreeRecursively(selectNode.getChildNode(childNumber) as SelectNode, childRefNode);
+        this.updateTreeRecursively(selectNode.getChildNode(childNumber) as SelectNode, childRefNode);
       } else if (selectNode.checkChildNodeExist(childNumber)) {
         (selectNode.getChildNode(childNumber) as SelectNode).clear();
       }
+    }
+  }
+
+  private completeTreeRecursively(selectNode: SelectNode, refNode: RenderNode): void {
+    if (selectNode.checkNeedDiff() && refNode.checkIsLoaded()) {
+      this.diff(selectNode, refNode);
+      selectNode.setNotNeedDiff();
+    } else if (refNode.checkRecentLoaded()) {
+      this.rebuildConnection(selectNode, refNode);
+    }
+
+    for (const childWithNumber of selectNode.getChildNodesWithNumber()) {
+      this.completeTreeRecursively(childWithNumber[1] as SelectNode, 
+                                   refNode.getChildNode(childWithNumber[0]) as RenderNode);
     }
   }
 }

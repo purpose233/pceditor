@@ -15,9 +15,11 @@ export class RenderNode extends MNONode {
   // TODO: maybe remove isRendering flag
   private isRendering: boolean = false;
   private isBBoxRendering: boolean = false;
-  // private isDirty: boolean = false;
+  // whether the node is recently loaded
+  private recentLoaded: boolean = false;
+  // whether the node is modified by deleting/adding operation
   private isModified = false;
-  private needModifying = false;
+  // private needModifying = false;
 
   constructor(idx: string, bbox: BoundingBox, parentNode: null | RenderNode,
               isNew: boolean = true) {
@@ -30,16 +32,19 @@ export class RenderNode extends MNONode {
 
   public async load(): Promise<void> {
     if (this.isLoaded) { return; }
-    console.log('load node: ' + this.idx);
+    // console.log('load node: ' + this.idx);
     await deserializeNode(ExportDataPath + this.idx, this);
     this.isLoaded = true;
+    this.recentLoaded = true;
     this.mesh = this.createMesh();
   }
 
   public async unload(): Promise<void> {
+    // isLoaded will be set false in parent function
     await super.unload();
     if (this.isRendering) { console.log('unload rendering node'); }
-    console.log('unload node: ' + this.idx);
+    // console.log('unload node: ' + this.idx);
+    this.recentLoaded = false;
     this.mesh = null;
   }
 
@@ -73,6 +78,10 @@ export class RenderNode extends MNONode {
   }
 
   public checkIsRendering(): boolean { return this.isRendering; }
+
+  public checkRecentLoaded(): boolean { return this.recentLoaded; }
+
+  public setNotRecentLoaded(): void { this.recentLoaded = false; }
 
   public renderBBox(scene: Scene): void {
     if (!this.bboxMesh) {
