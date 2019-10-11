@@ -40,6 +40,8 @@ export class SelectNode extends OctreeNode {
   
   public setNotNeedDiff(): void { this.needDiff = false; }
   
+  public getRefNode(): RenderNode { return this.refNode; }
+
   public getGridEntryIter(): IterableIterator<[number, RenderPoint]> {
     return this.grid.entries();
   }
@@ -85,21 +87,9 @@ export class SelectNode extends OctreeNode {
       child.updateRender(scene);
     }
   }
-  
-  public deleteNode(): void {
-    const iter = this.grid.keys();
-    let result;
-    while (!(result = iter.next()).done) {
-      const gNumber: number = result.value;
-      this.refNode.deleteGridPoint(gNumber);
-    }
-    for (let i = 0; i < 8; i++) {
-      this.refNode.deleteStackPoints(this.pointStacks[i], i);
-    }
-  }
 
   // clear will clear all nodes in subtree
-  public clear(): void {
+  public clear(isRecursive: boolean = true): void {
     this.isReached = false;
     this.isDirty = this.isDirty || this.getPointCount() > 0;
     const gridIter = this.grid.values();
@@ -114,9 +104,24 @@ export class SelectNode extends OctreeNode {
     }
     this.grid.clear();
     this.pointStacks = [[],[],[],[],[],[],[],[]];
-    // If the parent node is not reached, the children won't be reached neither.
-    for (const child of this.getChildNodes() as SelectNode[]) {
-      child.clear();
+    if (isRecursive) {
+      // If the parent node is not reached, the children won't be reached neither.
+      for (const child of this.getChildNodes() as SelectNode[]) {
+        child.clear();
+      }
+    }
+  }
+
+  // delete points in refNode
+  public delete(): void {
+    const iter = this.grid.keys();
+    let result;
+    while (!(result = iter.next()).done) {
+      const gNumber: number = result.value;
+      this.refNode.deleteGridPoint(gNumber);
+    }
+    for (let i = 0; i < 8; i++) {
+      this.refNode.deleteStackPoints(this.pointStacks[i], i);
     }
   }
 }

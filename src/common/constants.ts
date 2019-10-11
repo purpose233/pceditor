@@ -26,6 +26,7 @@ export const MaxRenderNodes = 20;
 export const ExportFolderPath = '/home/purpose/Projects/web/output/';
 export const ExportIndexPath = ExportFolderPath + 'index';
 export const ExportDataPath = ExportFolderPath + 'n';
+export const ExportTempPostfix = '.temp';
 
 export const DefaultBoxSelectorWidth = 4;
 export const DefaultBoxSelectorHeight = 4;

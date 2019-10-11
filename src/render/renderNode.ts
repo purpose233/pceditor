@@ -2,8 +2,8 @@ import { MNONode } from '../tree/mnoNode';
 import { Points, Scene, BufferGeometry, BufferAttribute, 
   PointsMaterial, VertexColors, Line, 
   Mesh, MeshBasicMaterial, Color, BoxHelper, BoxGeometry, Box3, Box3Helper, Vector3 } from 'three';
-import { deserializeNode } from '../common/serialize';
-import { ExportDataPath, DefaultPointSize, SelectedPointColor, BBoxColor } from '../common/constants';
+import { deserializeNode, serializeNode } from '../common/serialize';
+import { ExportDataPath, DefaultPointSize, SelectedPointColor, BBoxColor, ExportTempPostfix } from '../common/constants';
 import { RenderPoint } from './renderPoint';
 import { MNOPoint } from '../tree/mnoPoint';
 import { BoundingBox } from '../common/bbox';
@@ -18,6 +18,7 @@ export class RenderNode extends MNONode {
   // whether the node is recently loaded
   private recentLoaded: boolean = false;
   // whether the node is modified by deleting/adding operation
+  // when node is modified, it will relate to temp file
   private isModified = false;
   // private needModifying = false;
 
@@ -30,16 +31,20 @@ export class RenderNode extends MNONode {
     return new RenderNode(idx, bbox, parentNode);
   };
 
-  public async load(): Promise<void> {
+  public async load(withoutMesh: boolean = false): Promise<void> {
     if (this.isLoaded) { return; }
     // console.log('load node: ' + this.idx);
-    await deserializeNode(ExportDataPath + this.idx, this);
+    const filePath = this.isModified ? ExportDataPath + this.idx + ExportTempPostfix : ExportDataPath + this.idx;
+    await deserializeNode(filePath, this);
     this.isLoaded = true;
     this.recentLoaded = true;
-    this.mesh = this.createMesh();
+    if (!withoutMesh) { this.mesh = this.createMesh(); }
   }
 
   public async unload(): Promise<void> {
+    if (this.isModified) {
+      serializeNode(ExportDataPath + this.idx + ExportTempPostfix, this);
+    }
     // isLoaded will be set false in parent function
     await super.unload();
     if (this.isRendering) { console.log('unload rendering node'); }

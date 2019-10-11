@@ -6,11 +6,14 @@ import { Scene } from 'three';
 import { SelectNode } from './selectNode';
 import { MNOPoint } from '../tree/mnoPoint';
 
+// TODO: functions like diffing, updating, deleting could be move to SelectNode class
+
 export abstract class BaseSelector {
   
   protected refTree: RenderTree;
   protected selectTree: SelectTree;
   protected isRendering: boolean = false;
+  // whether the selector is updated
   protected isUpdated: boolean = false;
 
   constructor(refTree: RenderTree) {
@@ -29,14 +32,16 @@ export abstract class BaseSelector {
   // render need to be extended by child class
   public render(scene: Scene, isFocused: boolean): void {
     this.isRendering = true;
-  } 
+  }
 
   // public abstract pick();
 
   public checkIsRendering(): boolean { return this.isRendering; }
   
-  public deletePoints(scene: Scene): void {
-    
+  public async deletePoints(scene: Scene): Promise<void> {
+    const rootNode = this.selectTree.getRootNode() as SelectNode;
+    await this.deleteRecursively(rootNode, rootNode.getRefNode());
+    this.selectTree.updateTreeRender(scene);
   }
 
   public rebuildConnection(selectNode: SelectNode, refNode: RenderNode): void {
@@ -186,6 +191,30 @@ export abstract class BaseSelector {
   private diff(selectNode: SelectNode, refNode: RenderNode): void {
     this.diffGrid(selectNode, refNode);
     this.diffStacks(selectNode, refNode);
+  }
+
+  private async deleteRecursively(selectNode: SelectNode, refNode: RenderNode): Promise<void> {
+    // TODO: fill the hole of deletion
+    let needUnload = false;
+    if (!refNode.checkIsLoaded()) {
+      // need not to create mesh for loaded refNode
+      await refNode.load(true);
+      needUnload = true;
+    }
+    if (selectNode.checkNeedDiff()) {
+      this.diff(selectNode, refNode);
+      selectNode.setNotNeedDiff();
+    }
+    selectNode.delete();
+    selectNode.setDirty();
+    // do not clear the nodes in subtree
+    selectNode.clear(false);
+    if (needUnload) {
+      await refNode.unload();
+    }
+    for (const childNode of selectNode.getChildNodes() as SelectNode[]) {
+      await this.deleteRecursively(childNode, childNode.getRefNode());
+    }
   }
 
   private updateTreeRecursively(selectNode: SelectNode, refNode: RenderNode): void {

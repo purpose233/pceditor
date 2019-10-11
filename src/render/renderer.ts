@@ -54,11 +54,6 @@ export class PCRenderer {
       console.log(this.tree);
     } else {
       this.selector.completeSelectTree(scene);
-      // for (const node of nodes) {
-      //   if (node.checkRecentLoaded()) {
-      //     this.selector.rebuildConnection(node);
-      //   }
-      // }
     }
 
     // clear recentLoaded flag after updating is done
