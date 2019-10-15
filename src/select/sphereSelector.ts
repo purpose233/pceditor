@@ -5,6 +5,7 @@ import { DefaultSphereSelectorRadius, UnselectedSelectorColor, DefaultSphereSele
 import { RenderTree } from '../render/renderTree';
 import { RenderPoint } from '../render/renderPoint';
 import { RenderNode } from '../render/renderNode';
+import { PositionGizmo } from './gizmo/positionGizmo';
 
 export class SphereSelector extends BaseSelector {
 
@@ -12,6 +13,7 @@ export class SphereSelector extends BaseSelector {
   private radius: number;
   private selectedMesh: Line;
   private unselectedMesh: Line;
+  private positionGizmo: PositionGizmo;
   // private controlMesh:
 
   constructor(refTree: RenderTree, scene: Scene, center: Vector3, radius: number) {
@@ -21,6 +23,9 @@ export class SphereSelector extends BaseSelector {
     this.selectedMesh = SphereSelector.createMesh(center, radius, true);
     this.unselectedMesh = SphereSelector.createMesh(center, radius, false);
     this.updateSelectTree(scene);
+    this.positionGizmo = new PositionGizmo(center, new Vector3(radius, radius, radius));
+
+    this.positionGizmo.enable(scene);
 
     // TODO: add transparent shape for selector
     // var geometry = new THREE.SphereBufferGeometry(DefaultSphereSelectorRadius, 32, 32);

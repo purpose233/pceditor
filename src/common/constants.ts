@@ -9,6 +9,14 @@ export const SelectedPointColor = new Color(0xf56f70);
 export const SelectedSelectorColor = new Color(0xffff00);
 export const UnselectedSelectorColor = new Color(0x00ff00);
 export const BBoxColor = new Color(0xaaaaaa);
+export const GizmoXColor = new Color(0xaa0000);
+export const GizmoYColor = new Color(0x00aa00);
+export const GizmoZColor = new Color(0x0000aa);
+export const GizmoArrowSegments = 20;
+export const GizmoArrowTopHeight = 0.1;
+export const GizmoArrowTopRadius = 0.05;
+export const GizmoArrowBodyRadius = 0.015;
+export const GizmoArrowBodyHeight = 1;
 
 export const GridSize = 128;
 export const NodeStackMax = 128;

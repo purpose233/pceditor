@@ -6,8 +6,6 @@ import { Scene } from 'three';
 import { SelectNode } from './selectNode';
 import { MNOPoint } from '../tree/mnoPoint';
 
-// TODO: functions like diffing, updating, deleting could be move to SelectNode class
-
 export abstract class BaseSelector {
   
   protected refTree: RenderTree;
@@ -15,7 +13,7 @@ export abstract class BaseSelector {
   protected isRendering: boolean = false;
   // whether the selector is updated
   protected isUpdated: boolean = false;
-
+ 
   constructor(refTree: RenderTree) {
     this.refTree = refTree;   
     this.selectTree = new SelectTree(refTree);
