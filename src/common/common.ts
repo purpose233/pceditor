@@ -1,4 +1,4 @@
-import { SerializedBBoxType } from './types';
+import { SerializedBBoxType, ClosestPointOfLineResult, AxisType } from './types';
 import { Vector3, Camera, Matrix4 } from 'three';
 import { BoundingBox } from './bbox';
 
@@ -40,4 +40,38 @@ export function calcWorldToCameraMatrix(camera: Camera): Matrix4 {
          -Math.sin(-ry),0,Math.cos(-ry),0,
          0,0,0,1);
   return mz.multiply(my).multiply(mx).multiply(mt);
+}
+
+// TODO: generalize the presentation of line
+export function calcClosestPointOfLines(origin0: Vector3, direction0: Vector3, 
+                                        origin1: Vector3, direction1: Vector3): ClosestPointOfLineResult | null {
+  // Solution:
+  //   P = o0 + s * d0; Q = o1 + t * d1;
+  //   (Q - P) * d0 = 0; (Q - P) * d1 = 0;
+  //   (o1 - o0) * d0 + t * d1 * d0 - s * d0 * d0 = 0;
+  //   (o1 - o0) * d1 + t * d1 * d1 - s * d0 * d1 = 0;
+  //   let a = (o1 - o0) * d0, b = (o1 - o0) * d1,
+  //       c = d0 * d0, d = d1 * d1, e = d0 * d1;
+  //   s = (a + e * t) / c;
+  //   t = (e * a / c - b) / (d - e * e / c);
+  
+  // TODO: normalize direction vectors
+  const o2 = origin0.clone().negate().add(origin1);
+  const a = o2.dot(direction0), b = o2.dot(direction1), c = direction0.dot(direction0), 
+        d = direction1.dot(direction1), e = direction0.dot(direction1);
+  if (c === 0 || d - e * e / c === 0) { return null; }
+  const t = (e * a / c - b) / (d - e * e / c);
+  const s = (a + e * t) / c;
+  const P = origin0.clone().add(direction0.multiplyScalar(s));
+  const Q = origin1.clone().add(direction1.multiplyScalar(t));
+  const distance = P.distanceTo(Q);
+  return { point0: P, point1: Q, s, t, distance };
+}
+
+export function getDirectionByAxis(axis: AxisType, isNegative: boolean = false): Vector3 {
+  switch (axis) {
+    case 'x': return new Vector3(isNegative ? -1 : 1, 0, 0);
+    case 'y': return new Vector3(0, isNegative ? -1 : 1, 0);
+    case 'z': return new Vector3(0, 0, isNegative ? -1 : 1);
+  }
 }

@@ -43,7 +43,10 @@ export class PCScene {
     // this.controls.staticMoving = true;
     // this.controls.dynamicDampingFactor = 0.3;
     // this.controls.keys = [ 65, 83, 68 ];
-    this.controls = new OrbitControls(this.camera, canvas);
+    
+    // Note that the control need to be added on the parent element of canvas, 
+    //  so that it could be stopped by gizmo event callbacks.  
+    this.controls = new OrbitControls(this.camera, canvas.parentElement as HTMLElement);
     this.controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
     this.controls.dampingFactor = 0.05;
     this.controls.screenSpacePanning = false;

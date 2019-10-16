@@ -47,7 +47,7 @@ export class PCRenderer {
     }
 
     if (this.selector === null) {
-      this.selector = new SphereSelector(this.tree, scene, new Vector3(0,0,0), DefaultSphereSelectorRadius);
+      this.selector = new SphereSelector(this.tree, scene, camera, new Vector3(0,0,0), DefaultSphereSelectorRadius);
       this.selector.render(scene, false);
       console.log(scene);
       console.log(this.selector);
@@ -151,7 +151,7 @@ export class PCRenderer {
     // node.renderBBox(scene);
     this.renderingNodes.add(node);
   }
- 
+
   private renderNodesTree(root: RenderNode, scene: Scene, camera: PerspectiveCamera): void {
     this.showNode(root, scene, camera);
     const childNodes = root.getChildNodes();

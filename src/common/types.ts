@@ -1,4 +1,4 @@
-import { Vector3 } from 'three';
+import { Vector3, Mesh } from 'three';
 
 export interface SerializedBBoxType {
   minX: number, minY: number, minZ: number, 
@@ -20,8 +20,17 @@ export interface TreeIndexType {
   root: NodeIndexType
 }
 
-// TODO: set BoundingBox to class
-// export interface BoundingBoxType {
-//   min: Vector3,
-//   max: Vector3
-// }
+export type AxisType = 'x' | 'y' | 'z';
+
+export type ClosestPointOfLineResult = {
+  point0: Vector3,
+  point1: Vector3,
+  s: number,
+  t: number,
+  distance: number
+};
+
+export type GizmoMeshesType = {
+  x: Mesh, y: Mesh, z: Mesh, 
+  xh: Mesh, yh: Mesh, zh: Mesh
+};
