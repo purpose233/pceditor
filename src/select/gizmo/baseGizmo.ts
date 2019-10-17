@@ -1,4 +1,4 @@
-import { Mesh, Vector3, Scene, Vector2, Object3D, Camera } from 'three';
+import { Mesh, Vector3, Scene, Vector2, Object3D, Camera, Raycaster } from 'three';
 import { AxisType, GizmoMeshesType } from '../../common/types';
 import { EventEmitter } from 'events';
 
@@ -25,10 +25,12 @@ export abstract class BaseGizmo {
   protected zHighlightMesh: Mesh;
   // position attribute is used in resize function after new meshes are created
   protected position: Vector3;
+  protected size: Vector3;
   protected isEnabled: boolean = false;
   protected highlightedAxis: AxisType | null = null;
   protected currentAxis: AxisType | null = null;
   protected totalOffset: number = 0;
+  protected rayCaster: Raycaster = new Raycaster();
 
   protected mouseDownCB: (e: MouseEvent) => void;
   protected mouseMoveCB: (e: MouseEvent) => void;
@@ -38,6 +40,7 @@ export abstract class BaseGizmo {
     this.scene = scene;
     this.camera = camera;
     this.position = position;
+    this.size = size;
     const meshes = this.createMeshes(size);
     this.xMesh = meshes.x;
     this.yMesh = meshes.y;
@@ -45,11 +48,7 @@ export abstract class BaseGizmo {
     this.xHighlightMesh = meshes.xh;
     this.yHighlightMesh = meshes.yh;
     this.zHighlightMesh = meshes.zh;
-    // In order to unite the paramater of relocate function, relocate function 
-    //  cannot be called without scene paremeter (even it won't be used).
-    this.xMesh.position.set(position.x, position.y, position.z);
-    this.yMesh.position.set(position.x, position.y, position.z);
-    this.zMesh.position.set(position.x, position.y, position.z);
+    this.relocate(scene, position);
     
     this.mouseDownCB = this.onMouseDown.bind(this);
     this.mouseMoveCB = this.onMouseMove.bind(this);
@@ -97,20 +96,23 @@ export abstract class BaseGizmo {
     this.xHighlightMesh = meshes.xh;
     this.yHighlightMesh = meshes.yh;
     this.zHighlightMesh = meshes.zh;
+    this.size.set(size.x, size.y, size.z);
     this.relocate(scene, this.position);
     if (this.isEnabled) {
       this.show(scene);
     }
   }
 
-  public relocate(scene: Scene, position: Vector3): void {
-    this.xMesh.position.set(position.x, position.y, position.z);
-    this.yMesh.position.set(position.x, position.y, position.z);
-    this.zMesh.position.set(position.x, position.y, position.z);
-    this.xHighlightMesh.position.set(position.x, position.y, position.z);
-    this.yHighlightMesh.position.set(position.x, position.y, position.z);
-    this.zHighlightMesh.position.set(position.x, position.y, position.z);
-  }
+  public abstract relocate(scene: Scene, position: Vector3): void;
+
+  // public relocate(scene: Scene, position: Vector3): void {
+  //   this.xMesh.position.set(position.x, position.y, position.z);
+  //   this.yMesh.position.set(position.x, position.y, position.z);
+  //   this.zMesh.position.set(position.x, position.y, position.z);
+  //   this.xHighlightMesh.position.set(position.x, position.y, position.z);
+  //   this.yHighlightMesh.position.set(position.x, position.y, position.z);
+  //   this.zHighlightMesh.position.set(position.x, position.y, position.z);
+  // }
 
   protected abstract onMouseDown(event: MouseEvent): void;
 
@@ -166,5 +168,13 @@ export abstract class BaseGizmo {
       case this.zMesh: return 'z';
       default: return selected.parent ? this.determineAxis(selected.parent) : null;
     }
+  }
+
+  protected intersectObject(event: MouseEvent): Object3D | null {
+    const mouse = this.calcMouse(event);
+    this.rayCaster.setFromCamera(mouse, this.camera);
+    const intersects = this.rayCaster.intersectObjects(this.getMeshes(), true);
+    if (intersects.length > 0) { return intersects[0].object }
+    else { return null; }
   }
 }

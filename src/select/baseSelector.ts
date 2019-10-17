@@ -28,9 +28,7 @@ export abstract class BaseSelector {
   public abstract checkPointInSelector(point: RenderPoint): boolean;
 
   // render need to be extended by child class
-  public render(scene: Scene, isFocused: boolean): void {
-    this.isRendering = true;
-  }
+  public abstract render(scene: Scene, isFocused: boolean): void;
 
   // public abstract pick();
 
