@@ -18,10 +18,6 @@ export abstract class BaseSelector {
     this.refTree = refTree;   
     this.selectTree = new SelectTree(refTree);
   }
-  
-  public abstract select(scene: Scene): void;
-
-  public abstract unselected(scene: Scene): void;
 
   public abstract checkNodeInSelector(node: RenderNode): boolean;
   
@@ -85,10 +81,7 @@ export abstract class BaseSelector {
   private diffGrid(selectNode: SelectNode, refNode: RenderNode): void {
     let isDirty = false;
     
-    const refIter = refNode.getGridEntryIter();
-    const selectIter = selectNode.getGridEntryIter();
-    let refResult, selectResult = selectIter.next();
-    if (selectResult.done) {
+    if (selectNode.getGridCount() === 0) {
       refNode.travelGrid((p: MNOPoint, i: number, gridNumber: number): void => {
         const point = p as RenderPoint;
         if (this.checkPointInSelector(point)) {
@@ -97,11 +90,15 @@ export abstract class BaseSelector {
         }
       });
     } else {
+      const refPoints = refNode.getGridPointsByOrder() as [number, RenderPoint][];
+      const selectPoints = selectNode.getGridPointsByOrder();
       const addNumbers: number[] = [];
       const removeNumbers: number[] = [];
-      let selectNumber = selectResult.value[0];
-      while (!(refResult = refIter.next()).done) {
-        const refNumber = refResult.value[0], refPoint = refResult.value[1];
+      let selectIndex = 0, refIndex = 0;
+      let selectNumber: number = selectPoints[selectIndex][0];
+      while (refIndex < refPoints.length) {
+        const refNumber = refPoints[refIndex][0], refPoint = refPoints[refIndex][1];
+        refIndex++;
         if (!this.checkPointInSelector(refPoint as RenderPoint)) { continue; }
         if (selectNumber === -1) {
           isDirty = true;
@@ -111,23 +108,23 @@ export abstract class BaseSelector {
             isDirty = true;
             addNumbers.push(refNumber);
           } else if (refNumber === selectNumber) {
-            selectResult = selectIter.next();
-            selectNumber = selectResult.done ? -1 : selectResult.value[0];
+            selectIndex++;
+            selectNumber = selectIndex >= selectPoints.length ? -1 : selectPoints[selectIndex][0];
           } else {
             isDirty = true;
             removeNumbers.push(selectNumber); 
             while (true) {
-              selectResult = selectIter.next();
-              if (selectResult.done) {
+              selectIndex++;
+              if (selectIndex >= selectPoints.length) {
                 selectNumber = -1;
                 break;
               } else {
-                selectNumber = selectResult.value[0];
+                selectNumber = selectPoints[selectIndex][0];
                 if (selectNumber < refNumber) {
                   removeNumbers.push(selectNumber);
                 } else if (selectNumber === refNumber) {
-                  selectResult = selectIter.next();
-                  selectNumber = selectResult.done ? -1 : selectResult.value[0];
+                  selectIndex++;
+                  selectNumber = selectIndex >= selectPoints.length ? -1 : selectPoints[selectIndex][0];
                   break;
                 } else {
                   addNumbers.push(refNumber);
@@ -141,9 +138,11 @@ export abstract class BaseSelector {
       if (selectNumber !== -1) {
         isDirty = true;
         removeNumbers.push(selectNumber);
-        while (!(selectResult = selectIter.next()).done) {
-          selectNumber = selectResult.value[0];
+        selectIndex++; 
+        while (selectIndex < selectPoints.length) {
+          selectNumber = selectPoints[selectIndex][0];
           removeNumbers.push(selectNumber);
+          selectIndex++
         }
       }
       for (const gridNumber of removeNumbers) {

@@ -17,6 +17,8 @@ export class SelectNode extends OctreeNode {
   // store points in eight stacks of render node
   private pointStacks: RenderPoint[][] = [[],[],[],[],[],[],[],[]];
 
+  private gridByOrder: [number, RenderPoint][] = [];
+
   constructor(idx: string, parentNode: SelectNode | null, refNode: RenderNode) {
     super(idx, parentNode);
     this.refNode = refNode;
@@ -45,18 +47,28 @@ export class SelectNode extends OctreeNode {
   public getGridEntryIter(): IterableIterator<[number, RenderPoint]> {
     return this.grid.entries();
   }
+
+  public getGridPointsByOrder(): [number, RenderPoint][] { return this.gridByOrder; }
+
+  public getGridCount(): number { return this.grid.size; }
   
   public getStacks(): RenderPoint[][] { return this.pointStacks; }
   
   public selectGridPoint(point: RenderPoint, gridNumber: number): void {
     point.select();
     this.grid.set(gridNumber, point);
+    const index = this.findInsertPointIndexByOrder(gridNumber);
+    if (index !== -1) {
+      this.gridByOrder.splice(index, 0, [gridNumber, point]);
+    }
   }
   
   public unselectGridPoint(gridNumber: number): void {
     const point = this.grid.get(gridNumber);
     if (point) { point.unselect(); }
     this.grid.delete(gridNumber);
+    const index = this.findPointIndexByOrder(gridNumber);
+    if (index !== -1) { this.gridByOrder.splice(index, 1); }
   }
   
   public selectStackPoint(point: RenderPoint, stackNumber: number): void {
@@ -123,6 +135,67 @@ export class SelectNode extends OctreeNode {
     }
     for (let i = 0; i < 8; i++) {
       this.refNode.deleteStackPoints(this.pointStacks[i], i);
+    }
+  }
+
+  protected findInsertPointIndexByOrder(gridNumber: number): number {
+    // for most situation, the grid number will be larger than all current grid points
+    if (this.gridByOrder.length <= 0) { return 0; }
+    if (gridNumber > this.gridByOrder[this.gridByOrder.length - 1][0]) {
+      return this.gridByOrder.length;
+    } else if (gridNumber < this.gridByOrder[0][0]) {
+      return 0;
+    } else {
+      const length = this.gridByOrder.length;
+      let left = 0, right = length - 1;
+      let index = Math.floor(length / 2);
+      while (true) {
+        if (this.gridByOrder[index][0] < gridNumber) {
+          if (index >= length - 1) { return length; }
+          if (this.gridByOrder[index + 1][0] > gridNumber) {
+            return index + 1;
+          } else {
+            left = index;
+            index = Math.ceil((right - index) / 2) + index;
+          }
+        } else if (this.gridByOrder[index][0] > gridNumber) {
+          if (index <= 0) { return 0; }
+          if (this.gridByOrder[index - 1][0] < gridNumber) {
+            return index;
+          } else {
+            right = index;
+            index = Math.floor((index - left) / 2) + left;
+          }
+        } else {
+          return -1;
+        }
+      }
+    }
+  }
+
+  protected findPointIndexByOrder(gridNumber: number): number {
+    if (this.gridByOrder.length <= 0) { return -1; }
+    if (gridNumber > this.gridByOrder[this.gridByOrder.length - 1][0]) {
+      return -1;
+    } else if (gridNumber < this.gridByOrder[0][0]) {
+      return -1;
+    } else {
+      const length = this.gridByOrder.length;
+      let left = 0, right = length - 1;
+      let index = Math.floor(length / 2);
+      while (true) {
+        if (this.gridByOrder[index][0] < gridNumber) {
+          left = index;
+          if (right === left + 1 && this.gridByOrder[right][0] !== gridNumber) { return -1; }
+          index = Math.ceil((right - index) / 2) + index;
+        } else if (this.gridByOrder[index][0] > gridNumber) {
+          right = index;
+          if (right === left + 1 && this.gridByOrder[left][0] !== gridNumber) { return -1; }
+          index = Math.floor((index - left) / 2) + left;
+        } else {
+          return index;
+        }
+      }
     }
   }
 }

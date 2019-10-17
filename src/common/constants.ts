@@ -13,8 +13,7 @@ export const MaxRenderNodes = 20;
 export const DefaultPointSize = 0.05;
 export const DefaultPointColor = new Color(0xffffff);
 export const SelectedPointColor = new Color(0xf56f70);
-export const SelectedSelectorColor = new Color(0xffff00);
-export const UnselectedSelectorColor = new Color(0x00ff00);
+export const SelectorColor = new Color(0x00ff00);
 export const BBoxColor = new Color(0xaaaaaa);
 
 // -- Gizmo rendering --

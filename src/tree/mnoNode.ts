@@ -15,6 +15,7 @@ export abstract class MNONode extends OctreeNode {
   protected grid: Map<number, MNOPoint> = new Map();
   protected pointStacks: MNOPoint[][] = [[],[],[],[],[],[],[],[]];
   protected isLoaded: boolean;
+  protected gridByOrder: [number, MNOPoint][] = [];
 
   constructor(idx: string, bbox: BoundingBox, parentNode: null | MNONode,
               isNew: boolean = true) {
@@ -26,7 +27,13 @@ export abstract class MNONode extends OctreeNode {
 
   protected abstract createNewNode(idx: string, bbox: BoundingBox, parentNode: null | MNONode): MNONode;
 
-  public addPointToGrid(gridNumber: number, point: MNOPoint): void { this.grid.set(gridNumber, point); }
+  public addPointToGrid(gridNumber: number, point: MNOPoint): void { 
+    this.grid.set(gridNumber, point);
+    const index = this.findInsertPointIndexByOrder(gridNumber);
+    if (index !== -1) {
+      this.gridByOrder.splice(index, 0, [gridNumber, point]);
+    }
+  }
 
   public addPointToStack(stackIndex: number, point: MNOPoint): void { this.pointStacks[stackIndex].push(point); }
 
@@ -100,17 +107,25 @@ export abstract class MNONode extends OctreeNode {
     }
   }
 
-  public getPointCount(): number {
-    let count = this.grid.size;
+  public getGridCount(): number { return this.grid.size; }
+
+  public getStacksCount(): number {
+    let count = 0;
     for (const stack of this.pointStacks) {
       count += stack.length;
     }
     return count;
   }
 
+  public getPointCount(): number {
+    return this.getGridCount() + this.getStacksCount();
+  }
+
   public getGrid(): Map<number, MNOPoint> { return this.grid; }
 
   public getGridPoint(gridNumber: number): MNOPoint | undefined { return this.grid.get(gridNumber); }
+
+  public getGridPointsByOrder(): [number, MNOPoint][] { return this.gridByOrder; }
 
   public getStacks(): MNOPoint[][] { return this.pointStacks; }
 
@@ -145,6 +160,7 @@ export abstract class MNONode extends OctreeNode {
 
   public async unload(): Promise<void> {
     this.grid.clear();
+    this.gridByOrder = [];
     this.pointStacks = [[],[],[],[],[],[],[],[]];
     this.isLoaded = false;
   }
@@ -179,5 +195,66 @@ export abstract class MNONode extends OctreeNode {
       this.bbox.getMax().clone().add(new Vector3(halfScope.x * (nodeVector.x - 1), 
         halfScope.y * (nodeVector.y - 1), halfScope.z * (nodeVector.z - 1)))
     );
+  }
+
+  protected findInsertPointIndexByOrder(gridNumber: number): number {
+    // for most situation, the grid number will be larger than all current grid points
+    if (this.gridByOrder.length <= 0) { return 0; }
+    if (gridNumber > this.gridByOrder[this.gridByOrder.length - 1][0]) {
+      return this.gridByOrder.length;
+    } else if (gridNumber < this.gridByOrder[0][0]) {
+      return 0;
+    } else {
+      const length = this.gridByOrder.length;
+      let left = 0, right = length - 1;
+      let index = Math.floor(length / 2);
+      while (true) {
+        if (this.gridByOrder[index][0] < gridNumber) {
+          if (index >= length - 1) { return length; }
+          if (this.gridByOrder[index + 1][0] > gridNumber) {
+            return index + 1;
+          } else {
+            left = index;
+            index = Math.ceil((right - index) / 2) + index;
+          }
+        } else if (this.gridByOrder[index][0] > gridNumber) {
+          if (index <= 0) { return 0; }
+          if (this.gridByOrder[index - 1][0] < gridNumber) {
+            return index;
+          } else {
+            right = index;
+            index = Math.floor((index - left) / 2) + left;
+          }
+        } else {
+          return -1;
+        }
+      }
+    }
+  }
+
+  protected findPointIndexByOrder(gridNumber: number): number {
+    if (this.gridByOrder.length <= 0) { return -1; }
+    if (gridNumber > this.gridByOrder[this.gridByOrder.length - 1][0]) {
+      return -1;
+    } else if (gridNumber < this.gridByOrder[0][0]) {
+      return -1;
+    } else {
+      const length = this.gridByOrder.length;
+      let left = 0, right = length - 1;
+      let index = Math.floor(length / 2);
+      while (true) {
+        if (this.gridByOrder[index][0] < gridNumber) {
+          left = index;
+          if (right === left + 1 && this.gridByOrder[right][0] !== gridNumber) { return -1; }
+          index = Math.ceil((right - index) / 2) + index;
+        } else if (this.gridByOrder[index][0] > gridNumber) {
+          right = index;
+          if (right === left + 1 && this.gridByOrder[left][0] !== gridNumber) { return -1; }
+          index = Math.floor((index - left) / 2) + left;
+        } else {
+          return index;
+        }
+      }
+    }
   }
 }

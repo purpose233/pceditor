@@ -121,6 +121,8 @@ export class RenderNode extends MNONode {
     if (point) {
       this.grid.delete(gridNumber);
       this.isModified = true;
+      const index = this.findPointIndexByOrder(gridNumber);
+      if (index !== -1) { this.gridByOrder.splice(index, 1); }
     }
     return point ? point as RenderPoint : null;
   }

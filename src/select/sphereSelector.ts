@@ -1,6 +1,8 @@
 import { BaseSelector } from './baseSelector';
-import { Vector3, LineBasicMaterial, LineLoop, Line, CircleGeometry, Scene, Camera } from 'three';
-import { DefaultSphereSelectorRadius, UnselectedSelectorColor, DefaultSphereSelectorSegments, SelectedSelectorColor, MinSphereSelectorRadius } from '../common/constants';
+import { Vector3, LineBasicMaterial, LineLoop, Line, 
+  CircleGeometry, Scene, Camera } from 'three';
+import { DefaultSphereSelectorRadius, SelectorColor,
+   DefaultSphereSelectorSegments, MinSphereSelectorRadius } from '../common/constants';
 import { RenderTree } from '../render/renderTree';
 import { RenderPoint } from '../render/renderPoint';
 import { RenderNode } from '../render/renderNode';
@@ -15,8 +17,7 @@ export class SphereSelector extends BaseSelector {
   private scene: Scene;
   private center: Vector3;
   private radius: number;
-  private selectedMesh: Line;
-  private unselectedMesh: Line;
+  private mesh: Line;
   private positionGizmo: PositionGizmo;
   private sizeGizmo: SizeGizmo;
 
@@ -25,8 +26,7 @@ export class SphereSelector extends BaseSelector {
     this.scene = scene;
     this.center = center;
     this.radius = radius;
-    this.selectedMesh = SphereSelector.createMesh(center, radius, true);
-    this.unselectedMesh = SphereSelector.createMesh(center, radius, false);
+    this.mesh = SphereSelector.createMesh(center, radius);
     
     const gizmoSize = new Vector3(radius, radius, radius);
     this.positionGizmo = new PositionGizmo(scene, camera, center, gizmoSize);
@@ -148,42 +148,22 @@ export class SphereSelector extends BaseSelector {
     
   // }
 
-  public select(scene: Scene): void {
-    scene.remove(this.unselectedMesh);
-    scene.add(this.selectedMesh);
-  }
-
-  public unselected(scene: Scene): void {
-    scene.remove(this.selectedMesh);
-    scene.add(this.unselectedMesh);
-  }
-
   public render(scene: Scene, isFocused: boolean): void {    
     if (this.isUpdated) {
-      this.scene.remove(this.selectedMesh);
-      this.scene.remove(this.unselectedMesh);
-      this.selectedMesh = SphereSelector.createMesh(this.center, this.radius, true);
-      this.unselectedMesh = SphereSelector.createMesh(this.center, this.radius, false);
+      this.scene.remove(this.mesh);
+      this.mesh = SphereSelector.createMesh(this.center, this.radius);
+      this.isUpdated = false;
     }
     // TODO: Use relocate function or just modify in relocate function
-    this.selectedMesh.position.set(this.center.x, this.center.y, this.center.z);
-    this.unselectedMesh.position.set(this.center.x, this.center.y, this.center.z);
+    this.mesh.position.set(this.center.x, this.center.y, this.center.z);
     
-    scene.add(this.unselectedMesh);
-
-    // if (isFocused) {
-    //   scene.remove(this.unselectedMesh);
-    //   scene.add(this.selectedMesh);
-    // } else {
-    //   scene.remove(this.selectedMesh);
-    //   scene.add(this.unselectedMesh);
-    // }
+    scene.add(this.mesh);
     this.isRendering = true;
   }
 
   // TODO: use transparent sphere instead
-  private static createMesh(center: Vector3, radius: number, isSelected: boolean): Line {
-    const material = new LineBasicMaterial({color: isSelected ? SelectedSelectorColor : UnselectedSelectorColor});
+  private static createMesh(center: Vector3, radius: number): Line {
+    const material = new LineBasicMaterial({color: SelectorColor});
     const geometry = new CircleGeometry(radius, DefaultSphereSelectorSegments);
     // Remove center vertex
     geometry.vertices.shift();

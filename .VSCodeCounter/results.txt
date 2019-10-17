@@ -1,24 +1,24 @@
-Date : 2019-10-17 11:35:33
+Date : 2019-10-17 14:32:40
 Directory : /home/purpose/Projects/web/pceditor/src
-Total : 33 files,  1971 codes, 375 comments, 393 blanks, all 2739 lines
+Total : 34 files,  2020 codes, 397 comments, 402 blanks, all 2819 lines
 
 Languages
 +------------+------------+------------+------------+------------+------------+
 | language   | files      | code       | comment    | blank      | total      |
 +------------+------------+------------+------------+------------+------------+
-| TypeScript |         33 |      1,971 |        375 |        393 |      2,739 |
+| TypeScript |         34 |      2,020 |        397 |        402 |      2,819 |
 +------------+------------+------------+------------+------------+------------+
 
 Directories
 +-------------------------------+------------+------------+------------+------------+------------+
 | path                          | files      | code       | comment    | blank      | total      |
 +-------------------------------+------------+------------+------------+------------+------------+
-| .                             |         33 |      1,971 |        375 |        393 |      2,739 |
-| select                        |          9 |        775 |        108 |        142 |      1,025 |
-| common                        |          6 |        396 |         96 |         68 |        560 |
+| .                             |         34 |      2,020 |        397 |        402 |      2,819 |
+| select                        |         10 |        821 |        125 |        150 |      1,096 |
+| common                        |          6 |        399 |        101 |         69 |        569 |
 | render                        |          5 |        314 |        127 |         76 |        517 |
+| select/gizmo                  |          5 |        296 |         25 |         48 |        369 |
 | tree                          |          5 |        269 |         11 |         64 |        344 |
-| select/gizmo                  |          4 |        259 |         19 |         42 |        320 |
 | converter                     |          5 |        168 |         10 |         29 |        207 |
 +-------------------------------+------------+------------+------------+------------+------------+
 
@@ -28,7 +28,7 @@ Files
 +-------------------------------+------------+------------+------------+------------+------------+
 | common/bbox.ts                | TypeScript |        116 |         45 |         22 |        183 |
 | common/common.ts              | TypeScript |         60 |         11 |          7 |         78 |
-| common/constants.ts           | TypeScript |         31 |          7 |          8 |         46 |
+| common/constants.ts           | TypeScript |         34 |         12 |          9 |         55 |
 | common/lru.ts                 | TypeScript |         32 |         13 |          8 |         53 |
 | common/serialize.ts           | TypeScript |        128 |         19 |         16 |        163 |
 | common/types.ts               | TypeScript |         29 |          1 |          7 |         37 |
@@ -45,19 +45,20 @@ Files
 | render/renderTree.ts          | TypeScript |         23 |          0 |          6 |         29 |
 | render/renderer.ts            | TypeScript |         81 |         86 |         19 |        186 |
 | render/scene.ts               | TypeScript |         57 |         27 |         19 |        103 |
-| select/baseSelector.ts        | TypeScript |        212 |         17 |         28 |        257 |
+| select/baseSelector.ts        | TypeScript |        210 |         17 |         28 |        255 |
 | select/boxSelector.ts         | TypeScript |          0 |         37 |         10 |         47 |
-| select/gizmo/baseGizmo.ts     | TypeScript |        138 |          7 |         26 |        171 |
-| select/gizmo/positionGizmo.ts | TypeScript |        121 |         12 |         14 |        147 |
-| select/gizmo/resizeGizmo.ts   | TypeScript |          0 |          0 |          1 |          1 |
+| select/gizmo/axisGizmo.ts     | TypeScript |         78 |          9 |          9 |         96 |
+| select/gizmo/baseGizmo.ts     | TypeScript |        140 |         13 |         28 |        181 |
+| select/gizmo/positionGizmo.ts | TypeScript |         46 |          3 |          5 |         54 |
+| select/gizmo/resizeGizmo.ts   | TypeScript |         32 |          0 |          5 |         37 |
 | select/gizmo/rotationGizmo.ts | TypeScript |          0 |          0 |          1 |          1 |
 | select/selectNode.ts          | TypeScript |         95 |          9 |         25 |        129 |
 | select/selectTree.ts          | TypeScript |         46 |          4 |         11 |         61 |
-| select/sphereSelector.ts      | TypeScript |        163 |         22 |         26 |        211 |
+| select/sphereSelector.ts      | TypeScript |        174 |         33 |         28 |        235 |
 | tree/mnoNode.ts               | TypeScript |        146 |          9 |         29 |        184 |
 | tree/mnoPoint.ts              | TypeScript |         20 |          0 |          7 |         27 |
 | tree/mnoTree.ts               | TypeScript |         21 |          1 |          7 |         29 |
 | tree/octreeNode.ts            | TypeScript |         44 |          0 |         12 |         56 |
 | tree/octreeTree.ts            | TypeScript |         38 |          1 |          9 |         48 |
-| Total                         |            |      1,971 |        375 |        393 |      2,739 |
+| Total                         |            |      2,020 |        397 |        402 |      2,819 |
 +-------------------------------+------------+------------+------------+------------+------------+
