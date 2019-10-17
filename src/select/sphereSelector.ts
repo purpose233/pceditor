@@ -45,7 +45,7 @@ export class SphereSelector extends BaseSelector {
   // TODO: whether rerendering should to be called by selector itself?
   public relocate(scene: Scene, position: Vector3): void {
     this.center.set(position.x, position.y, position.z);
-    // this.updateSelectTree(scene);
+    this.updateSelectTree(scene);
   }
 
   public resize(scene: Scene, radius: number): void {

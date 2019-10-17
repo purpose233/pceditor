@@ -66,7 +66,7 @@ export class SelectNode extends OctreeNode {
   
   public unselectStackPoint(point: RenderPoint, stackNumber: number): void {
     point.unselect();
-    this.pointStacks[stackNumber].splice(this.pointStacks[stackNumber].indexOf(point));
+    this.pointStacks[stackNumber].splice(this.pointStacks[stackNumber].indexOf(point), 1);
   }
   
   public getPointCount(): number {
@@ -78,6 +78,7 @@ export class SelectNode extends OctreeNode {
   }
   
   public updateRender(scene: Scene): void {
+    // TODO: clear unreached node
     if (this.isDirty) {
       this.refNode.updateRender(scene);
       this.isDirty = false;
@@ -107,7 +108,7 @@ export class SelectNode extends OctreeNode {
     if (isRecursive) {
       // If the parent node is not reached, the children won't be reached neither.
       for (const child of this.getChildNodes() as SelectNode[]) {
-        child.clear();
+        child.clear(true);
       }
     }
   }

@@ -20,7 +20,8 @@ export class RenderNode extends MNONode {
   // whether the node is modified by deleting/adding operation
   // when node is modified, it will relate to temp file
   private isModified = false;
-  // private needModifying = false;
+  // used for debugging
+  private isForceUnrender: boolean = false;
 
   constructor(idx: string, bbox: BoundingBox, parentNode: null | RenderNode,
               isNew: boolean = true) {
@@ -54,7 +55,7 @@ export class RenderNode extends MNONode {
   }
 
   public render(scene: Scene): void {
-    if (this.isRendering) { return; }
+    if (this.isRendering || this.isForceUnrender) { return; }
     if (!this.isLoaded || !this.mesh) { 
       console.log('Rendered node has not loaded!')
       return; 
@@ -73,6 +74,15 @@ export class RenderNode extends MNONode {
     scene.remove(this.mesh as Points);
     if (this.isBBoxRendering && this.bboxMesh) { scene.remove(this.bboxMesh); }
     this.isRendering = false;
+  }
+
+  public forceUnrender(scene: Scene): void {
+    this.isForceUnrender = true;
+    this.unrender(scene);
+  }
+
+  public unforceUnrender(scene: Scene): void {
+    this.isForceUnrender = false;
   }
 
   public updateRender(scene: Scene): void {

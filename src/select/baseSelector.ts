@@ -87,8 +87,6 @@ export abstract class BaseSelector {
   private diffGrid(selectNode: SelectNode, refNode: RenderNode): void {
     let isDirty = false;
     
-    const addNumbers: number[] = [];
-    const removeNumbers: number[] = [];
     const refIter = refNode.getGridEntryIter();
     const selectIter = selectNode.getGridEntryIter();
     let refResult, selectResult = selectIter.next();
@@ -101,6 +99,8 @@ export abstract class BaseSelector {
         }
       });
     } else {
+      const addNumbers: number[] = [];
+      const removeNumbers: number[] = [];
       let selectNumber = selectResult.value[0];
       while (!(refResult = refIter.next()).done) {
         const refNumber = refResult.value[0], refPoint = refResult.value[1];
@@ -142,6 +142,7 @@ export abstract class BaseSelector {
       }
       if (selectNumber !== -1) {
         isDirty = true;
+        removeNumbers.push(selectNumber);
         while (!(selectResult = selectIter.next()).done) {
           selectNumber = selectResult.value[0];
           removeNumbers.push(selectNumber);
