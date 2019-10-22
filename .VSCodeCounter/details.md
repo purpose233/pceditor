@@ -1,17 +1,17 @@
 # Details
 
-Date : 2019-10-17 17:17:57
+Date : 2019-10-22 16:55:43
 
 Directory /home/purpose/Projects/web/pceditor/src
 
-Total : 34 files,  2150 codes, 355 comments, 398 blanks, all 2903 lines
+Total : 35 files,  2320 codes, 349 comments, 417 blanks, all 3086 lines
 
 [summary](results.md)
 
 ## Files
 | filename | language | code | comment | blank | total |
 | :--- | :--- | ---: | ---: | ---: | ---: |
-| [common/bbox.ts](file:///home/purpose/Projects/web/pceditor/src/common/bbox.ts) | TypeScript | 116 | 45 | 22 | 183 |
+| [common/bbox.ts](file:///home/purpose/Projects/web/pceditor/src/common/bbox.ts) | TypeScript | 123 | 45 | 24 | 192 |
 | [common/common.ts](file:///home/purpose/Projects/web/pceditor/src/common/common.ts) | TypeScript | 60 | 11 | 7 | 78 |
 | [common/constants.ts](file:///home/purpose/Projects/web/pceditor/src/common/constants.ts) | TypeScript | 33 | 12 | 9 | 54 |
 | [common/lru.ts](file:///home/purpose/Projects/web/pceditor/src/common/lru.ts) | TypeScript | 32 | 13 | 8 | 53 |
@@ -28,19 +28,20 @@ Total : 34 files,  2150 codes, 355 comments, 398 blanks, all 2903 lines
 | [render/renderNode.ts](file:///home/purpose/Projects/web/pceditor/src/render/renderNode.ts) | TypeScript | 148 | 10 | 23 | 181 |
 | [render/renderPoint.ts](file:///home/purpose/Projects/web/pceditor/src/render/renderPoint.ts) | TypeScript | 7 | 4 | 9 | 20 |
 | [render/renderTree.ts](file:///home/purpose/Projects/web/pceditor/src/render/renderTree.ts) | TypeScript | 23 | 0 | 6 | 29 |
-| [render/renderer.ts](file:///home/purpose/Projects/web/pceditor/src/render/renderer.ts) | TypeScript | 81 | 86 | 19 | 186 |
+| [render/renderer.ts](file:///home/purpose/Projects/web/pceditor/src/render/renderer.ts) | TypeScript | 82 | 87 | 19 | 188 |
 | [render/scene.ts](file:///home/purpose/Projects/web/pceditor/src/render/scene.ts) | TypeScript | 57 | 27 | 19 | 103 |
-| [select/baseSelector.ts](file:///home/purpose/Projects/web/pceditor/src/select/baseSelector.ts) | TypeScript | 211 | 17 | 26 | 254 |
-| [select/boxSelector.ts](file:///home/purpose/Projects/web/pceditor/src/select/boxSelector.ts) | TypeScript | 0 | 0 | 1 | 1 |
+| [select/baseSelector.ts](file:///home/purpose/Projects/web/pceditor/src/select/baseSelector.ts) | TypeScript | 213 | 17 | 25 | 255 |
+| [select/boxSelector.ts](file:///home/purpose/Projects/web/pceditor/src/select/boxSelector.ts) | TypeScript | 147 | 1 | 14 | 162 |
 | [select/gizmo/axisGizmo.ts](file:///home/purpose/Projects/web/pceditor/src/select/gizmo/axisGizmo.ts) | TypeScript | 78 | 9 | 9 | 96 |
 | [select/gizmo/baseGizmo.ts](file:///home/purpose/Projects/web/pceditor/src/select/gizmo/baseGizmo.ts) | TypeScript | 140 | 13 | 28 | 181 |
 | [select/gizmo/positionGizmo.ts](file:///home/purpose/Projects/web/pceditor/src/select/gizmo/positionGizmo.ts) | TypeScript | 46 | 3 | 5 | 54 |
-| [select/gizmo/resizeGizmo.ts](file:///home/purpose/Projects/web/pceditor/src/select/gizmo/resizeGizmo.ts) | TypeScript | 32 | 0 | 5 | 37 |
+| [select/gizmo/resizeGizmo.ts](file:///home/purpose/Projects/web/pceditor/src/select/gizmo/resizeGizmo.ts) | TypeScript | 33 | 0 | 5 | 38 |
 | [select/gizmo/rotationGizmo.ts](file:///home/purpose/Projects/web/pceditor/src/select/gizmo/rotationGizmo.ts) | TypeScript | 0 | 0 | 1 | 1 |
 | [select/selectNode.ts](file:///home/purpose/Projects/web/pceditor/src/select/selectNode.ts) | TypeScript | 162 | 10 | 30 | 202 |
 | [select/selectTree.ts](file:///home/purpose/Projects/web/pceditor/src/select/selectTree.ts) | TypeScript | 46 | 4 | 11 | 61 |
-| [select/sphereSelector.ts](file:///home/purpose/Projects/web/pceditor/src/select/sphereSelector.ts) | TypeScript | 164 | 26 | 25 | 215 |
-| [tree/mnoNode.ts](file:///home/purpose/Projects/web/pceditor/src/tree/mnoNode.ts) | TypeScript | 217 | 10 | 34 | 261 |
+| [select/shapeSelector.ts](file:///home/purpose/Projects/web/pceditor/src/select/shapeSelector.ts) | TypeScript | 28 | 2 | 9 | 39 |
+| [select/sphereSelector.ts](file:///home/purpose/Projects/web/pceditor/src/select/sphereSelector.ts) | TypeScript | 147 | 16 | 20 | 183 |
+| [tree/mnoNode.ts](file:///home/purpose/Projects/web/pceditor/src/tree/mnoNode.ts) | TypeScript | 218 | 10 | 35 | 263 |
 | [tree/mnoPoint.ts](file:///home/purpose/Projects/web/pceditor/src/tree/mnoPoint.ts) | TypeScript | 20 | 0 | 7 | 27 |
 | [tree/mnoTree.ts](file:///home/purpose/Projects/web/pceditor/src/tree/mnoTree.ts) | TypeScript | 21 | 1 | 7 | 29 |
 | [tree/octreeNode.ts](file:///home/purpose/Projects/web/pceditor/src/tree/octreeNode.ts) | TypeScript | 44 | 0 | 12 | 56 |

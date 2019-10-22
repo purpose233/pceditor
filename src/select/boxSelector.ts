@@ -1,6 +1,6 @@
 import { ShapeSelector } from './shapeSelector';
-import { Vector3, Line, Scene, Camera, Box3Helper, Box3, Object3D, LineBasicMaterial, VertexColors, BufferGeometry, Float32BufferAttribute } from 'three';
-import { SelectorColor, MinBoxSelectorSize, DefaultBoxSelectorSize } from '../common/constants';
+import { Vector3, Line, Scene, Camera, Object3D, LineBasicMaterial, VertexColors, BufferGeometry, Float32BufferAttribute } from 'three';
+import { SelectorColor, MinBoxSelectorSize } from '../common/constants';
 import { RenderTree } from '../render/renderTree';
 import { RenderPoint } from '../render/renderPoint';
 import { RenderNode } from '../render/renderNode';

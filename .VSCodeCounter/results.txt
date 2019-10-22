@@ -1,24 +1,24 @@
-Date : 2019-10-17 17:17:57
+Date : 2019-10-22 16:55:42
 Directory : /home/purpose/Projects/web/pceditor/src
-Total : 34 files,  2150 codes, 355 comments, 398 blanks, all 2903 lines
+Total : 35 files,  2320 codes, 349 comments, 417 blanks, all 3086 lines
 
 Languages
 +------------+------------+------------+------------+------------+------------+
 | language   | files      | code       | comment    | blank      | total      |
 +------------+------------+------------+------------+------------+------------+
-| TypeScript |         34 |      2,150 |        355 |        398 |      2,903 |
+| TypeScript |         35 |      2,320 |        349 |        417 |      3,086 |
 +------------+------------+------------+------------+------------+------------+
 
 Directories
 +-------------------------------+------------+------------+------------+------------+------------+
 | path                          | files      | code       | comment    | blank      | total      |
 +-------------------------------+------------+------------+------------+------------+------------+
-| .                             |         34 |      2,150 |        355 |        398 |      2,903 |
-| select                        |         10 |        879 |         82 |        141 |      1,102 |
-| common                        |          6 |        398 |        101 |         69 |        568 |
-| tree                          |          5 |        340 |         12 |         69 |        421 |
-| render                        |          5 |        316 |        127 |         76 |        519 |
-| select/gizmo                  |          5 |        296 |         25 |         48 |        369 |
+| .                             |         35 |      2,320 |        349 |        417 |      3,086 |
+| select                        |         11 |      1,040 |         75 |        157 |      1,272 |
+| common                        |          6 |        405 |        101 |         71 |        577 |
+| tree                          |          5 |        341 |         12 |         70 |        423 |
+| render                        |          5 |        317 |        128 |         76 |        521 |
+| select/gizmo                  |          5 |        297 |         25 |         48 |        370 |
 | converter                     |          5 |        168 |         10 |         29 |        207 |
 +-------------------------------+------------+------------+------------+------------+------------+
 
@@ -26,7 +26,7 @@ Files
 +-------------------------------+------------+------------+------------+------------+------------+
 | filename                      | language   | code       | comment    | blank      | total      |
 +-------------------------------+------------+------------+------------+------------+------------+
-| common/bbox.ts                | TypeScript |        116 |         45 |         22 |        183 |
+| common/bbox.ts                | TypeScript |        123 |         45 |         24 |        192 |
 | common/common.ts              | TypeScript |         60 |         11 |          7 |         78 |
 | common/constants.ts           | TypeScript |         33 |         12 |          9 |         54 |
 | common/lru.ts                 | TypeScript |         32 |         13 |          8 |         53 |
@@ -43,22 +43,23 @@ Files
 | render/renderNode.ts          | TypeScript |        148 |         10 |         23 |        181 |
 | render/renderPoint.ts         | TypeScript |          7 |          4 |          9 |         20 |
 | render/renderTree.ts          | TypeScript |         23 |          0 |          6 |         29 |
-| render/renderer.ts            | TypeScript |         81 |         86 |         19 |        186 |
+| render/renderer.ts            | TypeScript |         82 |         87 |         19 |        188 |
 | render/scene.ts               | TypeScript |         57 |         27 |         19 |        103 |
-| select/baseSelector.ts        | TypeScript |        211 |         17 |         26 |        254 |
-| select/boxSelector.ts         | TypeScript |          0 |          0 |          1 |          1 |
+| select/baseSelector.ts        | TypeScript |        213 |         17 |         25 |        255 |
+| select/boxSelector.ts         | TypeScript |        147 |          1 |         14 |        162 |
 | select/gizmo/axisGizmo.ts     | TypeScript |         78 |          9 |          9 |         96 |
 | select/gizmo/baseGizmo.ts     | TypeScript |        140 |         13 |         28 |        181 |
 | select/gizmo/positionGizmo.ts | TypeScript |         46 |          3 |          5 |         54 |
-| select/gizmo/resizeGizmo.ts   | TypeScript |         32 |          0 |          5 |         37 |
+| select/gizmo/resizeGizmo.ts   | TypeScript |         33 |          0 |          5 |         38 |
 | select/gizmo/rotationGizmo.ts | TypeScript |          0 |          0 |          1 |          1 |
 | select/selectNode.ts          | TypeScript |        162 |         10 |         30 |        202 |
 | select/selectTree.ts          | TypeScript |         46 |          4 |         11 |         61 |
-| select/sphereSelector.ts      | TypeScript |        164 |         26 |         25 |        215 |
-| tree/mnoNode.ts               | TypeScript |        217 |         10 |         34 |        261 |
+| select/shapeSelector.ts       | TypeScript |         28 |          2 |          9 |         39 |
+| select/sphereSelector.ts      | TypeScript |        147 |         16 |         20 |        183 |
+| tree/mnoNode.ts               | TypeScript |        218 |         10 |         35 |        263 |
 | tree/mnoPoint.ts              | TypeScript |         20 |          0 |          7 |         27 |
 | tree/mnoTree.ts               | TypeScript |         21 |          1 |          7 |         29 |
 | tree/octreeNode.ts            | TypeScript |         44 |          0 |         12 |         56 |
 | tree/octreeTree.ts            | TypeScript |         38 |          1 |          9 |         48 |
-| Total                         |            |      2,150 |        355 |        398 |      2,903 |
+| Total                         |            |      2,320 |        349 |        417 |      3,086 |
 +-------------------------------+------------+------------+------------+------------+------------+

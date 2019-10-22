@@ -1,24 +1,37 @@
 import { AxisGizmo } from './axisGizmo';
 import { Mesh, Vector3, Color, Scene, 
-  CylinderBufferGeometry, MeshBasicMaterial } from 'three';
+  CylinderBufferGeometry, MeshBasicMaterial, BackSide } from 'three';
 import { GizmoArrowTopRadius, GizmoArrowTopHeight, GizmoArrowSegments, 
   GizmoXColor, GizmoYColor, GizmoZColor, 
-  GizmoArrowBodyRadius, GizmoArrowBodyHeight, GizmoXHighlightColor, GizmoYHighlightColor, GizmoZHighlightColor } from '../../common/constants';
+  GizmoArrowBodyRadius, GizmoArrowBodyHeight, GizmoXHighlightColor, GizmoYHighlightColor, GizmoZHighlightColor, OutlineColor, OutlineRatio } from '../../common/constants';
 import { GizmoMeshesType } from '../../common/types';
 
 // default cylinder is placed at origin and orient to y+ direction
 function createArrowMesh(color: Color): Mesh {
-  const material = new MeshBasicMaterial({color})
+  const material = new MeshBasicMaterial({color});
   const topGeometry = new CylinderBufferGeometry(0, GizmoArrowTopRadius, 
-                                                 GizmoArrowTopHeight, GizmoArrowSegments);
+    GizmoArrowTopHeight, GizmoArrowSegments);
   const arrowTop = new Mesh(topGeometry, material);
   const bodyGeometry = new CylinderBufferGeometry(GizmoArrowBodyRadius, GizmoArrowBodyRadius, 
-                                          GizmoArrowBodyHeight, GizmoArrowSegments);
+    GizmoArrowBodyHeight, GizmoArrowSegments);
   const arrowBody = new Mesh(bodyGeometry, material);
   // arrowBody.translateY(GizmoArrowBodyHeight / 2);
   // cuz the arrow top is a child of arrow body, the translating result will be the sum of two mesh.
   arrowTop.translateY(GizmoArrowBodyHeight / 2 + GizmoArrowTopHeight / 2);
   arrowBody.add(arrowTop);
+  
+  // create outline mesh
+  const outlineMaterial = new MeshBasicMaterial({color: OutlineColor, side: BackSide});
+  const topGeometryOutline = new CylinderBufferGeometry(0, GizmoArrowTopRadius * OutlineRatio, 
+    GizmoArrowTopHeight * OutlineRatio, GizmoArrowSegments);
+  const arrowTopOutline = new Mesh(topGeometryOutline, outlineMaterial);
+  const ratio = (OutlineRatio - 1) * 2.5 + 1;
+  const bodyGeometryOutline = new CylinderBufferGeometry(GizmoArrowBodyRadius * ratio, GizmoArrowBodyRadius * ratio, 
+    GizmoArrowBodyHeight, GizmoArrowSegments);
+  const arrowBodyOutline = new Mesh(bodyGeometryOutline, outlineMaterial);
+  arrowTopOutline.translateY(GizmoArrowBodyHeight / 2 + GizmoArrowTopHeight * OutlineRatio / 2);
+  arrowBody.add(arrowTopOutline);
+  arrowBody.add(arrowBodyOutline);
   return arrowBody;
 }
 

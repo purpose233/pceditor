@@ -1,5 +1,5 @@
 import { ShapeSelector } from './shapeSelector';
-import { Vector3, LineBasicMaterial, LineLoop, Line, 
+import { Vector3, LineBasicMaterial, LineLoop, 
   CircleGeometry, Scene, Camera, Object3D } from 'three';
 import { DefaultSphereSelectorRadius, SelectorColor,
   DefaultSphereSelectorSegments, MinSphereSelectorRadius } from '../common/constants';

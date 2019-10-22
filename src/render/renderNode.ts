@@ -1,9 +1,9 @@
 import { MNONode } from '../tree/mnoNode';
 import { Points, Scene, BufferGeometry, BufferAttribute, 
   PointsMaterial, VertexColors, Line, 
-  Mesh, MeshBasicMaterial, Color, BoxHelper, BoxGeometry, Box3, Box3Helper, Vector3 } from 'three';
+  Color, Box3, Box3Helper, Vector3 } from 'three';
 import { deserializeNode, serializeNode } from '../common/serialize';
-import { ExportDataPath, DefaultPointSize, SelectedPointColor, BBoxColor, ExportTempPostfix } from '../common/constants';
+import { ExportDataPath, DefaultPointSize, SelectedPointColor, BBoxColor, ExportTempPostfix, OutlineRatio, OutlineColor } from '../common/constants';
 import { RenderPoint } from './renderPoint';
 import { MNOPoint } from '../tree/mnoPoint';
 import { BoundingBox } from '../common/bbox';
@@ -165,8 +165,12 @@ export class RenderNode extends MNONode {
     geometry.addAttribute('position', new BufferAttribute(positions, 3));
     geometry.addAttribute('color', new BufferAttribute(colors, 3));
     geometry.computeBoundingBox();
+    const outlineMaterial = new PointsMaterial({size: DefaultPointSize * OutlineRatio, color: OutlineColor});
+    const outlineMesh = new Points(geometry, outlineMaterial);
     const material = new PointsMaterial({size: DefaultPointSize, vertexColors: VertexColors});
-    return new Points(geometry, material);
+    const mesh = new Points(geometry, material);
+    mesh.add(outlineMesh);
+    return mesh;
   }
 
   private createBBoxMesh(): Box3Helper {

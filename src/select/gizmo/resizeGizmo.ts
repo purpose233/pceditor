@@ -1,16 +1,23 @@
 import { AxisGizmo } from './axisGizmo';
 import { Vector3, Scene, MeshBasicMaterial, 
-  SphereBufferGeometry, Color, Mesh } from 'three';
+  SphereBufferGeometry, Color, Mesh, BackSide, FrontSide } from 'three';
 import { GizmoMeshesType } from '../../common/types';
 import { GizmoSphereRadius, GizmoSphereSegments, 
   GizmoXColor, GizmoYColor, GizmoZColor, 
-  GizmoXHighlightColor, GizmoYHighlightColor, GizmoZHighlightColor } from '../../common/constants';
+  GizmoXHighlightColor, GizmoYHighlightColor, GizmoZHighlightColor, OutlineColor, OutlineRatio } from '../../common/constants';
 
 function createSphere(color: Color): Mesh {
-  const material = new MeshBasicMaterial({color});
+  const material = new MeshBasicMaterial({color, side: FrontSide});
   const geometry = new SphereBufferGeometry(GizmoSphereRadius, 
     GizmoSphereSegments, GizmoSphereSegments);
-  return new Mesh(geometry, material);
+  const mesh = new Mesh(geometry, material);
+  
+  // create outline mesh
+  const outlineMaterial = new MeshBasicMaterial({color: OutlineColor, side: BackSide});
+  const outlineMesh = new Mesh(geometry, outlineMaterial);
+  outlineMesh.scale.multiplyScalar(OutlineRatio);
+  mesh.add(outlineMesh);
+  return mesh;
 }
 
 export class SizeGizmo extends AxisGizmo {
