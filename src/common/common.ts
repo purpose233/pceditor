@@ -56,7 +56,7 @@ export function calcClosestPointOfLines(origin0: Vector3, direction0: Vector3,
   //   t = (e * a / c - b) / (d - e * e / c);
   
   // TODO: normalize direction vectors
-  const o2 = origin0.clone().negate().add(origin1);
+  const o2 = origin1.clone().sub(origin0.clone());
   const a = o2.dot(direction0), b = o2.dot(direction1), c = direction0.dot(direction0), 
         d = direction1.dot(direction1), e = direction0.dot(direction1);
   if (c === 0 || d - e * e / c === 0) { return null; }

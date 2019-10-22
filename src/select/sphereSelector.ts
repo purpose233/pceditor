@@ -1,8 +1,8 @@
-import { BaseSelector } from './baseSelector';
+import { ShapeSelector } from './shapeSelector';
 import { Vector3, LineBasicMaterial, LineLoop, Line, 
-  CircleGeometry, Scene, Camera } from 'three';
+  CircleGeometry, Scene, Camera, Object3D } from 'three';
 import { DefaultSphereSelectorRadius, SelectorColor,
-   DefaultSphereSelectorSegments, MinSphereSelectorRadius } from '../common/constants';
+  DefaultSphereSelectorSegments, MinSphereSelectorRadius } from '../common/constants';
 import { RenderTree } from '../render/renderTree';
 import { RenderPoint } from '../render/renderPoint';
 import { RenderNode } from '../render/renderNode';
@@ -10,23 +10,15 @@ import { PositionGizmo } from './gizmo/positionGizmo';
 import { AxisType } from '../common/types';
 import { SizeGizmo } from './gizmo/resizeGizmo';
 
-export class SphereSelector extends BaseSelector {
+export class SphereSelector extends ShapeSelector {
 
-  // TODO: fix the poor design of scene attribute
-  // used in gizmo callback, cuz it is called by emitter
-  private scene: Scene;
-  private center: Vector3;
   private radius: number;
-  private mesh: Line;
   private positionGizmo: PositionGizmo;
   private sizeGizmo: SizeGizmo;
 
   constructor(refTree: RenderTree, scene: Scene, camera: Camera, center: Vector3, radius: number) {
-    super(refTree);
-    this.scene = scene;
-    this.center = center;
+    super(refTree, scene, center, SphereSelector.createMesh(center, radius));
     this.radius = radius;
-    this.mesh = SphereSelector.createMesh(center, radius);
     
     const gizmoSize = new Vector3(radius, radius, radius);
     this.positionGizmo = new PositionGizmo(scene, camera, center, gizmoSize);
@@ -35,9 +27,9 @@ export class SphereSelector extends BaseSelector {
     this.positionGizmo.enable(scene);
     
     this.sizeGizmo = new SizeGizmo(scene, camera, center, gizmoSize);
-    this.sizeGizmo.enable(scene);
     this.sizeGizmo.addDragMoveCB(this.onSizeGizmoDragMove.bind(this));
     this.sizeGizmo.addDragEndCB(this.onSizeGizmoDragMove.bind(this));
+    this.sizeGizmo.enable(scene);
 
     // TODO: add transparent shape for selector
     // var geometry = new THREE.SphereBufferGeometry(DefaultSphereSelectorRadius, 32, 32);
@@ -48,15 +40,8 @@ export class SphereSelector extends BaseSelector {
     this.updateSelectTree(scene);
   }
 
-  public getCenter(): Vector3 { return this.center.clone(); }
-
-  // TODO: whether rerendering should to be called by selector itself?
-  public relocate(scene: Scene, position: Vector3): void {
-    this.center.set(position.x, position.y, position.z);
-    this.updateSelectTree(scene);
-  }
-
   public resize(scene: Scene, radius: number): void {
+    if (radius < MinSphereSelectorRadius) { return; }
     this.radius = radius;
     this.isUpdated = true;
     this.updateSelectTree(scene);
@@ -144,25 +129,12 @@ export class SphereSelector extends BaseSelector {
     return this.center.distanceTo(point.getPosition()) <= this.radius;
   }
 
-  // public updateSelectTree(): void {
-    
-  // }
-
-  public render(scene: Scene, isFocused: boolean): void {    
-    if (this.isUpdated) {
-      this.scene.remove(this.mesh);
-      this.mesh = SphereSelector.createMesh(this.center, this.radius);
-      this.isUpdated = false;
-    }
-    // TODO: Use relocate function or just modify in relocate function
-    this.mesh.position.set(this.center.x, this.center.y, this.center.z);
-    
-    scene.add(this.mesh);
-    this.isRendering = true;
+  protected updateMesh(): void {
+    this.mesh = SphereSelector.createMesh(this.center, this.radius);
   }
 
   // TODO: use transparent sphere instead
-  private static createMesh(center: Vector3, radius: number): Line {
+  private static createMesh(center: Vector3, radius: number): Object3D {
     const material = new LineBasicMaterial({color: SelectorColor});
     const geometry = new CircleGeometry(radius, DefaultSphereSelectorSegments);
     // Remove center vertex
@@ -182,8 +154,6 @@ export class SphereSelector extends BaseSelector {
     return parent;
   }
 
-  // private onPositionGizmoDragStart(axis: AxisType): void {}
-  // private onPositionGizmoDragUp(axis: AxisType, deltaOffset: number, totalOffset: number): void {}
   private onPositionGizmoDragMove(axis: AxisType, deltaOffset: number, totalOffset: number): void {
     const newCenter = this.center.clone();
     switch (axis) {
@@ -194,18 +164,16 @@ export class SphereSelector extends BaseSelector {
     this.positionGizmo.relocate(this.scene, newCenter);
     this.sizeGizmo.relocate(this.scene, newCenter);
     this.relocate(this.scene, newCenter);
-    this.render(this.scene, false);
+    this.render(this.scene);
   }
 
-  // private onSizeGizmoDragStart(axis: AxisType): void {}
-  // private onSizeGizmoDragUp(axis: AxisType, deltaOffset: number, totalOffset: number): void {}
   private onSizeGizmoDragMove(axis: AxisType, deltaOffset: number, totalOffset: number): void {
     // TODO: handle different axes
     const radius = this.radius + deltaOffset < MinSphereSelectorRadius ? 
       MinSphereSelectorRadius : this.radius + deltaOffset;
     this.sizeGizmo.resize(this.scene, new Vector3(radius, radius, radius));
     this.resize(this.scene, radius);
-    this.render(this.scene, false);
+    this.render(this.scene);
   }
 }
 

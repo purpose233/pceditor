@@ -137,6 +137,8 @@ export abstract class MNONode extends OctreeNode {
     return count;
   }
 
+  public getCenter(): Vector3 { return this.bbox.getCenter(); }
+
   public getBBox(): BoundingBox { return this.bbox; }
 
   public getIndex(): NodeIndexType {
@@ -167,7 +169,7 @@ export abstract class MNONode extends OctreeNode {
 
   protected findGrid(point: MNOPoint): Vector3 {
     const currentScope = point.getPosition().clone()
-      .add(this.bbox.getMin().clone().negate());
+      .sub(this.bbox.getMin().clone());
     const x = Math.floor(currentScope.x * GridSize / this.bboxSize.x);
     const y = Math.floor(currentScope.y * GridSize / this.bboxSize.y);
     const z = Math.floor(currentScope.z * GridSize / this.bboxSize.z);

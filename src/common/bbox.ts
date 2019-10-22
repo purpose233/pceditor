@@ -6,25 +6,27 @@ export class BoundingBox {
   private max: Vector3;
   private min: Vector3;
   private size: Vector3;
+  private center: Vector3;
 
   constructor(max: Vector3, min: Vector3) {
     this.max = max;
     this.min = min;
-    this.size = min.clone().negate().add(max);
+    this.size = max.clone().sub(min.clone());
+    this.center = max.clone().add(min.clone()).divideScalar(2);
   }
 
   public getMax(): Vector3 { return this.max; }
 
   public setMax(max: Vector3): void { 
-    this.max = max; 
-    this.size = this.min.clone().negate().add(this.max);
+    this.max = max;
+    this.updateAttributes(); 
   }
 
   public getMin(): Vector3 { return this.min; }
 
   public setMin(min: Vector3): void { 
-    this.min = min; 
-    this.size = this.min.clone().negate().add(this.max);
+    this.min = min;
+    this.updateAttributes(); 
   }
 
   public getSize(): Vector3 { return this.size; }
@@ -32,6 +34,8 @@ export class BoundingBox {
   public getSizeMaxScalar(): number { return Math.max(this.size.x, this.size.y, this.size.z); }
   
   public getSizeMinScalar(): number { return Math.min(this.size.x, this.size.y, this.size.z); }
+
+  public getCenter(): Vector3 { return this.center; }
 
   public calcDistanceToPosition(position: Vector3): number {
     return this.max.clone().add(this.min).divideScalar(2).distanceTo(position);
@@ -48,6 +52,11 @@ export class BoundingBox {
     vertices.push(new Vector3(this.max.x, this.max.y, this.min.z));
     vertices.push(new Vector3(this.max.x, this.max.y, this.max.z));
     return vertices; 
+  }
+
+  private updateAttributes(): void {
+    this.size = this.max.clone().sub(this.min.clone());
+    this.center = this.max.clone().add(this.min.clone()).divideScalar(2);
   }
 
   // outdated way, could not check node containing frustum

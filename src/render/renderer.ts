@@ -4,8 +4,9 @@ import { RenderNode } from './renderNode';
 import { LRU } from '../common/lru';
 import { BaseSelector } from '../select/baseSelector';
 import { SphereSelector } from '../select/sphereSelector';
-import { DefaultSphereSelectorRadius } from '../common/constants';
+import { DefaultSphereSelectorRadius, DefaultBoxSelectorSize } from '../common/constants';
 import { calcWorldToCameraMatrix } from '../common/common';
+import { BoxSelector } from '../select/boxSelector';
 
 // import * as THREE from 'three';
 
@@ -47,8 +48,9 @@ export class PCRenderer {
     }
 
     if (this.selector === null) {
-      this.selector = new SphereSelector(this.tree, scene, camera, new Vector3(0,0,0), DefaultSphereSelectorRadius);
-      this.selector.render(scene, false);
+      // this.selector = new SphereSelector(this.tree, scene, camera, new Vector3(0,0,0), DefaultSphereSelectorRadius);
+      this.selector = new BoxSelector(this.tree, scene, camera, new Vector3(0,0,0), new Vector3(DefaultBoxSelectorSize, DefaultBoxSelectorSize, DefaultBoxSelectorSize));
+      this.selector.render(scene);
       console.log(scene);
       console.log(this.selector);
       console.log(this.tree);

@@ -1,27 +1,27 @@
 # Summary
 
-Date : 2019-10-17 14:32:40
+Date : 2019-10-17 17:17:57
 
 Directory /home/purpose/Projects/web/pceditor/src
 
-Total : 34 files,  2020 codes, 397 comments, 402 blanks, all 2819 lines
+Total : 34 files,  2150 codes, 355 comments, 398 blanks, all 2903 lines
 
 [details](details.md)
 
 ## Languages
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| TypeScript | 34 | 2,020 | 397 | 402 | 2,819 |
+| TypeScript | 34 | 2,150 | 355 | 398 | 2,903 |
 
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 34 | 2,020 | 397 | 402 | 2,819 |
-| common | 6 | 399 | 101 | 69 | 569 |
+| . | 34 | 2,150 | 355 | 398 | 2,903 |
+| common | 6 | 398 | 101 | 69 | 568 |
 | converter | 5 | 168 | 10 | 29 | 207 |
-| render | 5 | 314 | 127 | 76 | 517 |
-| select | 10 | 821 | 125 | 150 | 1,096 |
+| render | 5 | 316 | 127 | 76 | 519 |
+| select | 10 | 879 | 82 | 141 | 1,102 |
 | select/gizmo | 5 | 296 | 25 | 48 | 369 |
-| tree | 5 | 269 | 11 | 64 | 344 |
+| tree | 5 | 340 | 12 | 69 | 421 |
 
 [details](details.md)

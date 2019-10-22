@@ -1,5 +1,5 @@
 import { Scene, PerspectiveCamera, 
-  WebGLRenderer, GridHelper, Color } from 'three';
+  WebGLRenderer, Color } from 'three';
 // import { TrackballControls } from '../../lib/TrackballControls';
 import { OrbitControls } from '../../lib/OrbitControls';
 import Stats from 'stats.js';

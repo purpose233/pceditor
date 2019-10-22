@@ -7,15 +7,19 @@ import { SelectNode } from './selectNode';
 import { MNOPoint } from '../tree/mnoPoint';
 
 export abstract class BaseSelector {
-  
+
+  // TODO: fix the poor design of scene attribute
+  // used in gizmo callback, cuz it is called by emitter
+  protected scene: Scene;
   protected refTree: RenderTree;
   protected selectTree: SelectTree;
   protected isRendering: boolean = false;
   // whether the selector is updated
   protected isUpdated: boolean = false;
  
-  constructor(refTree: RenderTree) {
+  constructor(refTree: RenderTree, scene: Scene) {
     this.refTree = refTree;   
+    this.scene = scene;
     this.selectTree = new SelectTree(refTree);
   }
 
@@ -23,10 +27,7 @@ export abstract class BaseSelector {
   
   public abstract checkPointInSelector(point: RenderPoint): boolean;
 
-  // render need to be extended by child class
-  public abstract render(scene: Scene, isFocused: boolean): void;
-
-  // public abstract pick();
+  public abstract render(scene: Scene): void;
 
   public checkIsRendering(): boolean { return this.isRendering; }
   

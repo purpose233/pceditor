@@ -1,6 +1,7 @@
 # dev
 .idea/
 .vscode/
+.VSCodeCounter/
 node_modules/
 *.log
 __pycache__/

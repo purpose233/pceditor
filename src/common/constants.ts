@@ -32,11 +32,11 @@ export const GizmoSphereRadius = 0.05;
 export const GizmoSphereSegments = 20;
 
 // -- Selector attributes --
-export const DefaultBoxSelectorWidth = 4;
-export const DefaultBoxSelectorHeight = 4;
 export const MinSphereSelectorRadius = 0.5;
 export const DefaultSphereSelectorRadius = 2; 
 export const DefaultSphereSelectorSegments = 64;
+export const MinBoxSelectorSize = 1;
+export const DefaultBoxSelectorSize = 4;
 
 // -- Point cloud converter --
 // Max converter threshold should be greater than a fulfilled node,
