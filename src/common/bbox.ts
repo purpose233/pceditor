@@ -54,7 +54,7 @@ export class BoundingBox {
     return vertices; 
   }
 
-  private updateAttributes(): void {
+  public updateAttributes(): void {
     this.size = this.max.clone().sub(this.min.clone());
     this.center = this.max.clone().add(this.min.clone()).divideScalar(2);
   }

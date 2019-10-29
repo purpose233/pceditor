@@ -32,11 +32,15 @@ export class RenderNode extends MNONode {
     return new RenderNode(idx, bbox, parentNode);
   };
 
+  public getFilePath(): string {
+    return this.isModified ? ExportDataPath + this.idx + ExportTempPostfix : 
+      ExportDataPath + this.idx;
+  }
+
   public async load(withoutMesh: boolean = false): Promise<void> {
     if (this.isLoaded) { return; }
     // console.log('load node: ' + this.idx);
-    const filePath = this.isModified ? ExportDataPath + this.idx + ExportTempPostfix : ExportDataPath + this.idx;
-    await deserializeNode(filePath, this);
+    await deserializeNode(this.getFilePath(), this);
     this.isLoaded = true;
     this.recentLoaded = true;
     if (!withoutMesh) { this.mesh = this.createMesh(); }
@@ -119,6 +123,7 @@ export class RenderNode extends MNONode {
   public deleteGridPoint(gridNumber: number): RenderPoint | null {
     const point = this.grid.get(gridNumber);
     if (point) {
+      this.pointCount--;
       this.grid.delete(gridNumber);
       this.isModified = true;
       const index = this.findPointIndexByOrder(gridNumber);
@@ -130,6 +135,7 @@ export class RenderNode extends MNONode {
   public deleteStackPoint(point: RenderPoint, stackNumber: number): void {
     const stack = this.pointStacks[stackNumber];
     if (stack.includes(point)) {
+      this.pointCount--;
       stack.splice(stack.indexOf(point), 1);
       this.isModified = true;
     }

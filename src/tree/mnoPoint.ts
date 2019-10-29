@@ -19,8 +19,8 @@ export abstract class MNOPoint {
 
   public isInBBox(bbox: BoundingBox): boolean {
   const min = bbox.getMin(), max = bbox.getMax();
-  return this.position.x > min.x && this.position.x < max.x 
-      && this.position.y > min.y && this.position.y < max.y 
-      && this.position.z > min.z && this.position.z < max.z;
+  return this.position.x >= min.x && this.position.x <= max.x 
+      && this.position.y >= min.y && this.position.y <= max.y 
+      && this.position.z >= min.z && this.position.z <= max.z;
   }
 }

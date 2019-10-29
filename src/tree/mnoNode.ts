@@ -16,6 +16,7 @@ export abstract class MNONode extends OctreeNode {
   protected pointStacks: MNOPoint[][] = [[],[],[],[],[],[],[],[]];
   protected isLoaded: boolean;
   protected gridByOrder: [number, MNOPoint][] = [];
+  protected pointCount: number = 0;
 
   constructor(idx: string, bbox: BoundingBox, parentNode: null | MNONode,
               isNew: boolean = true) {
@@ -48,6 +49,7 @@ export abstract class MNONode extends OctreeNode {
     const gridNumber = this.calcGridNumber(grid);
     if (!this.grid.get(gridNumber)) {
       this.grid.set(gridNumber, point);
+      this.pointCount++;
     } else {
       const nodeVector = this.findChildNodeVectorByGrid(grid);
       const nodeNumber = this.calcNodeNumber(nodeVector);
@@ -57,11 +59,13 @@ export abstract class MNONode extends OctreeNode {
       } else {
         if (this.pointStacks[nodeNumber].length < NodeStackMax) {
           this.pointStacks[nodeNumber].push(point);
+          this.pointCount++;
         } else {
           const childNode = this.createNewNode(this.idx + nodeNumber,
             this.calcBBoxByNode(nodeVector), this);
           childNode.addPoints(this.pointStacks[nodeNumber]);
           this.childNodes[nodeNumber] = childNode;
+          this.pointCount -= this.pointStacks[nodeNumber].length;
           this.pointStacks[nodeNumber] = [];
         }
       }
@@ -117,8 +121,16 @@ export abstract class MNONode extends OctreeNode {
     return count;
   }
 
-  public getPointCount(): number {
-    return this.getGridCount() + this.getStacksCount();
+  public getPointCount(): number { return this.pointCount; }
+
+  public setPointCount(count: number): void { this.pointCount = count; } 
+
+  public getSubtreePointCount(): number {
+    let count = this.getPointCount();
+    for (const childNode of this.getChildNodes() as MNONode[]) {
+      count += childNode.getSubtreePointCount();
+    }
+    return count;
   }
 
   public getGrid(): Map<number, MNOPoint> { return this.grid; }
@@ -146,7 +158,8 @@ export abstract class MNONode extends OctreeNode {
       idx: this.idx, 
       bbox: bboxToSerializedbboxType(this.bbox), 
       mask: this.getChildrenMask(),
-      childIndexes: this.childNodes.map((node) => (node ? (node as MNONode).getIndex() : null))
+      childIndexes: this.childNodes.map((node) => (node ? (node as MNONode).getIndex() : null)),
+      pointCount: this.pointCount
     }; 
   }
 
@@ -173,16 +186,17 @@ export abstract class MNONode extends OctreeNode {
     const x = Math.floor(currentScope.x * GridSize / this.bboxSize.x);
     const y = Math.floor(currentScope.y * GridSize / this.bboxSize.y);
     const z = Math.floor(currentScope.z * GridSize / this.bboxSize.z);
-    return new Vector3(x, y, z);
+    return new Vector3(x >= GridSize ? x - 1 : x, y >= GridSize ? y - 1 : y, z >= GridSize ? z - 1 : z);
   }
 
   protected calcGridNumber(grid: Vector3): number {
     return grid.x + grid.y * GridSize + grid.z * GridSize * GridSize;
-  } 
+  }
 
   protected findChildNodeVectorByGrid(grid: Vector3): Vector3 {
-    return new Vector3(Math.floor(grid.x / 64), Math.floor(grid.y / 64), 
-      Math.floor(grid.z / 64));
+    const gridToStack = GridSize / 2;
+    return new Vector3(Math.floor(grid.x / gridToStack), Math.floor(grid.y / gridToStack), 
+      Math.floor(grid.z / gridToStack));
   }
 
   protected calcNodeNumber(nodeVector: Vector3): number {
@@ -192,10 +206,10 @@ export abstract class MNONode extends OctreeNode {
   protected calcBBoxByNode(nodeVector: Vector3): BoundingBox {
     const halfScope = this.bboxSize.clone().divideScalar(2);
     return new BoundingBox(
-      this.bbox.getMin().clone().add(new Vector3(halfScope.x * nodeVector.x, 
-        halfScope.y * nodeVector.y, halfScope.z * nodeVector.z)),
       this.bbox.getMax().clone().add(new Vector3(halfScope.x * (nodeVector.x - 1), 
-        halfScope.y * (nodeVector.y - 1), halfScope.z * (nodeVector.z - 1)))
+        halfScope.y * (nodeVector.y - 1), halfScope.z * (nodeVector.z - 1))),
+      this.bbox.getMin().clone().add(new Vector3(halfScope.x * nodeVector.x, 
+        halfScope.y * nodeVector.y, halfScope.z * nodeVector.z))
     );
   }
 

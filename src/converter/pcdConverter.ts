@@ -32,8 +32,8 @@ export class PCDConverter extends BaseConverter {
 
   public async readBoundingBox(path: string): Promise<BoundingBox> {
     const bbox: BoundingBox = new BoundingBox(
-      new Vector3(Infinity, Infinity, Infinity),
-      new Vector3(-Infinity, -Infinity, -Infinity)
+      new Vector3(-Infinity, -Infinity, -Infinity),
+      new Vector3(Infinity, Infinity, Infinity)
     );
     await this.readLine(path, (data: string): void => {
       const words = data.split(' ');
@@ -44,6 +44,7 @@ export class PCDConverter extends BaseConverter {
         bbox.getMin().min(vector);
       }
     });
+    bbox.updateAttributes();
     return bbox;
   }
 
@@ -65,6 +66,7 @@ export class PCDConverter extends BaseConverter {
         }
       }
     });
+    console.log('Read points: ' + pointCount);
     await serializeTree(tree);
     return tree;
   }

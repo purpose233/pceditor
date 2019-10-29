@@ -20,7 +20,7 @@ export class ConverterNode extends MNONode {
   public setRefTree(refTree: ConverterTree): void { this.refTree = refTree; }
 
   protected createNewNode(idx: string, bbox: BoundingBox, parentNode: null | ConverterNode): MNONode {
-    return new ConverterNode(idx, bbox, parentNode, this.refTree);
+    return new ConverterNode(idx, bbox, parentNode, this.refTree, true);
   };
 
   public async addPoint(point: ConverterPoint): Promise<void> {
@@ -33,6 +33,7 @@ export class ConverterNode extends MNONode {
     if (!this.grid.get(gridNumber)) {
       this.grid.set(gridNumber, point);
       isInCurrentNode = true;
+      this.pointCount++;
     } else {
       const nodeVector = this.findChildNodeVectorByGrid(grid);
       const nodeNumber = this.calcNodeNumber(nodeVector);
@@ -43,12 +44,15 @@ export class ConverterNode extends MNONode {
         if (this.pointStacks[nodeNumber].length < NodeStackMax) {
           this.pointStacks[nodeNumber].push(point);
           isInCurrentNode = true;
+          this.pointCount++;
         } else {
           const childNode = this.createNewNode(this.idx + nodeNumber,
             this.calcBBoxByNode(nodeVector), this);
           childNode.addPoints(this.pointStacks[nodeNumber]);
           this.childNodes[nodeNumber] = childNode;
+          this.pointCount -= this.pointStacks[nodeNumber].length;
           this.pointStacks[nodeNumber] = [];
+          childNode.addPoint(point);
         }
       }
     }

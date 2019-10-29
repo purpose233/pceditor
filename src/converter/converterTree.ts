@@ -12,7 +12,7 @@ export class ConverterTree extends MNOTree {
   private loadedCount: number = 0;
 
   protected static createRootNode(bbox: BoundingBox): ConverterNode {
-    return new ConverterNode('0', bbox, null, null, false);
+    return new ConverterNode('0', bbox, null, null, true);
   }
 
   public getLoadedCount(): number { return this.loadedCount; }

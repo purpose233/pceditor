@@ -1,6 +1,24 @@
+import fs from 'fs';
 import { SerializedBBoxType, ClosestPointOfLineResult, AxisType } from './types';
 import { Vector3, Camera, Matrix4 } from 'three';
 import { BoundingBox } from './bbox';
+
+export function readFileP<T>(filePath: string, handler: (buffer: Buffer)=>T): Promise<T> {
+  return new Promise((resolve) => {
+    fs.readFile(filePath, (err: any, data: Buffer) => {
+      resolve(handler(data));
+    })
+    // const rs = fs.createReadStream(filePath);
+    // const chunks: Buffer[] = [];
+    // rs.on('data', function(chunk: Buffer) {
+    //   chunks.push(chunk);
+    // });
+    // rs.on('readable', () => {});
+    // rs.on('end', () => {
+    //   resolve(handler(Buffer.concat(chunks)));
+    // });
+  });
+}
 
 export function serializedbboxToBBoxType(sbbox: SerializedBBoxType): BoundingBox {
   return new BoundingBox(

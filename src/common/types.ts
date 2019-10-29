@@ -9,7 +9,8 @@ export interface NodeIndexType {
   idx: string,
   bbox: SerializedBBoxType,
   mask: number, 
-  childIndexes: (NodeIndexType | null)[]
+  childIndexes: (NodeIndexType | null)[],
+  pointCount: number
 }
 
 export interface TreeIndexType {

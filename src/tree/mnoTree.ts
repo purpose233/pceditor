@@ -6,7 +6,6 @@ import { BoundingBox } from '../common/bbox';
 export abstract class MNOTree extends OctreeTree {
 
   protected bbox: BoundingBox; 
-  protected pointCount: number = 0;
 
   constructor(root: MNONode, bbox: BoundingBox) {
     super(root);
@@ -14,7 +13,6 @@ export abstract class MNOTree extends OctreeTree {
   }
 
   public addPoint(point: MNOPoint): void {
-    this.pointCount++;
     if (point.isInBBox(this.bbox)) {
       (this.rootNode as MNONode).addPoint(point);
     } else {
@@ -24,5 +22,5 @@ export abstract class MNOTree extends OctreeTree {
 
   public getBBox(): BoundingBox { return this.bbox; }
 
-  public getPointCount(): number { return this.pointCount; }
+  public getPointCount(): number { return (this.rootNode as MNONode).getSubtreePointCount(); }
 }
