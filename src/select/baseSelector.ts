@@ -43,6 +43,7 @@ export abstract class BaseSelector {
   public clearPoints(scene: Scene): void {
     const rootNode = this.selectTree.getRootNode() as SelectNode;
     rootNode.clear(true);
+    this.selectTree.updateTreeRender(scene);
     this.unrender(scene);
   }
 
