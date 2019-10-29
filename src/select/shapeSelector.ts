@@ -34,5 +34,11 @@ export abstract class ShapeSelector extends BaseSelector {
     this.isRendering = true;
   }
 
+  public unrender(scene: Scene): void {
+    if (!this.isRendering) { return; }
+    scene.remove(this.mesh);
+    this.isRendering = false;
+  }
+
   protected abstract updateMesh(): void;
 }

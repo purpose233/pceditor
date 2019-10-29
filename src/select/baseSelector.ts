@@ -29,12 +29,21 @@ export abstract class BaseSelector {
 
   public abstract render(scene: Scene): void;
 
+  public abstract unrender(scene: Scene): void;
+
   public checkIsRendering(): boolean { return this.isRendering; }
   
   public async deletePoints(scene: Scene): Promise<void> {
     const rootNode = this.selectTree.getRootNode() as SelectNode;
     await this.deleteRecursively(rootNode, rootNode.getRefNode());
     this.selectTree.updateTreeRender(scene);
+  }
+
+  // only used when the selector is no more needed
+  public clearPoints(scene: Scene): void {
+    const rootNode = this.selectTree.getRootNode() as SelectNode;
+    rootNode.clear(true);
+    this.unrender(scene);
   }
 
   public rebuildConnection(selectNode: SelectNode, refNode: RenderNode): void {

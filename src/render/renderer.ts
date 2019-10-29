@@ -1,12 +1,12 @@
-import { Scene, PerspectiveCamera, Vector3, Matrix4 } from 'three';
+import { Scene, PerspectiveCamera, Matrix4 } from 'three';
 import { RenderTree } from './renderTree';
 import { RenderNode } from './renderNode';
 import { LRU } from '../common/lru';
 import { BaseSelector } from '../select/baseSelector';
-import { SphereSelector } from '../select/sphereSelector';
-import { DefaultSphereSelectorRadius, DefaultBoxSelectorSize } from '../common/constants';
 import { calcWorldToCameraMatrix } from '../common/common';
-import { BoxSelector } from '../select/boxSelector';
+import { BoxSelector, createDefaultBoxSelector } from '../select/boxSelector';
+import { SelectorNameType } from '../common/types';
+import { SphereSelector, createDefaultSphereSelector } from '../select/sphereSelector';
 
 // import * as THREE from 'three';
 
@@ -47,14 +47,7 @@ export class PCRenderer {
       this.showNode(node, scene, camera);
     }
 
-    if (this.selector === null) {
-      // this.selector = new SphereSelector(this.tree, scene, camera, new Vector3(0,0,0), DefaultSphereSelectorRadius);
-      this.selector = new BoxSelector(this.tree, scene, camera, new Vector3(0,0,0), new Vector3(DefaultBoxSelectorSize, DefaultBoxSelectorSize, DefaultBoxSelectorSize));
-      this.selector.render(scene);
-      console.log(scene);
-      console.log(this.selector);
-      console.log(this.tree);
-    } else {
+    if (this.selector !== null) {
       this.selector.completeSelectTree(scene);
     }
 
@@ -152,6 +145,37 @@ export class PCRenderer {
     node.render(scene);
     // node.renderBBox(scene);
     this.renderingNodes.add(node);
+  }
+
+  public addSelector(selectorName: SelectorNameType, scene: Scene, camera: PerspectiveCamera): void {
+    if (selectorName === null) { return; }
+    switch (selectorName) {
+      case 'boxSelector': 
+        if (!(this.selector instanceof BoxSelector)) {
+          this.removeSelector(scene, camera);
+        }
+        if (!this.selector) {
+          this.selector = createDefaultBoxSelector(this.tree, scene, camera);
+          this.selector.render(scene);
+        }
+        break;
+      case 'sphereSelector':
+        if (!(this.selector instanceof SphereSelector)) {
+          this.removeSelector(scene, camera);
+        }
+        if (!this.selector) {
+          this.selector = createDefaultSphereSelector(this.tree, scene, camera);
+          this.selector.render(scene);
+        }
+        break;
+    }
+  }
+
+  public removeSelector(scene: Scene, camera: PerspectiveCamera): void {
+    if (!this.selector) { return; }
+    this.selector.clearPoints(scene);
+    this.selector.unrender(scene);
+    this.selector = null;
   }
 
   private renderNodesTree(root: RenderNode, scene: Scene, camera: PerspectiveCamera): void {

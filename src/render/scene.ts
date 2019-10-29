@@ -32,6 +32,8 @@ export class PCScene {
     // container.appendChild(this.renderer.domElement);
 
     this.stats = new Stats();
+    this.stats.dom.style.left = '280px';
+    this.stats.dom.style.top = '10px';
     container.appendChild(this.stats.dom);
 
     // this.controls = new TrackballControls(this.camera, canvas);

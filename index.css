@@ -1,0 +1,33 @@
+body, html { 
+  margin: 0; height: 100%;
+}
+
+#container { 
+  height: 100%;
+  width: 100%;
+  display: flex;
+}
+#sider-menu { 
+  width: 350px; 
+  height: 100%;
+  background: #202020;
+  padding: 20px;
+}
+#sider-menu .menu-panel {
+  margin-bottom: 20px;
+}
+#sider-menu .title {
+  color: white;
+}
+#sider-menu .divider {
+  height: 1px;
+  background: white;
+  width: 100%;
+  margin: 10px 0;
+}
+#canvas-container { 
+  overflow: hidden;
+}
+#canvas-container, #canvas { 
+  height: 100%;
+}

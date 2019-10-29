@@ -1,6 +1,6 @@
 import { ShapeSelector } from './shapeSelector';
 import { Vector3, Line, Scene, Camera, Object3D, LineBasicMaterial, VertexColors, BufferGeometry, Float32BufferAttribute } from 'three';
-import { SelectorColor, MinBoxSelectorSize } from '../common/constants';
+import { SelectorColor, MinBoxSelectorSize, DefaultBoxSelectorSize } from '../common/constants';
 import { RenderTree } from '../render/renderTree';
 import { RenderPoint } from '../render/renderPoint';
 import { RenderNode } from '../render/renderNode';
@@ -32,6 +32,12 @@ export class BoxSelector extends ShapeSelector {
     this.sizeGizmo.enable(scene);
     
     this.updateSelectTree(scene);
+  }
+
+  public unrender(scene: Scene): void {
+    super.unrender(scene);
+    this.positionGizmo.disable(scene);
+    this.sizeGizmo.disable(scene);
   }
 
   public resize(scene: Scene, size: Vector3) {
@@ -158,4 +164,10 @@ export class BoxSelector extends ShapeSelector {
     this.resize(this.scene, size);
     this.render(this.scene);
   }
+}
+
+export function createDefaultBoxSelector(refTree: RenderTree, 
+  scene: Scene, camera: Camera): BoxSelector {
+  return new BoxSelector(refTree, scene, camera, new Vector3(0, 0, 0), 
+    new Vector3(DefaultBoxSelectorSize, DefaultBoxSelectorSize, DefaultBoxSelectorSize));
 }

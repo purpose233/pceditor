@@ -35,3 +35,5 @@ export type GizmoMeshesType = {
   x: Mesh, y: Mesh, z: Mesh, 
   xh: Mesh, yh: Mesh, zh: Mesh
 };
+
+export type SelectorNameType = null | 'boxSelector' | 'sphereSelector'; 

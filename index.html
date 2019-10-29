@@ -2,11 +2,8 @@
 <html>
   <head>
     <title>Editor</title>
-    <style>
-			body, html { margin: 0; height: 100%; }
-      #container { overflow: hidden; }
-			#container, #canvas { width: 100%; height: 100%; }
-		</style>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./index.css">
   </head>
   <body>
     <!-- <h1>Hello World!</h1>
@@ -15,10 +12,31 @@
     and Electron <span id="electron-version"></span>. -->
 
     <div id="container">
-      <canvas id="canvas"></canvas>
+      <div id="sider-menu">
+        <div class="menu-panel selector-panel">
+          <h5 class="title">Selector</h5>
+          <div class='divider'></div>
+          <button type="button" class="btn btn-light" id="noneSelector">None</button>
+          <button type="button" class="btn btn-secondary" id="boxSelector">Box</button>
+          <button type="button" class="btn btn-secondary" id="sphereSelector">Sphere</button>
+        </div>
+        <div class="menu-panel render-panel">
+          <h5 class="title">Render</h5>
+          <div class="divider"></div>
+        </div>
+        <div class="menu-panel operation-panel">
+          <h5 class="title">Operation</h5>
+          <div class="divider"></div>
+          <button type="button" class="btn btn-secondary">Export</button>
+        </div>
+      </div>
+      <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+      </div>
     </div>
 
-    <!-- <script src="./dist/index.js"></script> -->
+    <!-- <script src="popper.min.js"></script> -->
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
     <script>
       require('./dist/index.js')
     </script>

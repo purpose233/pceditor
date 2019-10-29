@@ -40,6 +40,12 @@ export class SphereSelector extends ShapeSelector {
     this.updateSelectTree(scene);
   }
 
+  public unrender(scene: Scene): void {
+    super.unrender(scene);
+    this.positionGizmo.disable(scene);
+    this.sizeGizmo.disable(scene);
+  }
+
   public resize(scene: Scene, radius: number): void {
     if (radius < MinSphereSelectorRadius) { return; }
     this.radius = radius;
@@ -179,4 +185,10 @@ export class SphereSelector extends ShapeSelector {
 
 export function createSphereSelectorFromPoint(scene: Scene, camera: Camera, point: RenderPoint, tree: RenderTree): SphereSelector {
   return new SphereSelector(tree, scene, camera, point.getPosition(), DefaultSphereSelectorRadius);
+}
+
+export function createDefaultSphereSelector(refTree: RenderTree, 
+  scene: Scene, camera: Camera): SphereSelector {
+  return new SphereSelector(refTree, scene, camera, 
+    new Vector3(0,0,0), DefaultSphereSelectorRadius);
 }
