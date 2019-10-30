@@ -17,6 +17,7 @@ export class PCRenderer {
   private lru: LRU = new LRU();
   private renderingNodes: Set<RenderNode> = new Set();
   private currentWtoCMatrix: Matrix4 = new Matrix4();
+  private isSelectorControlEnabled: boolean = false;
 
   private renderInfoChangeCB: ((info: RenderInfoType) => void) | null = null;
 
@@ -35,6 +36,15 @@ export class PCRenderer {
   // }
 
   public async renderTree(scene: Scene, camera: PerspectiveCamera): Promise<void> {
+    if (!this.isSelectorControlEnabled) {
+      document.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (this.selector && (e.key === 'Delete' || e.key === 'Backspace')) {
+          this.selector.deletePoints(scene);
+        }
+      });
+      this.isSelectorControlEnabled = true;
+    }
+    
     this.currentWtoCMatrix = calcWorldToCameraMatrix(camera);
     const nodes = this.calcRenderNodes(this.tree.getRootNode() as RenderNode, camera);
     // console.log('count: ' + nodes.length);
@@ -55,6 +65,7 @@ export class PCRenderer {
 
     if (this.selector !== null) {
       this.selector.completeSelectTree(scene);
+      this.selector.markUnloadedNodes(this.lru.getRecentUnloadedNodes());
     }
 
     // clear recentLoaded flag after updating is done

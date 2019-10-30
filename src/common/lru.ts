@@ -4,10 +4,13 @@ import { MaxRenderNodes } from './constants';
 export class LRU {
 
   private loadedNodeStack: RenderNode[] = [];
+  private recentUnloadedNodes: RenderNode[] = [];
 
   public getLoadedNodesCount(): number {
     return this.loadedNodeStack.length;
   }
+
+  public getRecentUnloadedNodes(): RenderNode[] { return this.recentUnloadedNodes; }
 
   public updateNodeTime(node: RenderNode): void {
     const index = this.loadedNodeStack.indexOf(node);
@@ -26,7 +29,8 @@ export class LRU {
         i--;
       }
     }
-    await this.unloadOverflowedNodes(nodes.length < MaxRenderNodes ? MaxRenderNodes - nodes.length : 0);
+    this.recentUnloadedNodes = await this.unloadOverflowedNodes(
+      nodes.length < MaxRenderNodes ? MaxRenderNodes - nodes.length : 0);
     for (const node of nodes) {
       await node.load();
       this.loadedNodeStack.push(node);
@@ -46,11 +50,14 @@ export class LRU {
   //   this.updateNodeTime(node);
   // }
 
-  private async unloadOverflowedNodes(max?: number): Promise<void> {
+  private async unloadOverflowedNodes(max?: number): Promise<RenderNode[]> {
+    const nodes: RenderNode[] = [];
     const threshold = max !== undefined ? max : MaxRenderNodes;
     while (this.loadedNodeStack.length > threshold) {
       const node = this.loadedNodeStack.shift() as RenderNode;
       await node.unload();
+      nodes.push(node);
     }
+    return nodes;
   }
 }

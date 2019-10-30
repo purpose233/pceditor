@@ -37,10 +37,20 @@ export abstract class BaseSelector {
     return (this.selectTree.getRootNode() as SelectNode).getSubtreePointCount();
   }
 
+  public markUnloadedNodes(nodes: RenderNode[]): void {
+    for (const node of nodes) {
+      const idx = node.getIdx();
+      const selectNode = this.selectTree.getNodeByIdx(idx);
+      if (selectNode) { (selectNode as SelectNode).setNeedDiff(); }
+    }
+  }
+
   public async deletePoints(scene: Scene): Promise<void> {
     const rootNode = this.selectTree.getRootNode() as SelectNode;
     await this.deleteRecursively(rootNode, rootNode.getRefNode());
     this.selectTree.updateTreeRender(scene);
+    this.selectTree = new SelectTree(this.refTree);
+    this.updateSelectTree(scene);
   }
 
   // only used when the selector is no more needed
