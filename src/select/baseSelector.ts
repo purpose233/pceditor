@@ -33,6 +33,10 @@ export abstract class BaseSelector {
 
   public checkIsRendering(): boolean { return this.isRendering; }
   
+  public getPointCount(): number {
+    return (this.selectTree.getRootNode() as SelectNode).getSubtreePointCount();
+  }
+
   public async deletePoints(scene: Scene): Promise<void> {
     const rootNode = this.selectTree.getRootNode() as SelectNode;
     await this.deleteRecursively(rootNode, rootNode.getRefNode());

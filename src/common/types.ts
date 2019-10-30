@@ -36,6 +36,14 @@ export type GizmoMeshesType = {
   xh: Mesh, yh: Mesh, zh: Mesh
 };
 
+export type RenderInfoType = {
+  nodes: number,
+  points: number,
+  selectedPoints: number,
+  maxLoD: number,
+  loadedNodes: number
+};
+
 export type SelectorNameType = null | 'boxSelector' | 'sphereSelector'; 
 
 export type ToastType = 'info' | 'error' | 'warning' | 'success';

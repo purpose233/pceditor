@@ -31,6 +31,7 @@ body, html {
 }
 #sider-menu .title {
   color: white;
+  font-weight: bold;
 }
 #sider-menu .divider {
   height: 1px;
@@ -43,4 +44,17 @@ body, html {
 }
 #canvas-container, #canvas { 
   height: 100%;
+}
+#sider-menu .render-info-line {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+#sider-menu .render-info-line p {
+  display: inline-block;
+  color: white;
+}
+/* #sider-menu .render-info-line .render-info-key {
+} */
+#sider-menu .render-info-line .render-info-value {
+  float: right;
 }

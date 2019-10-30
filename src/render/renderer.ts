@@ -5,7 +5,7 @@ import { LRU } from '../common/lru';
 import { BaseSelector } from '../select/baseSelector';
 import { calcWorldToCameraMatrix } from '../common/common';
 import { BoxSelector, createDefaultBoxSelector } from '../select/boxSelector';
-import { SelectorNameType } from '../common/types';
+import { SelectorNameType, RenderInfoType } from '../common/types';
 import { SphereSelector, createDefaultSphereSelector } from '../select/sphereSelector';
 
 // import * as THREE from 'three';
@@ -18,15 +18,21 @@ export class PCRenderer {
   private renderingNodes: Set<RenderNode> = new Set();
   private currentWtoCMatrix: Matrix4 = new Matrix4();
 
+  private renderInfoChangeCB: ((info: RenderInfoType) => void) | null = null;
+
   constructor(tree: RenderTree) {
     this.tree = tree;
   }
 
-  public async renderTotalTree(scene: Scene, camera: PerspectiveCamera): Promise<void> {
-    // TODO: load all nodes
-    await this.lru.requireNodes(this.tree.getAllNodes() as RenderNode[]);
-    this.renderNodesTree(this.tree.getRootNode() as RenderNode, scene, camera);
+  public setRenderInfoChangeCB(callback: (info: RenderInfoType) => void): void {
+    this.renderInfoChangeCB = callback;
   }
+
+  // public async renderTotalTree(scene: Scene, camera: PerspectiveCamera): Promise<void> {
+  //   // TODO: load all nodes & get render info
+  //   await this.lru.requireNodes(this.tree.getAllNodes() as RenderNode[]);
+  //   this.renderNodesTree(this.tree.getRootNode() as RenderNode, scene, camera);
+  // }
 
   public async renderTree(scene: Scene, camera: PerspectiveCamera): Promise<void> {
     this.currentWtoCMatrix = calcWorldToCameraMatrix(camera);
@@ -54,6 +60,25 @@ export class PCRenderer {
     // clear recentLoaded flag after updating is done
     for (const node of nodes) {
       node.setNotRecentLoaded();
+    }
+
+    if (this.renderInfoChangeCB) {
+      let maxLoD = 1, points = 0;
+      for (const node of nodes) {
+        if (node.getIdx().length > maxLoD) {
+          maxLoD = node.getIdx().length;
+        }
+        points += node.getPointCount();
+      }
+  
+      const renderInfo: RenderInfoType = {
+        nodes: nodes.length,
+        points,
+        selectedPoints: this.selector ? this.selector.getPointCount() : 0,
+        maxLoD,
+        loadedNodes: this.lru.getLoadedNodesCount()
+      }
+      this.renderInfoChangeCB(renderInfo);
     }
   }
   

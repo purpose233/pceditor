@@ -88,6 +88,14 @@ export class SelectNode extends OctreeNode {
     }
     return count;
   }
+
+  public getSubtreePointCount(): number {
+    let count = this.getPointCount();
+    for (const childNode of this.getChildNodes() as SelectNode[]) {
+      count += childNode.getSubtreePointCount();
+    }
+    return count;
+  }
   
   public updateRender(scene: Scene): void {
     // TODO: clear unreached node

@@ -5,6 +5,10 @@ export class LRU {
 
   private loadedNodeStack: RenderNode[] = [];
 
+  public getLoadedNodesCount(): number {
+    return this.loadedNodeStack.length;
+  }
+
   public updateNodeTime(node: RenderNode): void {
     const index = this.loadedNodeStack.indexOf(node);
     if (index >= 0) {

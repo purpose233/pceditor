@@ -8,9 +8,10 @@ import { RenderTree } from './render/renderTree';
 import { ExportIndexPath } from './common/constants';
 import { exportToPCD } from './export/exportToPCD';
 import { SelectorController } from './ui/selectorController';
-import { SelectorNameType } from './common/types';
+import { SelectorNameType, RenderInfoType } from './common/types';
 import { OperationController } from './ui/operationController';
 import { ToastController } from './ui/toastController';
+import { RenderController } from './ui/renderController';
 
 (async () => {
   
@@ -41,6 +42,12 @@ import { ToastController } from './ui/toastController';
     } else {
       renderer.addSelector(selectorName, scene, camera);
     }
+  });
+
+  const renderController = new RenderController();
+  renderController.init();
+  renderer.setRenderInfoChangeCB((info: RenderInfoType) => {
+    renderController.setRenderInfo(info);
   });
 
   const operationController = new OperationController();
