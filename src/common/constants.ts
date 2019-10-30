@@ -48,6 +48,13 @@ export const DefaultBoxSelectorSize = 4;
 // And it could be convconvenient to reduce the de&serializing operations.
 export const MaxConverterThreshold = 1000000;
 
+// -- UI --
+export const DefaultToastDelay = 2000;
+export const ToastSuccessColor = '#28a745';
+export const ToastWarningColor = '#fbc108';
+export const ToastErrorColor = '#dc3545';
+export const ToastInfoColor = '#2da2b8';
+
 // TODO: fix the hardcoding
 export const ExportFolderPath = '/home/purpose/Projects/web/output/';
 export const ExportIndexPath = ExportFolderPath + 'index';

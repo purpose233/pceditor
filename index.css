@@ -2,6 +2,19 @@ body, html {
   margin: 0; height: 100%;
 }
 
+#toast-container {
+  position: absolute; 
+  top: 20px; 
+  right: 20px;
+}
+.toast {
+  min-width: 250px;
+}
+.toast-icon {
+  width: 20px; 
+  height: 20px;
+}
+
 #container { 
   height: 100%;
   width: 100%;

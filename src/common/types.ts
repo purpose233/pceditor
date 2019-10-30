@@ -37,3 +37,5 @@ export type GizmoMeshesType = {
 };
 
 export type SelectorNameType = null | 'boxSelector' | 'sphereSelector'; 
+
+export type ToastType = 'info' | 'error' | 'warning' | 'success';

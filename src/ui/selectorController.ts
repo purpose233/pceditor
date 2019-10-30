@@ -7,35 +7,35 @@ export class SelectorController {
   private sphereSelectorBtn: HTMLElement = document.getElementById('sphereSelector') as HTMLElement;
   
   private currentBtn: HTMLElement = this.noneSelectorBtn;
-  private selectorChangeCB: ((selectorName: SelectorNameType, lastSelectorName: SelectorNameType) => void) | null = null;
+  private selectorChangeCB: ((selectorName: SelectorNameType, lastSelectorName: SelectorNameType) => Promise<void>) | null = null;
 
   public init() {
-    this.noneSelectorBtn.addEventListener('click', () => {
+    this.noneSelectorBtn.addEventListener('click', async () => {
       if (this.currentBtn === this.noneSelectorBtn) { return; }
-      else { this.onSelectorBtnClick(this.noneSelectorBtn); }
+      else { await this.onSelectorBtnClick(this.noneSelectorBtn); }
     });
-    this.boxSelectorBtn.addEventListener('click', () => {
+    this.boxSelectorBtn.addEventListener('click', async () => {
       if (this.currentBtn === this.boxSelectorBtn) { return; }
-      else { this.onSelectorBtnClick(this.boxSelectorBtn); }
+      else { await this.onSelectorBtnClick(this.boxSelectorBtn); }
     });
-    this.sphereSelectorBtn.addEventListener('click', () => {
+    this.sphereSelectorBtn.addEventListener('click', async () => {
       if (this.currentBtn === this.sphereSelectorBtn) { return; }
-      else { this.onSelectorBtnClick(this.sphereSelectorBtn); }
+      else { await this.onSelectorBtnClick(this.sphereSelectorBtn); }
     });
   }
 
-  public setOnSelectorChangeCB(callback: (selectorName: SelectorNameType, lastSelectorName: SelectorNameType) => void) {
+  public setOnSelectorChangeCB(callback: (selectorName: SelectorNameType, lastSelectorName: SelectorNameType) => Promise<void>) {
     this.selectorChangeCB = callback;
   }
 
-  private onSelectorBtnClick = (btn: HTMLElement) => {
+  private onSelectorBtnClick = async (btn: HTMLElement) => {
     const lastSelectorName = this.getSelectorNameByBtn(this.currentBtn);
     this.unselectBtn(this.currentBtn);
     this.selectBtn(btn);
     this.currentBtn = btn;
     const selectorName = this.getSelectorNameByBtn(btn);
     if (this.selectorChangeCB) {
-      this.selectorChangeCB(selectorName, lastSelectorName);
+      await this.selectorChangeCB(selectorName, lastSelectorName);
     }
   }
 

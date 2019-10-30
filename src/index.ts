@@ -7,8 +7,10 @@ import { deserializeIndex } from './common/serialize';
 import { RenderTree } from './render/renderTree';
 import { ExportIndexPath } from './common/constants';
 import { exportToPCD } from './export/exportToPCD';
-import { SelectorController } from './menu/selector';
+import { SelectorController } from './ui/selectorController';
 import { SelectorNameType } from './common/types';
+import { OperationController } from './ui/operationController';
+import { ToastController } from './ui/toastController';
 
 (async () => {
   
@@ -27,9 +29,13 @@ import { SelectorNameType } from './common/types';
   const scene = pcScene.getScene();
   const camera = pcScene.getCamera();
 
+  const toastController = new ToastController();
+  toastController.init();
+  (window as any).toast = toastController;
+
   const selectorController = new SelectorController();
   selectorController.init();
-  selectorController.setOnSelectorChangeCB((selectorName: SelectorNameType): void => {
+  selectorController.setOnSelectorChangeCB(async (selectorName: SelectorNameType): Promise<void> => {
     if (!selectorName) { 
       renderer.removeSelector(scene, camera); 
     } else {
@@ -37,7 +43,17 @@ import { SelectorNameType } from './common/types';
     }
   });
 
-  // setTimeout(() => {
-  //   exportToPCD('/home/purpose/Projects/web/output/out.pcd', renderTree);
-  // }, 1000);
+  const operationController = new OperationController();
+  operationController.init();
+  operationController.setOnConfirmExportCB(async (path: string) => {
+    const filePath = path + '/out.pcd';
+    operationController.waitExportModal();
+    await exportToPCD(filePath, renderTree);
+    await new Promise((resolve) => {setTimeout(() => {
+      resolve();
+    }, 1000);})
+    operationController.unwaitExportModal();
+    operationController.closeExportModal();
+    toastController.showToast('success', 'Export', 'Successfully export to ' + filePath);
+  });
 })();
