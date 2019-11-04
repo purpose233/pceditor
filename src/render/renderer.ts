@@ -65,6 +65,9 @@ export class PCRenderer {
 
     if (this.selector !== null) {
       this.selector.completeSelectTree(scene);
+      // if (this.lru.getRecentUnloadedNodes().length > 0) {
+      //   console.log(this.lru.getRecentUnloadedNodes());
+      // }
       this.selector.markUnloadedNodes(this.lru.getRecentUnloadedNodes());
     }
 

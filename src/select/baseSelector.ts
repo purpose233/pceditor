@@ -41,7 +41,7 @@ export abstract class BaseSelector {
     for (const node of nodes) {
       const idx = node.getIdx();
       const selectNode = this.selectTree.getNodeByIdx(idx);
-      if (selectNode) { (selectNode as SelectNode).setNeedDiff(); }
+      if (selectNode) { (selectNode as SelectNode).setNeedReconnect(); }
     }
   }
 
@@ -222,6 +222,10 @@ export abstract class BaseSelector {
       await refNode.load(true);
       needUnload = true;
     }
+    if (selectNode.checkNeedReconnect()) {
+      this.rebuildConnection(selectNode, refNode);
+      selectNode.setNotNeedReconnect();
+    }
     if (selectNode.checkNeedDiff()) {
       this.diff(selectNode, refNode);
       selectNode.setNotNeedDiff();
@@ -263,12 +267,22 @@ export abstract class BaseSelector {
   }
 
   private completeTreeRecursively(selectNode: SelectNode, refNode: RenderNode): void {
-    if (selectNode.checkNeedDiff() && refNode.checkIsLoaded()) {
-      this.diff(selectNode, refNode);
-      selectNode.setNotNeedDiff();
-    } else if (refNode.checkRecentLoaded()) {
-      this.rebuildConnection(selectNode, refNode);
+    if (refNode.checkIsLoaded()) {
+      if (selectNode.checkNeedReconnect()) {
+        this.rebuildConnection(selectNode, refNode);
+        selectNode.setNotNeedReconnect();
+      }
+      if (selectNode.checkNeedDiff()) {
+        this.diff(selectNode, refNode);
+        selectNode.setNotNeedDiff();
+      }
     }
+    // if (selectNode.checkNeedDiff() && refNode.checkIsLoaded()) {
+    //   this.diff(selectNode, refNode);
+    //   selectNode.setNotNeedDiff();
+    // } else if (refNode.checkRecentLoaded()) {
+    //   this.rebuildConnection(selectNode, refNode);
+    // }
 
     for (const childWithNumber of selectNode.getChildNodesWithNumber()) {
       this.completeTreeRecursively(childWithNumber[1] as SelectNode, 

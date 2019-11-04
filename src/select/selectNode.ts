@@ -12,6 +12,8 @@ export class SelectNode extends OctreeNode {
   private isReached: boolean = false;
   // whether the node need further diffing cuz the refNode is not loaded
   private needDiff: boolean = false;
+  // whether the node is ref node unloaded and need to be reconnected
+  private needReconnect: boolean = false;
 
   private grid: Map<number, RenderPoint> = new Map();
   // store points in eight stacks of render node
@@ -41,6 +43,12 @@ export class SelectNode extends OctreeNode {
   public setNeedDiff(): void { this.needDiff = true; }
   
   public setNotNeedDiff(): void { this.needDiff = false; }
+
+  public checkNeedReconnect(): boolean { return this.needReconnect; }
+
+  public setNeedReconnect(): void { this.needReconnect = true; }
+
+  public setNotNeedReconnect(): void { this.needReconnect = false; }
   
   public getRefNode(): RenderNode { return this.refNode; }
 
