@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "start": "npm run build && electron ./dist/main.js"
+    "start": "npm run build && electron ./build/main.js",
+    "dist": "electron-builder"
   },
   "repository": {
     "type": "git",
@@ -18,10 +19,24 @@
     "url": "https://github.com/purpose233/pceditor/issues"
   },
   "homepage": "https://github.com/purpose233/pceditor#readme",
+    "build": {
+    "appId": "pceditor",
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "directories": {
+      "buildResources": "build",
+      "output": "dist"
+    }
+  },
   "devDependencies": {
     "@types/node": "^12.6.9",
     "@types/stats.js": "^0.17.0",
     "electron": "^6.0.1",
+    "electron-builder": "^21.2.0",
     "stats.js": "^0.17.0",
     "typescript": "^3.5.3"
   },

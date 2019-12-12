@@ -1,4 +1,5 @@
 import { Color } from 'three';
+import path from 'path';
 
 // Real World -> Three.js
 export const AxisRatio = 1.0;
@@ -55,8 +56,13 @@ export const ToastWarningColor = '#fbc108';
 export const ToastErrorColor = '#dc3545';
 export const ToastInfoColor = '#2da2b8';
 
+export const ConfigFileDirName = '.config';
+export const ConfigFileName = 'manifest.json';
+
 // TODO: fix the hardcoding
-export const ExportFolderPath = '/home/purpose/Projects/web/output/';
-export const ExportIndexPath = ExportFolderPath + 'index';
-export const ExportDataPath = ExportFolderPath + 'n';
+// export const ExportFolderPath = '/home/purpose/Projects/web/output/';
+export const ExportFolderPath = path.resolve(__dirname, '../../output/');
+console.log(ExportFolderPath);
+export const ExportIndexPath = ExportFolderPath + '/index';
+export const ExportDataPath = ExportFolderPath + '/n';
 export const ExportTempPostfix = '.temp';

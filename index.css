@@ -15,10 +15,22 @@ body, html {
   height: 20px;
 }
 
+#project-panel {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  min-width: 720px;
+  min-height: 400px;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+
 #container { 
   height: 100%;
   width: 100%;
   display: flex;
+  min-width: 800px;
+  min-height: 600px;
 }
 #sider-menu { 
   width: 350px; 
@@ -57,4 +69,44 @@ body, html {
 } */
 #sider-menu .render-info-line .render-info-value {
   float: right;
+}
+
+#project-panel {
+  padding: 32px;
+  max-height: 80%;
+  min-height: 60%;
+}
+#project-panel .project-container {
+  overflow: auto;
+  position: absolute;
+  height: calc(100% - 64px - 54px);
+  width: calc(100% - 64px);
+}
+#project-panel .project-container .project-item {
+  background: white;
+  border-radius: 10px;
+  width: 200px;
+  height: 290px;
+  padding: 10px;
+  text-align: center;
+  margin-right: 16px;
+  margin-bottom: 16px;
+  display: inline-block;
+}
+#project-panel .project-container .project-item img {
+  width: 160px;
+  height: 160px;
+  margin-bottom: 10px;
+}
+#project-panel .project-container .project-item .project-info {
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+#project-panel .project-panel-header {
+  margin-bottom: 16px;
 }

@@ -277,12 +277,6 @@ export abstract class BaseSelector {
         selectNode.setNotNeedDiff();
       }
     }
-    // if (selectNode.checkNeedDiff() && refNode.checkIsLoaded()) {
-    //   this.diff(selectNode, refNode);
-    //   selectNode.setNotNeedDiff();
-    // } else if (refNode.checkRecentLoaded()) {
-    //   this.rebuildConnection(selectNode, refNode);
-    // }
 
     for (const childWithNumber of selectNode.getChildNodesWithNumber()) {
       this.completeTreeRecursively(childWithNumber[1] as SelectNode, 

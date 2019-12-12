@@ -1,5 +1,16 @@
 import { Vector3, Mesh } from 'three';
 
+export interface ManifestType {
+  projects: ConfigProjectType[]
+}
+
+export interface ConfigProjectType {
+  id: string,
+  name: string,
+  path: string,
+  lastModified: string
+}
+
 export interface SerializedBBoxType {
   minX: number, minY: number, minZ: number, 
   maxX: number, maxY: number, maxZ: number
@@ -23,7 +34,7 @@ export interface TreeIndexType {
 
 export type AxisType = 'x' | 'y' | 'z';
 
-export type ClosestPointOfLineResult = {
+export interface ClosestPointOfLineResult {
   point0: Vector3,
   point1: Vector3,
   s: number,
@@ -36,7 +47,7 @@ export type GizmoMeshesType = {
   xh: Mesh, yh: Mesh, zh: Mesh
 };
 
-export type RenderInfoType = {
+export interface RenderInfoType {
   nodes: number,
   points: number,
   selectedPoints: number,

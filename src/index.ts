@@ -12,9 +12,12 @@ import { SelectorNameType, RenderInfoType } from './common/types';
 import { OperationController } from './ui/operationController';
 import { ToastController } from './ui/toastController';
 import { RenderController } from './ui/renderController';
+import { generateConfig, checkConfig } from './app/config';
 
 (async () => {
-  
+
+  if (!checkConfig(__dirname)) { generateConfig(__dirname); }
+
   const container = document.getElementById('canvas-container') as HTMLElement;
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   
