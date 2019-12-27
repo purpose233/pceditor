@@ -7,8 +7,8 @@ export abstract class MNOTree extends OctreeTree {
 
   protected bbox: BoundingBox; 
 
-  constructor(root: MNONode, bbox: BoundingBox) {
-    super(root);
+  constructor(refPath: string, root: MNONode, bbox: BoundingBox) {
+    super(refPath, root);
     this.bbox = bbox;
   }
 

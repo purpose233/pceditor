@@ -12,7 +12,8 @@ export class SelectTree extends OctreeTree {
   // private isDirty: boolean = false;
 
   constructor(refMNOTree: RenderTree) {
-    super(SelectTree.createRootNode(refMNOTree));
+    // do not need to get ref path from SelectTree
+    super('', SelectTree.createRootNode(refMNOTree));
   }
   
   protected static createRootNode(refMNOTree: RenderTree): SelectNode {

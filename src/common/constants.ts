@@ -59,10 +59,6 @@ export const ToastInfoColor = '#2da2b8';
 export const ConfigFileDirName = '.config';
 export const ConfigFileName = 'manifest.json';
 
-// TODO: fix the hardcoding
-// export const ExportFolderPath = '/home/purpose/Projects/web/output/';
-export const ExportFolderPath = path.resolve(__dirname, '../../output/');
-console.log(ExportFolderPath);
-export const ExportIndexPath = ExportFolderPath + '/index';
-export const ExportDataPath = ExportFolderPath + '/n';
 export const ExportTempPostfix = '.temp';
+export const ExportIndexName = '/index';
+export const ExportDataName = '/n';

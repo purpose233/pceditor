@@ -1,26 +1,20 @@
 import { MNONode } from '../tree/mnoNode';
 import { ConverterPoint } from './converterPoint';
 import { ConverterTree } from './converterTree';
-import { NodeStackMax, MaxConverterThreshold, ExportDataPath } from '../common/constants';
+import { NodeStackMax, MaxConverterThreshold } from '../common/constants';
 import { deserializeNode } from '../common/serialize';
 import { BoundingBox } from '../common/bbox';
 
 export class ConverterNode extends MNONode {
   
-  // TODO: the refTree cannot be null, but it will be a little bit hard to instantiate
-  private refTree: ConverterTree | null;
-
   constructor(idx: string, bbox: BoundingBox, 
               parentNode: null | ConverterNode, refTree: ConverterTree | null,
               isNew: boolean = true) {
-    super(idx, bbox, parentNode, isNew);
-    this.refTree = refTree;
+    super(idx, bbox, parentNode, refTree, isNew);
   }
 
-  public setRefTree(refTree: ConverterTree): void { this.refTree = refTree; }
-
   protected createNewNode(idx: string, bbox: BoundingBox, parentNode: null | ConverterNode): MNONode {
-    return new ConverterNode(idx, bbox, parentNode, this.refTree, true);
+    return new ConverterNode(idx, bbox, parentNode, this.refTree as ConverterTree, true);
   };
 
   public async addPoint(point: ConverterPoint): Promise<void> {
@@ -66,7 +60,7 @@ export class ConverterNode extends MNONode {
   }
 
   public async load(): Promise<void> {
-    await deserializeNode(ExportDataPath + this.idx, this, true);
+    await deserializeNode((this.refTree as ConverterTree).getRefDataPath(this.idx), this, true);
     this.isLoaded = true;
     (this.refTree as ConverterTree).changeLoadedCount(this.getPointCount());
   }

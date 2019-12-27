@@ -5,10 +5,13 @@ import { MNOPoint } from './mnoPoint';
 import { GridSize, NodeStackMax } from '../common/constants';
 import { bboxToSerializedbboxType } from '../common/common';
 import { BoundingBox } from '../common/bbox';
+import { MNOTree } from './mnoTree';
 
 // TODO: set some functions static
 export abstract class MNONode extends OctreeNode {
 
+  // TODO: the refTree cannot be null, but it will be a little bit hard to instantiate
+  protected refTree: MNOTree | null = null;
   protected bbox: BoundingBox;
   private bboxSize: Vector3;
   // grid number: increased by x, y, z
@@ -18,15 +21,19 @@ export abstract class MNONode extends OctreeNode {
   protected gridByOrder: [number, MNOPoint][] = [];
   protected pointCount: number = 0;
 
-  constructor(idx: string, bbox: BoundingBox, parentNode: null | MNONode,
+  constructor(idx: string, bbox: BoundingBox, 
+              parentNode: null | MNONode, refTree: MNOTree | null,
               isNew: boolean = true) {
     super(idx, parentNode);
     this.bbox = bbox;
     this.bboxSize = this.bbox.getSize();
+    this.refTree = refTree;
     this.isLoaded = isNew;
   }
 
   protected abstract createNewNode(idx: string, bbox: BoundingBox, parentNode: null | MNONode): MNONode;
+
+  public setRefTree(refTree: MNOTree): void { this.refTree = refTree; }
 
   public addPointToGrid(gridNumber: number, point: MNOPoint): void { 
     this.grid.set(gridNumber, point);

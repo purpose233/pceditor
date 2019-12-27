@@ -6,6 +6,7 @@ body, html {
   position: absolute; 
   top: 20px; 
   right: 20px;
+  z-index: 1050;
 }
 .toast {
   min-width: 250px;
@@ -81,6 +82,9 @@ body, html {
   position: absolute;
   height: calc(100% - 64px - 54px);
   width: calc(100% - 64px);
+  background: #ccc;
+  border-radius: 10px;
+  padding: 16px;
 }
 #project-panel .project-container .project-item {
   background: white;

@@ -4,8 +4,8 @@ import { BoundingBox } from '../common/bbox';
 
 export class ConverterTree extends MNOTree {
 
-  constructor(bbox: BoundingBox) {
-    super(ConverterTree.createRootNode(bbox), bbox);
+  constructor(refPath: string, bbox: BoundingBox) {
+    super(refPath, ConverterTree.createRootNode(bbox), bbox);
     (this.rootNode as ConverterNode).setRefTree(this);
   }
 

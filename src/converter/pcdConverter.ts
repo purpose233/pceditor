@@ -48,12 +48,12 @@ export class PCDConverter extends BaseConverter {
     return bbox;
   }
 
-  public async read(path: string): Promise<ConverterTree> {
+  public async read(filePath: string, exportPath: string): Promise<ConverterTree> {
     let pointNumber: number = 0;
     let pointCount: number = 0;
-    const bbox = await this.readBoundingBox(path);
-    const tree = new ConverterTree(bbox);
-    await this.readLine(path, (data: string) => {
+    const bbox = await this.readBoundingBox(filePath);
+    const tree = new ConverterTree(exportPath, bbox);
+    await this.readLine(filePath, (data: string) => {
       const words = data.split(' ');
       if (!isNaN(parseFloat(words[0]))) {
         const point = new ConverterPoint(new Vector3(parseFloat(words[0]), 

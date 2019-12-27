@@ -1,12 +1,21 @@
 import { OctreeNode } from './octreeNode';
+import { ExportDataName, ExportIndexName } from '../common/constants';
 
 export abstract class OctreeTree {
 
   protected rootNode: OctreeNode;
+  protected refPath: string;
 
-  constructor (rootNode: OctreeNode) {
+  constructor (refPath: string, rootNode: OctreeNode) {
+    this.refPath = refPath;
     this.rootNode = rootNode;
   }
+
+  public getRefPath(): string { return this.refPath; }
+
+  public getRefDataPath(idx?: string): string { return this.refPath + ExportDataName + (idx ? idx : ''); }
+
+  public getRefIndexPath(): string { return this.refPath + ExportIndexName; }
 
   public getRootNode(): OctreeNode { return this.rootNode; }
 

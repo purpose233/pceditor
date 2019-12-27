@@ -10,19 +10,18 @@ import { ConverterTree } from '../converter/converterTree';
 import { RenderTree } from '../render/renderTree';
 import { ConverterPoint } from '../converter/converterPoint';
 import { RenderPoint } from '../render/renderPoint';
-import { ExportDataPath, ExportIndexPath } from './constants';
 
 // TODO: use stream to improve the usage of rom
 
 export async function serializeTree(tree: MNOTree): Promise<void> {
   async function handleNode(node: MNONode): Promise<void> {
-    await serializeNode(ExportDataPath + node.getIdx(), node);
+    await serializeNode(tree.getRefDataPath() + node.getIdx(), node);
     for (const childNode of node.getChildNodes() as MNONode[]) {
       await handleNode(childNode);
     }
   }
 
-  await serializeIndex(ExportIndexPath, tree);
+  await serializeIndex(tree.getRefIndexPath(), tree);
   await handleNode(tree.getRootNode() as MNONode);  
 }
 
@@ -83,12 +82,13 @@ export function serializeNode(filePath: string, node: MNONode): Promise<void> {
   });
 }
 
-export function deserializeIndex(filePath: string, isConvertering: boolean = false): Promise<MNOTree> {
+export function deserializeIndex(refPath: string, filePath: string, isConvertering: boolean = false): Promise<MNOTree> {
 
   function handleNode(idx: string, index: NodeIndexType, parentNode: MNONode, tree: MNOTree): MNONode {
     const node = isConvertering ? new ConverterNode(idx, serializedbboxToBBoxType(index.bbox), parentNode as ConverterNode, 
                                                     tree as ConverterTree, false) 
-                                : new RenderNode(idx, serializedbboxToBBoxType(index.bbox), parentNode as RenderNode, false);
+                                : new RenderNode(idx, serializedbboxToBBoxType(index.bbox), parentNode as RenderNode, 
+                                                 tree as RenderTree, false);
     node.setPointCount(index.pointCount);
     for (let i = 0; i < 8; i++) {
       if (index.mask & (1 << i)) {
@@ -101,8 +101,8 @@ export function deserializeIndex(filePath: string, isConvertering: boolean = fal
   return readFileP(filePath, (buffer: Buffer) => {
     const treeIndex: TreeIndexType = JSON.parse(buffer.toString());
     // const tree = new BaseTree(serializedbboxToBBoxType(treeIndex.bbox));
-    const tree = isConvertering ? new ConverterTree(serializedbboxToBBoxType(treeIndex.bbox)) 
-                                : new RenderTree(serializedbboxToBBoxType(treeIndex.bbox));
+    const tree = isConvertering ? new ConverterTree(refPath, serializedbboxToBBoxType(treeIndex.bbox)) 
+                                : new RenderTree(refPath, serializedbboxToBBoxType(treeIndex.bbox));
     const rootNode = tree.getRootNode(), mask = treeIndex.root.mask;
     (rootNode as MNONode).setPointCount(treeIndex.root.pointCount);
     for (let i = 0; i < 8; i++) {

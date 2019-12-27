@@ -3,10 +3,11 @@ import { Points, Scene, BufferGeometry, BufferAttribute,
   PointsMaterial, VertexColors, Line, 
   Color, Box3, Box3Helper, Vector3 } from 'three';
 import { deserializeNode, serializeNode } from '../common/serialize';
-import { ExportDataPath, DefaultPointSize, SelectedPointColor, BBoxColor, ExportTempPostfix, OutlineRatio, OutlineColor } from '../common/constants';
+import { DefaultPointSize, SelectedPointColor, BBoxColor, OutlineRatio, OutlineColor, ExportTempPostfix } from '../common/constants';
 import { RenderPoint } from './renderPoint';
 import { MNOPoint } from '../tree/mnoPoint';
 import { BoundingBox } from '../common/bbox';
+import { RenderTree } from './renderTree';
 
 export class RenderNode extends MNONode {
 
@@ -23,18 +24,19 @@ export class RenderNode extends MNONode {
   // used for debugging
   private isForceUnrender: boolean = false;
 
-  constructor(idx: string, bbox: BoundingBox, parentNode: null | RenderNode,
+  constructor(idx: string, bbox: BoundingBox, 
+              parentNode: null | RenderNode, refTree: RenderTree | null,
               isNew: boolean = true) {
-    super(idx, bbox, parentNode, isNew);
+    super(idx, bbox, parentNode, refTree, isNew);
   }
 
   protected createNewNode(idx: string, bbox: BoundingBox, parentNode: null | RenderNode): MNONode {
-    return new RenderNode(idx, bbox, parentNode);
+    return new RenderNode(idx, bbox, parentNode, this.refTree as RenderTree);
   };
 
   public getFilePath(): string {
-    return this.isModified ? ExportDataPath + this.idx + ExportTempPostfix : 
-      ExportDataPath + this.idx;
+    const exportDataPath = (this.refTree as RenderTree).getRefDataPath(this.idx);
+    return this.isModified ? exportDataPath + ExportTempPostfix : exportDataPath;
   }
 
   public async load(withoutMesh: boolean = false): Promise<void> {
@@ -48,7 +50,7 @@ export class RenderNode extends MNONode {
 
   public async unload(): Promise<void> {
     if (this.isModified) {
-      serializeNode(ExportDataPath + this.idx + ExportTempPostfix, this);
+      serializeNode((this.refTree as RenderTree).getRefDataPath(this.idx) + ExportTempPostfix, this);
     }
     // isLoaded will be set false in parent function
     await super.unload();

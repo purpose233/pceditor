@@ -6,12 +6,13 @@ import { BoundingBox } from '../common/bbox';
 
 export class RenderTree extends MNOTree {
 
-  constructor(bbox: BoundingBox) {
-    super(RenderTree.createRootNode(bbox), bbox);
+  constructor(refPath: string, bbox: BoundingBox) {
+    super(refPath, RenderTree.createRootNode(bbox), bbox);
+    (this.rootNode as RenderNode).setRefTree(this);
   }
 
   protected static createRootNode(bbox: BoundingBox): MNONode {
-    return new RenderNode('0', bbox, null, false);
+    return new RenderNode('0', bbox, null, null, false);
   }
 
   public unrender(scene: Scene): void {
