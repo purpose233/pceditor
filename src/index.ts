@@ -1,4 +1,5 @@
 import path from 'path';
+import uuid from 'uuid/v4';
 import { PCDConverter } from './converter/pcdConverter';
 import { PCScene } from './render/scene';
 import { PCRenderer } from './render/renderer';
@@ -7,11 +8,11 @@ import { deserializeIndex } from './common/serialize';
 import { RenderTree } from './render/renderTree';
 import { exportToPCD } from './export/exportToPCD';
 import { SelectorController } from './ui/selectorController';
-import { SelectorNameType, RenderInfoType } from './common/types';
+import { SelectorNameType, RenderInfoType, ManifestType, ConfigProjectType } from './common/types';
 import { OperationController } from './ui/operationController';
 import { ToastController } from './ui/toastController';
 import { RenderController } from './ui/renderController';
-import { generateConfig, checkConfig } from './app/config';
+import { generateConfig, parseConfig, writeConfig } from './app/config';
 import { ProjectController } from './ui/projectController';
 
 declare global {
@@ -22,12 +23,13 @@ declare global {
 
 (async () => {
 
-  if (!checkConfig(__dirname)) { generateConfig(__dirname); }
-
+  const config: ManifestType = parseConfig(__dirname) || generateConfig(__dirname);
+  
   const container = document.getElementById('canvas-container') as HTMLElement;
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   
-  // const renderTree = await deserializeIndex(ExportIndexPath, false) as RenderTree;
+  // const refPath = path.resolve(__dirname, '../output');
+  // const renderTree = await deserializeIndex(refPath, refPath + '/index', false) as RenderTree;
   // console.log(renderTree);
   // const renderer = new PCRenderer(renderTree);
   // const pcScene = new PCScene(container, canvas, renderer);
@@ -36,15 +38,40 @@ declare global {
 
   const projectController = new ProjectController();
   projectController.init();
-  projectController.setOnUploadCB(async (file: File | null, name: string | null) => {
+  projectController.setFromConfig(config.projects);
+  projectController.setOnUploadCB(async (file: File | null, name: string | null): Promise<boolean> => {
+    // TODO: check pcd file
+    // TODO: add spinner
     if (!file || !name) {
       window.toast.showToast('error', 'Upload Error', 'Project name or point cloud file cannot be empty.');
+    } else if (config.projects.find((project => project.name === name))) {
+      window.toast.showToast('error', 'Upload Error', 'Project name cannot repeat.')
     } else {
       // const converter = new PCDConverter();
-      // let tree: ConverterTree | null = await converter.read(path.resolve(file.path));
+      const importPath = path.resolve(file.path);
+      const exportPath = path.resolve(__dirname, './projects/' + name);
+      // let tree: ConverterTree | null = await converter.read(importPath, exportPath);
       // console.log(tree);
       // tree = null;
+      const project: ConfigProjectType = {
+        id: uuid(),
+        name, 
+        path: exportPath,
+        lastModified: new Date().toLocaleString()
+      };
+      config.projects.push(project);
+      writeConfig(__dirname, config);
+      projectController.addProject(project);
+      return true;
     }
+    return false;
+  });
+  projectController.setOnDeleteCB(async (id: string): Promise<boolean> => {
+    projectController.deleteProject(id);
+    const index = config.projects.findIndex(project => project.id === id);
+    if (index > 0) { config.projects.splice(index, 1); }
+    writeConfig(__dirname, config);
+    return true;
   });
 
   const toastController = new ToastController();

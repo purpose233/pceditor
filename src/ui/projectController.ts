@@ -10,8 +10,12 @@ export class ProjectController {
   private importNameInput: HTMLInputElement = document.getElementById('import-name-input') as HTMLInputElement;
   private importFileInput: HTMLInputElement = document.getElementById('import-project-input') as HTMLInputElement;
   private importConfirmBtn: HTMLButtonElement = document.getElementById('import-confirm-btn') as HTMLButtonElement;
+  private deleteConfirmBtn: HTMLButtonElement = document.getElementById('confirm-delete-btn') as HTMLButtonElement;
 
-  private onUploadCB: ((file: File | null, name: string | null) => Promise<void>) | null = null;
+  // The return value of callback control whether to close the modal.
+  private onUploadCB: ((file: File | null, name: string | null) => Promise<boolean>) | null = null;
+  private onDeleteCB: ((id: string) => Promise<boolean>) | null = null;
+  private currentDeleteId: string | null = null;
 
   public init(): void {
     this.importBtn.addEventListener('click', () => {
@@ -22,15 +26,35 @@ export class ProjectController {
       const name = this.importNameInput.value === '' ? null : this.importNameInput.value;
       const file = this.importFileInput.files && this.importFileInput.files[0] 
                    ? this.importFileInput.files[0] : null;
-      this.onUploadCB(file, name);
+      if (await this.onUploadCB(file, name)) {
+        this.closeUploadModal();
+      }
     });
-    this.projectContainer.addEventListener('click', (e) => {
-      
+    this.projectContainer.addEventListener('click', (e: MouseEvent) => {
+      if (this.onDeleteCB 
+        && e.target && (e.target as Element).tagName === 'BUTTON' 
+        && (e.target as Element).getAttribute('data-ref') !== null) {
+        this.currentDeleteId = (e.target as Element).getAttribute('data-ref') as string;
+        this.openDeleteModal();
+      }
+    });
+    this.deleteConfirmBtn.addEventListener('click', async () => {
+      if (this.currentDeleteId && this.onDeleteCB) { 
+        if (await this.onDeleteCB(this.currentDeleteId)) {
+          this.closeDeleteModal();
+        }
+      } else {
+        this.closeDeleteModal(); 
+      }
     });
   }
 
-  public setOnUploadCB(callback: (file: File | null, name: string | null) => Promise<void>) {
+  public setOnUploadCB(callback: (file: File | null, name: string | null) => Promise<boolean>) {
     this.onUploadCB = callback;
+  }
+
+  public setOnDeleteCB(callback: (id: string) => Promise<boolean>): void {
+    this.onDeleteCB = callback;
   }
 
   public showProjectPanel(): void {
@@ -48,7 +72,7 @@ export class ProjectController {
     }
   }
 
-  private addProject(project: ConfigProjectType): void {
+  public addProject(project: ConfigProjectType): void {
     const div = document.createElement('div');
     div.innerHTML = `
 <div class="project-item" data-ref="${project.id}">
@@ -58,8 +82,20 @@ export class ProjectController {
   <button type="button" class="btn btn-danger" data-ref="${project.id}">Delete</button>
 </div>
     `;
-    const item = div.childNodes[0];
+    const item = div.childNodes[1];
     this.projectContainer.appendChild(item);
+  }
+
+  public deleteProject(id: string): void {
+    const childNodes = this.projectContainer.childNodes;
+    for (let i = 0; i < childNodes.length; i++) {
+      const node = childNodes[i];
+      if (node.nodeType === 1 
+        && (node as Element).classList.contains('project-item')
+        && (node as Element).getAttribute('data-ref') === id) {
+        this.projectContainer.removeChild(node);
+      }
+    }
   }
 
   private openUploadModal(): void {
@@ -67,11 +103,18 @@ export class ProjectController {
     this.importFileInput.value = '';
     $('#import-project-modal').modal('show');
   }
+  
+  private closeUploadModal(): void {
+    $('#import-project-modal').modal('hide');
+  }
 
-  // private closeUploadModal(): void {
-  //   $('#import-project-modal').modal('hide');
-  //   this.importInput.value = '';
-  // }
+  private openDeleteModal(): void {
+    $('#confirm-delete-modal').modal('show');
+  }
+  
+  private closeDeleteModal(): void {
+    $('#confirm-delete-modal').modal('hide');
+  }
 
   private removeProject(id: string): void {
     const item = this.projectContainer.querySelector(`.project-container [data-ref="${id}"]`);
