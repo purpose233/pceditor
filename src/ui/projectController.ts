@@ -4,6 +4,7 @@ declare const $: any;
 
 export class ProjectController {
 
+  private waitingMask: HTMLElement = document.getElementById('mask-container') as HTMLElement;
   private projectPanel: HTMLElement = document.getElementById('project-panel') as HTMLElement;
   private projectContainer: HTMLElement = document.getElementById('project-container') as HTMLElement;
   private importBtn: HTMLButtonElement = document.getElementById('import-project-btn') as HTMLButtonElement;
@@ -15,27 +16,41 @@ export class ProjectController {
   // The return value of callback control whether to close the modal.
   private onUploadCB: ((file: File | null, name: string | null) => Promise<boolean>) | null = null;
   private onDeleteCB: ((id: string) => Promise<boolean>) | null = null;
-  private currentDeleteId: string | null = null;
+  private onEditCB: ((id: string) => Promise<boolean>) | null = null;
 
+  private currentDeleteId: string | null = null;
+  
   public init(): void {
     this.importBtn.addEventListener('click', () => {
       this.openUploadModal();
     });
     this.importConfirmBtn.addEventListener('click', async () => {
       if (!this.onUploadCB) { return; }
+      this.showMask();
       const name = this.importNameInput.value === '' ? null : this.importNameInput.value;
       const file = this.importFileInput.files && this.importFileInput.files[0] 
                    ? this.importFileInput.files[0] : null;
+      // await new Promise((resolve) => {
+      //   setTimeout(() => {resolve()}, 2000)
+      // })
       if (await this.onUploadCB(file, name)) {
         this.closeUploadModal();
       }
+      this.hideMask();
     });
-    this.projectContainer.addEventListener('click', (e: MouseEvent) => {
-      if (this.onDeleteCB 
+    this.projectContainer.addEventListener('click', async (e: MouseEvent) => {
+      if (this.onDeleteCB && this.onEditCB
         && e.target && (e.target as Element).tagName === 'BUTTON' 
         && (e.target as Element).getAttribute('data-ref') !== null) {
-        this.currentDeleteId = (e.target as Element).getAttribute('data-ref') as string;
-        this.openDeleteModal();
+        const id = (e.target as Element).getAttribute('data-ref') as string;
+        if ((e.target as Element).getAttribute('data-type') === 'delete') {
+          this.currentDeleteId = id;
+          this.openDeleteModal();
+        } else {
+          if (await this.onEditCB(id)) {
+            this.hideProjectPanel();
+          }
+        }
       }
     });
     this.deleteConfirmBtn.addEventListener('click', async () => {
@@ -55,6 +70,10 @@ export class ProjectController {
 
   public setOnDeleteCB(callback: (id: string) => Promise<boolean>): void {
     this.onDeleteCB = callback;
+  }
+
+  public setOnEditCB(callback: (id: string) => Promise<boolean>): void {
+    this.onEditCB = callback;
   }
 
   public showProjectPanel(): void {
@@ -79,7 +98,8 @@ export class ProjectController {
   <img src="cloud.png">
   <p class="project-info"><b>Name: </b>${project.name}</p>
   <p class="project-info"><b>Path: </b>${project.path}</p>
-  <button type="button" class="btn btn-danger" data-ref="${project.id}">Delete</button>
+  <button type="button" class="btn btn-primary" data-ref="${project.id}" data-type="edit">Edit</button>
+  <button type="button" class="btn btn-danger" data-ref="${project.id}" data-type="delete">Delete</button>
 </div>
     `;
     const item = div.childNodes[1];
@@ -114,6 +134,14 @@ export class ProjectController {
   
   private closeDeleteModal(): void {
     $('#confirm-delete-modal').modal('hide');
+  }
+
+  private showMask(): void {
+    this.waitingMask.style.display = 'block';
+  }
+
+  private hideMask(): void {
+    this.waitingMask.style.display = 'none';
   }
 
   private removeProject(id: string): void {

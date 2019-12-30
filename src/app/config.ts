@@ -9,7 +9,6 @@ export function validateConfig(str: string): boolean {
 
 export function generateConfig(dirname: string): ManifestType {
   const dirPath = path.resolve(dirname, './' + ConfigFileDirName);
-  const configFilePath = dirPath + '/' + ConfigFileName;
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath);
   }

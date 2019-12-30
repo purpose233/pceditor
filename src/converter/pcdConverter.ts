@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { once } from 'events';
+import path from 'path';
 import readline from 'readline';
 import { Vector3 } from 'three';
 import { BaseConverter } from './baseConverter'; 
@@ -48,7 +48,18 @@ export class PCDConverter extends BaseConverter {
     return bbox;
   }
 
+  public createProjectDir(dirPath: string): void {
+    const projectPath = path.resolve(dirPath, '../');
+    if (!fs.existsSync(projectPath)) {
+      fs.mkdirSync(projectPath);
+    }
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath);
+    }
+  }
+
   public async read(filePath: string, exportPath: string): Promise<ConverterTree> {
+    this.createProjectDir(exportPath);
     let pointNumber: number = 0;
     let pointCount: number = 0;
     const bbox = await this.readBoundingBox(filePath);

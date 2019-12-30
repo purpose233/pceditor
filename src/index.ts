@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import uuid from 'uuid/v4';
 import { PCDConverter } from './converter/pcdConverter';
 import { PCScene } from './render/scene';
@@ -47,12 +48,13 @@ declare global {
     } else if (config.projects.find((project => project.name === name))) {
       window.toast.showToast('error', 'Upload Error', 'Project name cannot repeat.')
     } else {
-      // const converter = new PCDConverter();
+      const converter = new PCDConverter();
       const importPath = path.resolve(file.path);
       const exportPath = path.resolve(__dirname, './projects/' + name);
-      // let tree: ConverterTree | null = await converter.read(importPath, exportPath);
-      // console.log(tree);
-      // tree = null;
+      console.log(exportPath);
+      let tree: ConverterTree | null = await converter.read(importPath, exportPath);
+      console.log(tree);
+      tree = null;
       const project: ConfigProjectType = {
         id: uuid(),
         name, 
@@ -69,8 +71,19 @@ declare global {
   projectController.setOnDeleteCB(async (id: string): Promise<boolean> => {
     projectController.deleteProject(id);
     const index = config.projects.findIndex(project => project.id === id);
-    if (index > 0) { config.projects.splice(index, 1); }
+    if (index >= 0) { 
+      const project = config.projects.splice(index, 1)[0];
+      const files = fs.readdirSync(project.path);
+      for (const file of files) {
+        fs.unlinkSync(path.join(project.path, file));
+      }
+      fs.rmdirSync(project.path);
+    }
     writeConfig(__dirname, config);
+    return true;
+  });
+  projectController.setOnEditCB(async (id: string): Promise<boolean> => {
+    console.log(id);
     return true;
   });
 
