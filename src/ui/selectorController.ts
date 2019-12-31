@@ -7,7 +7,7 @@ export class SelectorController {
   private sphereSelectorBtn: HTMLElement = document.getElementById('sphereSelector') as HTMLElement;
   
   private currentBtn: HTMLElement = this.noneSelectorBtn;
-  private selectorChangeCB: ((selectorName: SelectorNameType, lastSelectorName: SelectorNameType) => Promise<void>) | null = null;
+  private onSelectorChangeCB: ((selectorName: SelectorNameType, lastSelectorName: SelectorNameType) => Promise<void>) | null = null;
 
   public init() {
     this.noneSelectorBtn.addEventListener('click', async () => {
@@ -25,7 +25,7 @@ export class SelectorController {
   }
 
   public setOnSelectorChangeCB(callback: (selectorName: SelectorNameType, lastSelectorName: SelectorNameType) => Promise<void>) {
-    this.selectorChangeCB = callback;
+    this.onSelectorChangeCB = callback;
   }
 
   private onSelectorBtnClick = async (btn: HTMLElement) => {
@@ -34,8 +34,8 @@ export class SelectorController {
     this.selectBtn(btn);
     this.currentBtn = btn;
     const selectorName = this.getSelectorNameByBtn(btn);
-    if (this.selectorChangeCB) {
-      await this.selectorChangeCB(selectorName, lastSelectorName);
+    if (this.onSelectorChangeCB) {
+      await this.onSelectorChangeCB(selectorName, lastSelectorName);
     }
   }
 

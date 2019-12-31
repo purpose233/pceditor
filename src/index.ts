@@ -15,6 +15,7 @@ import { ToastController } from './ui/toastController';
 import { RenderController } from './ui/renderController';
 import { generateConfig, parseConfig, writeConfig } from './app/config';
 import { ProjectController } from './ui/projectController';
+import { ExportIndexName } from './common/constants';
 
 declare global {
   interface Window {
@@ -28,14 +29,7 @@ declare global {
   
   const container = document.getElementById('canvas-container') as HTMLElement;
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-  
-  // const refPath = path.resolve(__dirname, '../output');
-  // const renderTree = await deserializeIndex(refPath, refPath + '/index', false) as RenderTree;
-  // console.log(renderTree);
-  // const renderer = new PCRenderer(renderTree);
-  // const pcScene = new PCScene(container, canvas, renderer);
-  // const scene = pcScene.getScene();
-  // const camera = pcScene.getCamera();
+  let renderScene: PCScene | null = null;
 
   const projectController = new ProjectController();
   projectController.init();
@@ -83,7 +77,38 @@ declare global {
     return true;
   });
   projectController.setOnEditCB(async (id: string): Promise<boolean> => {
-    console.log(id);
+    const project = config.projects.find(project => project.id === id);
+    if (!project) { return false; }
+    const renderTree = await deserializeIndex(project.path, path.join(project.path, ExportIndexName), false) as RenderTree;
+    console.log(renderTree);
+    const renderer = new PCRenderer(renderTree);
+    const pcScene = new PCScene(container, canvas, renderer);
+    renderScene = pcScene;
+    const scene = pcScene.getScene();
+    const camera = pcScene.getCamera();
+
+    selectorController.setOnSelectorChangeCB(async (selectorName: SelectorNameType): Promise<void> => {
+      if (!selectorName) { 
+        renderer.removeSelector(scene, camera); 
+      } else {
+        renderer.addSelector(selectorName, scene, camera);
+      }
+    });
+    renderer.setRenderInfoChangeCB((info: RenderInfoType) => {
+      renderController.setRenderInfo(info);
+    });
+    operationController.setOnExportCB(async (path: string) => {
+      const filePath = path + '/out.pcd';
+      operationController.waitExportModal();
+      await exportToPCD(filePath, renderTree);
+      await new Promise((resolve) => {setTimeout(() => {
+        resolve();
+      }, 1000);})
+      operationController.unwaitExportModal();
+      operationController.closeExportModal();
+      toastController.showToast('success', 'Export', 'Successfully export to ' + filePath);
+    });
+
     return true;
   });
 
@@ -91,8 +116,8 @@ declare global {
   toastController.init();
   window.toast = toastController;
 
-  // const selectorController = new SelectorController();
-  // selectorController.init();
+  const selectorController = new SelectorController();
+  selectorController.init();
   // selectorController.setOnSelectorChangeCB(async (selectorName: SelectorNameType): Promise<void> => {
   //   if (!selectorName) { 
   //     renderer.removeSelector(scene, camera); 
@@ -101,14 +126,14 @@ declare global {
   //   }
   // });
 
-  // const renderController = new RenderController();
-  // renderController.init();
+  const renderController = new RenderController();
+  renderController.init();
   // renderer.setRenderInfoChangeCB((info: RenderInfoType) => {
   //   renderController.setRenderInfo(info);
   // });
 
-  // const operationController = new OperationController();
-  // operationController.init();
+  const operationController = new OperationController();
+  operationController.init();
   // operationController.setOnConfirmExportCB(async (path: string) => {
   //   const filePath = path + '/out.pcd';
   //   operationController.waitExportModal();
@@ -120,4 +145,12 @@ declare global {
   //   operationController.closeExportModal();
   //   toastController.showToast('success', 'Export', 'Successfully export to ' + filePath);
   // });
+  operationController.setOnReturnMenuCB(async () => {
+    if (renderScene) {
+      renderScene.drop(container);
+    }
+    // selectorController.setOnSelectorChangeCB(async (selectorName: SelectorNameType): Promise<void> => {});
+    // operationController.setOnExportCB(async (path: string) => {});
+    projectController.showProjectPanel();
+  });
 })();

@@ -13,6 +13,7 @@ export class PCScene {
   private stats: Stats;
   private controls: OrbitControls;
   private pcRenderer: PCRenderer;
+  private isEnabled: boolean = true;
 
   constructor(container: HTMLElement, canvas: HTMLCanvasElement, renderer: PCRenderer) {
     this.scene = new Scene();
@@ -65,6 +66,16 @@ export class PCScene {
     this.animate();
   }
 
+  public drop(container: HTMLElement): void {
+    // stop animation
+    this.isEnabled = false;
+    this.renderer.clear();
+
+    // remove stats
+    this.stats.end();
+    container.removeChild(this.stats.dom);
+  }
+
   public getScene(): Scene { return this.scene; }
 
   public getCamera(): PerspectiveCamera { return this.camera; }
@@ -78,6 +89,7 @@ export class PCScene {
   }
 
   private animate = async () => {
+    if (!this.isEnabled) { return; }
     this.controls.update();
     this.stats.update();
     await this.render();

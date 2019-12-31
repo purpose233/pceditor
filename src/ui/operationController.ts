@@ -4,12 +4,18 @@ export class OperationController {
   private exportPathInput: HTMLInputElement = document.getElementById('exportPathInput') as HTMLInputElement;
   private exportModalCloseBtn: HTMLButtonElement = document.getElementById('exportModalCloseBtn') as HTMLButtonElement;
   private exportWaitingSpinner: HTMLElement = document.getElementById('exportWaitingSpinner') as HTMLElement;
+  private returnMenuBtn: HTMLButtonElement = document.getElementById('returnMenuBtn') as HTMLButtonElement;
 
   private exportPath: string | null = null;
-  private exportCB: ((path: string) => void) | null = null;
+  private onExportCB: ((path: string) => Promise<void>) | null = null;
+  private onReturnMenuCB: (() => Promise<void>) | null = null;
 
   public init(): void {
-    this.exportPathInput.addEventListener('change', (): void => {
+    this.returnMenuBtn.addEventListener('click', async () => {
+      if (!this.onReturnMenuCB) { return; }
+      await this.onReturnMenuCB();
+    });
+    this.exportPathInput.addEventListener('change', async () => {
       const files = this.exportPathInput.files;
       let file;
       if (files && (file = files[0])) {
@@ -20,12 +26,12 @@ export class OperationController {
         this.exportConfirmBtn.disabled = true;
       }
     });
-    this.exportConfirmBtn.addEventListener('click', (): void => {
+    this.exportConfirmBtn.addEventListener('click', async () => {
       if (!this.exportPath) { return; }
-      if (!this.exportCB) {
+      if (!this.onExportCB) {
         this.closeExportModal();
       } else {
-        this.exportCB(this.exportPath);
+        await this.onExportCB(this.exportPath);
       }
     });
     this.exportConfirmBtn.disabled = true;
@@ -35,8 +41,12 @@ export class OperationController {
     this.exportModalCloseBtn.click();
   }
 
-  public setOnConfirmExportCB(callback: (path: string) => void): void {
-    this.exportCB = callback;
+  public setOnExportCB(callback: (path: string) => Promise<void>): void {
+    this.onExportCB = callback;
+  }
+
+  public setOnReturnMenuCB(callback: () => Promise<void>): void {
+    this.onReturnMenuCB = callback;
   }
 
   public disableExportModal(): void {

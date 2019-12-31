@@ -16,6 +16,11 @@ body, html {
   height: 20px;
 }
 
+#project-mask {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
 #project-panel {
   position: absolute;
   left: 40px;

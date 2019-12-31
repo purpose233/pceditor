@@ -5,7 +5,7 @@ declare const $: any;
 export class ProjectController {
 
   private waitingMask: HTMLElement = document.getElementById('mask-container') as HTMLElement;
-  private projectPanel: HTMLElement = document.getElementById('project-panel') as HTMLElement;
+  private projectPanel: HTMLElement = document.getElementById('project-mask') as HTMLElement;
   private projectContainer: HTMLElement = document.getElementById('project-container') as HTMLElement;
   private importBtn: HTMLButtonElement = document.getElementById('import-project-btn') as HTMLButtonElement;
   private importNameInput: HTMLInputElement = document.getElementById('import-name-input') as HTMLInputElement;
